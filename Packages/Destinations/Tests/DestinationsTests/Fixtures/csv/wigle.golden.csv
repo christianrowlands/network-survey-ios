@@ -1,0 +1,5 @@
+WigleWifi-1.6,appRelease=1.0.0,"model=iPhone17,3",release=18.0,device=NetworkSurvey-iOS,display=,board=ESP32-C5,brand=Apple,star=Sol,body=3,subBody=0
+MAC,SSID,AuthMode,FirstSeen,Channel,Frequency,RSSI,CurrentLatitude,CurrentLongitude,AltitudeMeters,AccuracyMeters,RCOIs,MfgrId,Type
+02:00:5e:00:53:01,ExampleNet,[WPA2-PSK-CCMP][RSN-PSK+SAE-CCMP][ESS][WPS],2026-10-14 18:03:07,36,5180,-48,38.889484,-77.035278,21.3,5,,,WIFI
+02:00:5e:00:53:01,"Cafe, ""Guest""",[ESS],2026-10-14 18:03:07,36,5180,-48,38.889484,-77.035278,21.3,5,,,WIFI
+C2:00:5E:00:53:10,Example Tag,Misc [LE],2026-10-14 18:03:07,0,,-71,38.889484,-77.035278,21.3,5,,76,BLE

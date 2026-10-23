@@ -1,0 +1,3 @@
+{"version": "2.6.0", "messageType": "DeviceStatus", "data": {
+  "deviceSerialNumber": "1234", "deviceTime": "2026-10-22T14:05:00Z", "missionId": "m", "recordNumber": 1,
+  "batteryLevelPercent": 0, "error": {}, "deviceModel": "iPhone17,3", "appVersion": "1.0.0"}}

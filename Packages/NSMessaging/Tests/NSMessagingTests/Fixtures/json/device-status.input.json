@@ -1,0 +1,6 @@
+{"version": "2.6.0", "messageType": "DeviceStatus", "data": {
+  "deviceSerialNumber": "1234", "deviceName": "iPhone17,3", "deviceTime": "2026-10-22T14:05:00.001-04:00",
+  "latitude": 51.470334, "longitude": -0.486594, "altitude": 13.3, "batteryLevelPercent": 86, "deviceModel": "iPhone17,3",
+  "accuracy": 40, "error": {"errorMessage": "The scan stopped unexpectedly"}, "appVersion": "1.0.0",
+  "missionId": "Survey1 20200724-154325", "recordNumber": 4, "gnssLatitude": 51.470335, "gnssLongitude": -0.486595,
+  "gnssAltitude": 14.1, "gnssAccuracy": 6, "gnssAge": 1500, "mockLocation": true, "locationAge": 800, "speed": 0.5}}

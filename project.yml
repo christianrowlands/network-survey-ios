@@ -1,0 +1,137 @@
+name: NetworkSurvey
+
+options:
+  deploymentTarget:
+    iOS: "18.0"
+  developmentLanguage: en
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+
+packages:
+  BoardProtocol:
+    path: Packages/BoardProtocol
+  BoardKit:
+    path: Packages/BoardKit
+  SurveyCore:
+    path: Packages/SurveyCore
+  NSMessaging:
+    path: Packages/NSMessaging
+  Destinations:
+    path: Packages/Destinations
+
+targets:
+  NetworkSurvey:
+    type: application
+    platform: iOS
+    sources:
+      - NetworkSurvey
+      - Shared
+    dependencies:
+      - package: BoardProtocol
+      - package: BoardKit
+      - package: SurveyCore
+      - package: NSMessaging
+      - package: Destinations
+      - target: NetworkSurveyLiveActivity
+    settings:
+      base:
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_PREVIEWS: YES
+    info:
+      path: NetworkSurvey/Info.plist
+      properties:
+        CFBundleDisplayName: Network Survey
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        ITSAppUsesNonExemptEncryption: false
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIBackgroundModes:
+          - bluetooth-central
+          - location
+        NSSupportsLiveActivities: true
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        NSBluetoothAlwaysUsageDescription: Network Survey connects to your survey sensor board over Bluetooth to receive Wi-Fi and Bluetooth measurements.
+        NSLocationWhenInUseUsageDescription: Your location is added to each measurement during a survey you start, so coverage can be shown on a map. Location stays on this iPhone unless you set up an export.
+        NSLocationTemporaryUsageDescriptionDictionary:
+          SurveyAccuracy: Precise location is needed to place measurements accurately on the coverage map.
+        NSCameraUsageDescription: The camera is used only to scan a workspace registration QR code.
+        NSLocalNetworkUsageDescription: Needed to stream survey data to an MQTT broker or gRPC server on your local network.
+
+  NetworkSurveyLiveActivity:
+    type: app-extension
+    platform: iOS
+    sources:
+      - NetworkSurveyLiveActivity
+      - Shared
+      - NetworkSurvey/DesignSystem
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(NS_BUNDLE_ID).LiveActivity
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+    info:
+      path: NetworkSurveyLiveActivity/Info.plist
+      properties:
+        CFBundleDisplayName: Network Survey
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+
+  NetworkSurveyTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - NetworkSurveyTests
+    dependencies:
+      - target: NetworkSurvey
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(NS_BUNDLE_ID).Tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/NetworkSurvey.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NetworkSurvey
+        BUNDLE_LOADER: $(TEST_HOST)
+
+  NetworkSurveyUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - NetworkSurveyUITests
+    dependencies:
+      - target: NetworkSurvey
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(NS_BUNDLE_ID).UITests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: NetworkSurvey
+
+schemes:
+  NetworkSurvey:
+    build:
+      targets:
+        NetworkSurvey: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: false
+      targets:
+        - NetworkSurveyTests
+        - NetworkSurveyUITests
+    archive:
+      config: Release

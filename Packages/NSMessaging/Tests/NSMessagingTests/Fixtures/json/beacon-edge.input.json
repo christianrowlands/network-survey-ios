@@ -1,0 +1,6 @@
+{"version": "2.6.0", "messageType": "WifiBeaconRecord", "data": {
+  "deviceSerialNumber": "8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90", "deviceTime": "2026-10-22T14:03:07.12-05:00",
+  "missionId": "NS 8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90 20261022-140300", "recordNumber": 2147483647,
+  "bssid": "0a:11:22:33:44:55", "ssid": "Cafe <Guest> & \"Friends\" = 'ok' \\ \t\n\u0001 é  / 📡",
+  "wps": false, "channel": 0, "signalStrength": -52, "snr": 0, "altitude": -0.001, "longitude": 1e-5, "speed": 1.0E7,
+  "encryptionType": "UNKNOWN", "cipherSuites": ["UNKNOWN", "GCMP_256"], "akmSuites": ["UNKNOWN", "SAE"]}}

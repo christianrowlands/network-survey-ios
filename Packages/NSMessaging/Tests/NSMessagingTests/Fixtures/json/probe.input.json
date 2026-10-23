@@ -1,0 +1,6 @@
+{"version": "2.6.0", "messageType": "WifiProbeRequestRecord", "data": {
+  "deviceSerialNumber": "1234", "deviceTime": "2026-10-22T19:03:07Z", "latitude": 38.889484, "longitude": -77.035278,
+  "altitude": 21.5, "missionId": "Survey1 20200724-154325", "recordNumber": 7, "accuracy": 5, "locationAge": 250,
+  "sourceAddress": "06:1a:2b:3c:4d:5e", "destinationAddress": "ff:ff:ff:ff:ff:ff", "bssid": "ff:ff:ff:ff:ff:ff",
+  "ssid": "ExampleNet", "channel": 11, "frequencyMhz": 2462, "signalStrength": -67, "snr": 28,
+  "nodeType": "NON_AP_STA", "standard": "IEEE80211N"}}

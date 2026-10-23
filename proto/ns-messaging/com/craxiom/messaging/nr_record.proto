@@ -1,0 +1,74 @@
+/**
+ * A protobuf definition of the NR survey record defined in the Network Survey Messaging API.
+ *
+ * This protobuf definition is provided as a convenience only. See the official API documentation for the true NR
+ * Record message schema.
+ */
+syntax = "proto3";
+
+package com.craxiom.messaging;
+
+import "google/protobuf/wrappers.proto";
+import "com/craxiom/messaging/connectionstatus/connection_status.proto";
+
+option java_multiple_files = true;
+option java_package = "com.craxiom.messaging";
+option go_package = "craxiom.com/messaging";
+
+message NrRecord {
+    string version = 1;
+    string messageType = 2;
+    NrRecordData data = 3;
+}
+
+message NrRecordData {
+    string deviceSerialNumber = 1;
+    string deviceName = 2;
+    string deviceTime = 3;
+    double latitude = 4;
+    double longitude = 5;
+    float altitude = 6;
+    string missionId = 7;
+    int32 recordNumber = 8;
+    int32 groupNumber = 9;
+    int32 accuracy = 10;
+    uint32 locationAge = 11;
+    float speed = 55;
+
+    // Deprecated: Use plmn instead. Mobile Country Code.
+    google.protobuf.Int32Value mcc = 16;
+    // Deprecated: Use plmn instead. Mobile Network Code (leading zeros lost as int).
+    google.protobuf.Int32Value mnc = 17;
+    // PLMN identifier in "MCC-MNC" format (e.g., "310-01"). MCC is always 3 digits.
+    // MNC is 2 or 3 digits with leading zeros preserved.
+    // Consumers should prefer this over the separate integer mcc/mnc fields.
+    google.protobuf.StringValue plmn = 60;
+    google.protobuf.Int32Value tac = 18;
+    google.protobuf.Int64Value nci = 19;
+    google.protobuf.Int32Value narfcn = 20;
+    google.protobuf.Int32Value pci = 21;
+    google.protobuf.FloatValue ssRsrp = 22;
+    google.protobuf.FloatValue ssRsrq = 23;
+    google.protobuf.FloatValue ssSinr = 24;
+    google.protobuf.FloatValue csiRsrp = 25;
+    google.protobuf.FloatValue csiRsrq = 26;
+    google.protobuf.FloatValue csiSinr = 27;
+    google.protobuf.Int32Value ta = 28;
+    google.protobuf.BoolValue servingCell = 29;
+    string provider = 30;
+    google.protobuf.Int32Value slot = 31;
+    // The device's connection to this cell as reported by the device (e.g. SECONDARY_SERVING for
+    // the 5G NSA data leg when the scan group's primary serving cell is LTE). See the
+    // ConnectionStatus enum and the official API documentation for details.
+    com.craxiom.messaging.connectionstatus.ConnectionStatus connectionStatus = 61;
+
+    // The per-carrier channel bandwidths, in kHz, of the device's cellular data connection at the
+    // time of the scan, from ServiceState#getCellBandwidths(). One entry per aggregated component
+    // carrier, so two or more entries means carrier aggregation was active. This is device-level
+    // connection state rather than a property of this individual cell; it is only populated on
+    // records for cells the device was actively using (servingCell true or SECONDARY_SERVING) and
+    // is omitted on neighbor records. The producer filters out the platform's 0 and unavailable
+    // sentinel values, so every entry is a valid bandwidth. An absent or empty list means the
+    // device did not report bandwidths, NOT that carrier aggregation was inactive.
+    repeated int32 cellBandwidthsKhz = 62;
+}

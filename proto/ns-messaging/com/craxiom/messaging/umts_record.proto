@@ -1,0 +1,60 @@
+/**
+ * A protobuf definition of the UMTS survey record defined in the Network Survey Messaging API.
+ *
+ * This protobuf definition is provided as a convenience only. See the official API documentation for the true UMTS
+ * Record message schema.
+ */
+syntax = "proto3";
+
+package com.craxiom.messaging;
+
+import "google/protobuf/wrappers.proto";
+
+option java_multiple_files = true;
+option java_package = "com.craxiom.messaging";
+option go_package = "craxiom.com/messaging";
+
+message UmtsRecord {
+    string version = 1;
+    string messageType = 2;
+    UmtsRecordData data = 3;
+}
+
+message UmtsRecordData {
+    string deviceSerialNumber = 1;
+    string deviceName = 2;
+    string deviceTime = 3;
+    double latitude = 4;
+    double longitude = 5;
+    float altitude = 6;
+    string missionId = 7;
+    int32 recordNumber = 8;
+    int32 groupNumber = 9;
+    int32 accuracy = 10;
+    uint32 locationAge = 11;
+    float speed = 55;
+
+    // Deprecated: Use plmn instead. Mobile Country Code.
+    google.protobuf.Int32Value mcc = 16;
+    // Deprecated: Use plmn instead. Mobile Network Code (leading zeros lost as int).
+    google.protobuf.Int32Value mnc = 17;
+    // PLMN identifier in "MCC-MNC" format (e.g., "310-01"). MCC is always 3 digits.
+    // MNC is 2 or 3 digits with leading zeros preserved.
+    // Consumers should prefer this over the separate integer mcc/mnc fields.
+    google.protobuf.StringValue plmn = 60;
+    google.protobuf.Int32Value lac = 18;
+    google.protobuf.Int32Value cid = 19;
+    google.protobuf.Int32Value uarfcn = 20;
+    google.protobuf.Int32Value psc = 21;
+    google.protobuf.FloatValue rscp = 22;
+    google.protobuf.FloatValue signalStrength = 23;
+    google.protobuf.FloatValue ecno = 24;
+    google.protobuf.BoolValue servingCell = 25;
+    string provider = 27;
+    google.protobuf.Int32Value slot = 28;
+
+    // 61 and 62 are connectionStatus and cellBandwidthsKhz on the LTE and NR records. They are
+    // reserved here to keep the cross-message field number convention aligned in case a future
+    // radio technology change makes them meaningful for this record type.
+    reserved 61, 62;
+}

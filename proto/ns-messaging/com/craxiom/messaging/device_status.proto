@@ -1,0 +1,81 @@
+/**
+ * A protobuf definition of the Device Status message defined in the Network Survey Messaging API.
+ *
+ * This protobuf definition is provided as a convenience only. See the official API documentation for the true Device
+ * Status message schema.
+ */
+syntax = "proto3";
+
+package com.craxiom.messaging;
+
+import "google/protobuf/wrappers.proto";
+
+option java_multiple_files = true;
+option java_package = "com.craxiom.messaging";
+option go_package = "craxiom.com/messaging";
+
+message DeviceStatus {
+    string version = 1;
+    string messageType = 2;
+    DeviceStatusData data = 3;
+}
+
+message DeviceStatusData {
+    string deviceSerialNumber = 1;
+    string deviceName = 2;
+    string deviceTime = 3;
+    double latitude = 4;
+    double longitude = 5;
+    float altitude = 6;
+    string missionId = 13;
+    int32 recordNumber = 14;
+    string deviceModel = 8;
+    int32 accuracy = 9;
+    uint32 locationAge = 30;
+    float speed = 55;
+
+    google.protobuf.Int32Value batteryLevelPercent = 7;
+    Error error = 10;
+    google.protobuf.BoolValue mdmOverride = 11;
+    string appVersion = 12;
+
+    double gnssLatitude = 15;
+    double gnssLongitude = 16;
+    float gnssAltitude = 17;
+    int32 gnssAccuracy = 18;
+    double networkLatitude = 19;
+    double networkLongitude = 20;
+    float networkAltitude = 21;
+    int32 networkAccuracy = 22;
+
+    // The age, in milliseconds, of the GNSS provider location reported in gnssLatitude and
+    // gnssLongitude. Mirrors the semantics of locationAge, which describes the primary location
+    // only. A value of 0, or an absent field, means the age is unknown.
+    //
+    // The per provider ages exist so a consumer can tell a receiver that has stopped producing
+    // fixes, where the age grows while the coordinates stay the same, apart from a receiver that
+    // keeps reporting an identical but freshly computed fix, where the age stays small. Without an
+    // age the two look identical on the wire, and a stale position cannot be told from a live one.
+    uint32 gnssAge = 23;
+
+    // The age, in milliseconds, of the network provider location reported in networkLatitude and
+    // networkLongitude. A value of 0, or an absent field, means the age is unknown. See gnssAge
+    // for why the per provider ages are reported.
+    uint32 networkAge = 24;
+
+    // True when the primary location reported in latitude and longitude came from a mock location
+    // provider, as reported by Android's Location#isMock() on API 31 and above, or the deprecated
+    // Location#isFromMockProvider() below that.
+    //
+    // Only ever present as true. An absent field means the location did not come from a mock
+    // provider, or the producer did not check. Producers must not send an explicit false: mocking
+    // is the exceptional case, and stamping every ordinary record with a negative assertion costs
+    // wire bytes on every message to say nothing.
+    google.protobuf.BoolValue mockLocation = 25;
+}
+
+// Used to report an error with the device
+message Error {
+    string errorMessage = 1;
+}
+

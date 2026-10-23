@@ -1,0 +1,124 @@
+/**
+ * A protobuf definition for sending the messages defined in the Network Survey Messaging API over a gRPC stream.
+ *
+ * This proto file is used to generate gRPC stubs so that a client can send the various messages defined in the Network
+ * Survey Messaging API to a gRPC based server. This file enables both the gRPC server and client stubs to be generated.
+ *
+ * This protobuf definition is provided as a convenience only.
+ */
+syntax = "proto3";
+
+package com.craxiom.messaging.grpc;
+
+import "com/craxiom/messaging/gsm_record.proto";
+import "com/craxiom/messaging/cdma_record.proto";
+import "com/craxiom/messaging/umts_record.proto";
+import "com/craxiom/messaging/lte_record.proto";
+import "com/craxiom/messaging/nr_record.proto";
+import "com/craxiom/messaging/phone_state.proto";
+import "com/craxiom/messaging/lte_rrc.proto";
+import "com/craxiom/messaging/lte_nas.proto";
+import "com/craxiom/messaging/wifi_beacon_record.proto";
+import "com/craxiom/messaging/wifi_probe_request_record.proto";
+import "com/craxiom/messaging/wifi_ota_record.proto";
+import "com/craxiom/messaging/bluetooth_record.proto";
+import "com/craxiom/messaging/gnss_record.proto";
+import "com/craxiom/messaging/energy_detection.proto";
+import "com/craxiom/messaging/signal_detection.proto";
+
+option java_multiple_files = true;
+option java_package = "com.craxiom.messaging.grpc";
+option go_package = "craxiom.com/messaging";
+
+service WirelessSurvey {
+    rpc StreamGsmSurvey (stream GsmRecord) returns (GsmSurveyResponse) {
+    }
+    rpc StreamCdmaSurvey (stream CdmaRecord) returns (CdmaSurveyResponse) {
+    }
+    rpc StreamUmtsSurvey (stream UmtsRecord) returns (UmtsSurveyResponse) {
+    }
+    rpc StreamLteSurvey (stream LteRecord) returns (LteSurveyResponse) {
+    }
+    rpc StreamNrSurvey (stream NrRecord) returns (NrSurveyResponse) {
+    }
+    rpc StreamPhoneState (stream PhoneState) returns (PhoneStateResponse) {
+    }
+    rpc StreamWifiBeaconSurvey (stream WifiBeaconRecord) returns (WifiBeaconSurveyResponse) {
+    }
+    rpc StreamWifiProbeRequestSurvey (stream WifiProbeRequestRecord) returns (WifiProbeRequestSurveyResponse) {
+    }
+    rpc StreamWifiOtaSurvey (stream WifiOtaRecord) returns (WifiOtaSurveyResponse) {
+    }
+    rpc StreamBluetoothSurvey (stream BluetoothRecord) returns (BluetoothSurveyResponse) {
+    }
+    rpc StreamGnssSurvey (stream GnssRecord) returns (GnssSurveyResponse) {
+    }
+    rpc StreamEnergyDetections (stream EnergyDetection) returns (EnergyDetectionResponse) {
+    }
+    rpc StreamSignalDetections (stream SignalDetection) returns (SignalDetectionResponse) {
+    }
+    rpc StreamLteRrc (stream LteRrc) returns (LteRrcResponse) {
+    }
+    rpc StreamLteNas (stream LteNas) returns (LteNasResponse) {
+    }
+}
+
+message GsmSurveyResponse {
+
+}
+
+message CdmaSurveyResponse {
+
+}
+
+message UmtsSurveyResponse {
+
+}
+
+message LteSurveyResponse {
+
+}
+
+message NrSurveyResponse {
+
+}
+
+message PhoneStateResponse {
+
+}
+
+message WifiBeaconSurveyResponse {
+
+}
+
+message WifiProbeRequestSurveyResponse {
+
+}
+
+message WifiOtaSurveyResponse {
+
+}
+
+message BluetoothSurveyResponse {
+
+}
+
+message GnssSurveyResponse {
+
+}
+
+message EnergyDetectionResponse {
+
+}
+
+message SignalDetectionResponse {
+
+}
+
+message LteRrcResponse {
+
+}
+
+message LteNasResponse {
+
+}

@@ -1,0 +1,134 @@
+name: iOS
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Xcode 27 is on the xcode-27 runner image (a public preview when this was
+  # written). Pin the exact Xcode the project is developed with.
+  DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
+
+jobs:
+  text:
+    name: Text check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: No em dashes or home paths
+        run: scripts/check-text.sh
+
+  packages:
+    name: List packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      list: ${{ steps.list.outputs.list }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: list
+        run: |
+          list=$(for manifest in Packages/*/Package.swift Tools/*/Package.swift; do dirname "$manifest"; done | jq -R . | jq -cs .)
+          echo "list=$list" >> "$GITHUB_OUTPUT"
+
+  swift-test:
+    name: swift test ${{ matrix.package }}
+    needs: packages
+    runs-on: xcode-27
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.packages.outputs.list) }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: xcodebuild -version
+      # The MQTT tests start a private broker and skip themselves without one.
+      - name: Install mosquitto
+        if: matrix.package == 'Packages/Destinations'
+        run: brew install mosquitto
+      # Tools have no tests, so they only build.
+      - name: Test
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: |
+          if [ -d "$PACKAGE/Tests" ]; then
+            swift test --package-path "$PACKAGE" --force-resolved-versions
+          else
+            swift build --package-path "$PACKAGE" --force-resolved-versions
+          fi
+
+  codegen:
+    name: Generated code
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      # The board protocol's source of truth is the firmware repository. Set the
+      # repository variable FIRMWARE_REPOSITORY (owner/name, public) to compare
+      # against it; without it only the generated Swift is checked.
+      - uses: actions/checkout@v7
+        if: vars.FIRMWARE_REPOSITORY != ''
+        with:
+          repository: ${{ vars.FIRMWARE_REPOSITORY }}
+          path: firmware-repo
+          persist-credentials: false
+
+      - name: Install protoc
+        run: brew install protobuf
+
+      - name: Board protocol in sync
+        env:
+          FIRMWARE_REPOSITORY: ${{ vars.FIRMWARE_REPOSITORY }}
+        run: |
+          if [ -z "$FIRMWARE_REPOSITORY" ]; then
+            echo "::notice::FIRMWARE_REPOSITORY is not set, so the proto copy is not compared with the firmware repository"
+          fi
+          scripts/sync-proto.sh --check "$GITHUB_WORKSPACE/firmware-repo"
+
+      - name: NS Messaging gRPC code up to date
+        run: scripts/gen-ns-messaging-grpc.sh --check
+
+  app:
+    name: App build and unit tests
+    runs-on: xcode-27
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Pick a simulator
+        id: sim
+        run: |
+          if ! destination=$(scripts/sim-destination.sh); then
+            echo "::error::no iPhone simulator found"
+            exit 1
+          fi
+          echo "destination=$destination" >> "$GITHUB_OUTPUT"
+
+      - name: Build and run unit tests
+        env:
+          DESTINATION: ${{ steps.sim.outputs.destination }}
+        run: |
+          xcodebuild test \
+            -project NetworkSurvey.xcodeproj \
+            -scheme NetworkSurvey \
+            -destination "$DESTINATION" \
+            -only-testing:NetworkSurveyTests \
+            CODE_SIGNING_ALLOWED=NO

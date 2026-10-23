@@ -1,0 +1,40 @@
+/**
+ * Indicates the type of source address for the Bluetooth device.
+ *
+ * This protobuf definition is provided as a convenience only. See the official API documentation for the true field
+ * schema.
+ *
+ * It is necessary to define this enum in an individual file so that duplicate enum values can be used. This file
+ * specifies a different protobuf package than other enums so that the enum value scope is different than all other
+ * enums.
+ */
+syntax = "proto3";
+
+package com.craxiom.messaging.bluetooth.addresstype;
+
+option java_multiple_files = true;
+option java_package = "com.craxiom.messaging.bluetooth";
+option go_package = "craxiom.com/messaging";
+
+enum AddressType {
+    // Address type is unknown or unavailable. Reported when running on
+    // Android < API 35, since BluetoothDevice.getAddressType() was added
+    // in API 35 (Android 15).
+    UNKNOWN = 0;
+
+    // The IEEE-assigned hardware MAC address of the device. Typically
+    // reported for Bluetooth Classic (BR/EDR) devices, which have no
+    // public/random distinction at the protocol level, and for LE devices
+    // using a genuine public address. PUBLIC alone does not imply the
+    // device is trackable; Classic peripherals report PUBLIC by definition.
+    PUBLIC = 1;
+
+    // LE-only. The address is one of the LE random subtypes: resolvable
+    // private, non-resolvable private, or random static. Android's API
+    // does not distinguish between these subtypes.
+    RANDOM = 2;
+
+    // LE anonymous advertising. The device intentionally omits its address
+    // from advertising packets. Requires Android 15+ to observe.
+    ANONYMOUS = 3;
+}

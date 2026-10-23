@@ -1,0 +1,5 @@
+// Copy to Config/Local.xcconfig (gitignored) and set your Apple developer team ID to run on a device.
+DEVELOPMENT_TEAM =
+// A bundle identifier of your own, needed to sign for a device (the default is
+// in Base.xcconfig). Extensions and test bundles append a suffix to it.
+// NS_BUNDLE_ID = com.example.networksurvey

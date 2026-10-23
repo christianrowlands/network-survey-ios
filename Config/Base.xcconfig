@@ -1,0 +1,18 @@
+// Build settings shared by every target. The bundle identifier is set here and
+// nowhere else; extensions and test bundles append a suffix to it.
+NS_BUNDLE_ID = app.networksurvey.ios
+PRODUCT_BUNDLE_IDENTIFIER = $(NS_BUNDLE_ID)
+
+// Signing team. Leave empty here; put DEVELOPMENT_TEAM = <your team ID> in
+// Config/Local.xcconfig (gitignored, see Local.xcconfig.example) to run on a device.
+DEVELOPMENT_TEAM =
+CODE_SIGN_STYLE = Automatic
+
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+
+IPHONEOS_DEPLOYMENT_TARGET = 18.0
+SWIFT_VERSION = 6.0
+SWIFT_STRICT_CONCURRENCY = complete
+
+#include? "Local.xcconfig"

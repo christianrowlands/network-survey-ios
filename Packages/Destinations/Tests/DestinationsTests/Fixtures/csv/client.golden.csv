@@ -1,0 +1,4 @@
+# Created by Network Survey iOS version=1.0.0
+# CSV Version=0.1.0
+deviceTime,latitude,longitude,altitude,speed,accuracy,missionId,recordNumber,sourceAddress,bssid,channel,frequencyMhz,signalStrength,snr,frameCount,frameTypes,locallyAdministered,boardId,deviceSerialNumber,locationAge
+2026-10-14T18:03:07.25Z,38.889484,-77.035278,21.3,1.25,5,NS 8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90 20261014-180300,1,0a:11:22:33:44:55,02:00:5e:00:53:02,11,2462,-55.0,37.0,14,DATA;NULL_DATA,true,NS-1A2B,8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90,800
