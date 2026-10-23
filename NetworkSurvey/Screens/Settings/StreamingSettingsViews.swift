@@ -8,6 +8,11 @@ struct MQTTSettingsView: View {
         Form {
             Group {
                 Section {
+                    Text("Streams every record live to an MQTT broker your team runs, in the NS Messaging format. Most people don't need this: Files and NS Analytics work without a server.")
+                        .font(Theme.Fonts.body)
+                        .foregroundStyle(Theme.Colors.ink2)
+                }
+                Section {
                     Toggle("Stream to MQTT", isOn: settings.binding(Settings.destinationMQTT))
                         .accessibilityIdentifier("mqtt.enabled")
                 } footer: {
@@ -64,6 +69,11 @@ struct GRPCSettingsView: View {
         Form {
             Group {
                 Section {
+                    Text("Streams every record live to a gRPC server your team runs, in the NS Messaging format. Most people don't need this: Files and NS Analytics work without a server.")
+                        .font(Theme.Fonts.body)
+                        .foregroundStyle(Theme.Colors.ink2)
+                }
+                Section {
                     Toggle("Stream to gRPC", isOn: settings.binding(Settings.destinationGRPC))
                         .accessibilityIdentifier("grpc.enabled")
                 } footer: {
@@ -92,7 +102,7 @@ struct GRPCSettingsView: View {
     }
 }
 
-/// NS CSV, WiGLE CSV and pcapng.
+/// NS CSV and pcapng.
 struct FileSettingsView: View {
     @Environment(SettingsModel.self) private var settings
 
@@ -106,18 +116,11 @@ struct FileSettingsView: View {
                     Text("Network Survey CSV files: Wi-Fi, Bluetooth, clients and probe requests, one file of each per survey.")
                 }
                 Section {
-                    Toggle("WiGLE CSV", isOn: settings.binding(Settings.logWigleCSV))
+                    Toggle("Packet capture (pcapng)", isOn: settings.binding(Settings.surveyRawFrames))
                         .disabled(!settings[Settings.destinationLogFiles])
-                        .accessibilityIdentifier("files.wigle")
+                        .accessibilityIdentifier("files.pcap")
                 } footer: {
-                    Text("A file in the WiGLE upload format. Rows without a location are left out.")
-                }
-                Section {
-                    LabeledContent("pcapng") {
-                        Text(settings[Settings.surveyRawFrames] ? "On" : "Off")
-                    }
-                } footer: {
-                    Text("To save a packet capture (pcapng), turn on Raw frames on the Survey tab.")
+                    Text("Also saves every Wi-Fi frame the Scouts hear, in a file you can open in Wireshark. Files grow quickly. This is the same switch as Raw frames on the Survey tab.")
                 }
                 Section {
                     EmptyView()

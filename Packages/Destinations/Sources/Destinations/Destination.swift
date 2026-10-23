@@ -15,7 +15,7 @@ public protocol Destination: Actor {
 }
 
 public enum DestinationKind: String, Sendable, CaseIterable {
-    case nsCSV, wigle, pcap, mqtt, grpc, nsAnalytics
+    case nsCSV, pcap, mqtt, grpc, nsAnalytics
 }
 
 /// The survey session the destinations work for.

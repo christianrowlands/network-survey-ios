@@ -31,10 +31,12 @@ public struct FirmwareTrust: Sendable {
         self.keys = keys
     }
 
-    /// Release signing keys. Placeholder: the production key pair is not
-    /// generated yet. Add its public half here (base64 of the raw 32 bytes)
-    /// when the release key and its CI secret exist.
-    public static let releaseKeys: [FirmwareSigningKey] = []
+    /// Release signing keys (base64 of the raw 32 bytes). The firmware
+    /// repository has the same public key in scripts/keys/release-signing-key.pub;
+    /// its private half is the release workflow's signing secret.
+    public static let releaseKeys: [FirmwareSigningKey] = [
+        FirmwareSigningKey(name: "Release key", base64: "Ek1bybFsmuhEjknuauGaTa7N2zut111qFfKpziDEBwY=")!,
+    ]
 
     /// What Release builds trust.
     public static let release = FirmwareTrust(keys: releaseKeys)

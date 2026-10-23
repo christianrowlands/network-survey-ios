@@ -21,7 +21,6 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 | `destination_mqtt` | Bool | false | |
 | `destination_grpc` | Bool | false | |
 | `destination_ns_analytics` | Bool | false | |
-| `log_wigle_csv` | Bool | true | Also write a WiGLE CSV (with file logging) |
 
 ## MQTT
 
@@ -64,7 +63,7 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 |---|---|---|---|
 | `device_name` | String | "" | Empty: "iPhone-" plus the first 4 hex digits of the install ID (for example "iPhone-12FE"). Stamped as `deviceName` on MQTT and gRPC records |
 | `device_status_scan_interval_seconds` | Int | 120 | DeviceStatus interval while surveying, 10 to 86400 |
-| `install_id` | Secret | generated | Per-install UUID used as `deviceSerialNumber` and in the missionId. Not overridable |
+| `install_id` | Secret | generated | Per-install UUID. Its first 8 hex digits are the `deviceSerialNumber` and the device part of the missionId ("NS 12FE3A4B 20261023-140300"). Not overridable |
 
 ## Location, display, privacy
 
@@ -79,6 +78,7 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 
 | Key | Type | Default | Notes |
 |---|---|---|---|
-| `demo_board_enabled` | Bool | false | Show the simulated Demo board |
+| `demo_board_enabled` | Bool | false | Show the simulated Demo Scout |
+| `has_seen_welcome` | Bool | false | The first-launch welcome was closed (Settings > Help > Show welcome again shows it again) |
 
 Protocol and destination settings are read once when a survey starts and stay fixed until it stops. Privacy zone and ignore list changes apply to a running survey right away.

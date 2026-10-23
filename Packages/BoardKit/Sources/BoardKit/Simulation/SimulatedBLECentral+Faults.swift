@@ -66,6 +66,15 @@ extension SimulatedBLECentral {
         }
     }
 
+    /// Reports this board's stale bond as CBError 15 (encryption timed out), as
+    /// iOS sometimes does, instead of CBError 14.
+    public func reportStaleBondAsTimeout(_ board: BoardID) {
+        update(key(board)) { peripheral, _ in
+            peripheral.staleBondTimesOut = true
+            return []
+        }
+    }
+
     /// The user chose Forget This Device in Settings > Bluetooth.
     public func forgetOnPhone(_ board: BoardID) {
         update(key(board)) { peripheral, _ in

@@ -22,6 +22,8 @@ struct SimulatedPeripheral {
     var phoneBonded = false
     /// The phone kept keys the board deleted (ForgetBonds or a button wipe).
     var staleBondOnPhone = false
+    /// iOS reports some stale bonds as an encryption timeout (CBError 15) instead of CBError 14.
+    var staleBondTimesOut = false
     var userAcceptsPairing = true
     var subscribed: Set<BoardCharacteristic> = []
     var sequences: [BoardCharacteristic: UInt16] = [:]
@@ -83,7 +85,7 @@ struct SimulatedPeripheral {
     /// The board's rule for encrypted characteristics, plus what iOS does.
     mutating func authorize() -> BLEError? {
         if encrypted { return nil }
-        if staleBondOnPhone { return .peerRemovedPairing }
+        if staleBondOnPhone { return staleBondTimesOut ? .encryptionTimedOut : .peerRemovedPairing }
         if phoneBonded {
             encrypted = true
             return nil

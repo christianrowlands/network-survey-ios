@@ -29,7 +29,7 @@ final class DataScreensScreenshots: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-NSUITesting", "YES", "-NSAutoConnectDemo", "YES", "-NSDemoBoards", "2"]
         app.launch()
-        let ble = app.buttons["survey.protocol.BLE"]
+        let ble = app.buttons["survey.protocol.Bluetooth"]
         if ble.waitForExistence(timeout: 10) { ble.tap() }
         let start = app.buttons["survey.start"]
         XCTAssertTrue(start.waitForExistence(timeout: 15))
@@ -60,7 +60,7 @@ final class DataScreensScreenshots: XCTestCase {
         save(app, "detail-client")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
-        app.buttons["BLE"].tap()
+        app.buttons["Bluetooth"].tap()
         _ = app.cells.firstMatch.waitForExistence(timeout: 10)
         save(app, "lists-ble")
         app.cells.firstMatch.tap()

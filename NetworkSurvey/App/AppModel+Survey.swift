@@ -46,9 +46,9 @@ extension AppModel {
     static func message(for error: SessionError) -> String {
         switch error {
         case .notIdle: "A survey is already starting or running."
-        case .noBoardConnected: "Connect a board to start a survey."
+        case .noBoardConnected: "Connect a Scout to start a survey."
         case .nothingToSurvey: "Choose at least one thing to survey."
-        case .boardStartFailed(let reason): "The board did not start: \(reason)"
+        case .boardStartFailed(let reason): "The Scout did not start (\(reason)). Disconnect it and connect again, then start the survey."
         }
     }
 

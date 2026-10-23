@@ -2,92 +2,104 @@
 
 Network Survey records the Wi-Fi access points, Wi-Fi clients and Bluetooth LE
 devices around you, each tagged with location. Because iOS cannot scan Wi-Fi,
-the app uses a small ESP32 survey board as its radio. This guide covers
-everything from pairing the board to getting the data out.
+the app uses a small ESP32 sensor called NS Scout as its radio. This guide covers
+everything from pairing the Scout to getting the data out.
 
 Contents:
 
 1. [What you need](#what-you-need)
-2. [Pairing a board](#pairing-a-board)
-3. [Using several boards](#using-several-boards)
+2. [Pairing a Scout](#pairing-a-scout)
+3. [Using several Scouts](#using-several-scouts)
 4. [Starting a survey](#starting-a-survey)
 5. [While a survey runs](#while-a-survey-runs)
 6. [Where the data goes](#where-the-data-goes)
 7. [Looking at the data](#looking-at-the-data)
 8. [Privacy controls](#privacy-controls)
-9. [Updating board firmware](#updating-board-firmware)
+9. [Updating Scout firmware](#updating-scout-firmware)
 10. [Troubleshooting](#troubleshooting)
 
 ## What you need
 
 - An iPhone with iOS 18 or later.
-- A survey board running the Network Survey firmware. An ESP32-C5 board is
-  recommended, because it is the only supported chip that hears 5 GHz. The
-  firmware repository lists the supported boards and has a web installer for
-  the first install.
-- No board yet? Open **Survey > Boards** and turn on **Demo board**. It is a
-  simulated board with made-up data, so you can try every screen. Data from
-  the demo board is never sent to NS Analytics.
+- An NS Scout: an ESP32 board running the Network Survey firmware. An
+  ESP32-C5 board is recommended, because it is the only supported chip that
+  hears 5 GHz. [networksurvey.app/scout](https://networksurvey.app/scout)
+  says what to buy and how to install the firmware the first time. In the app,
+  **Survey > Scouts > New to NS Scout?** walks through the same steps.
+- No Scout yet? Open **Survey > Scouts** and turn on **Demo Scout**. It is a
+  simulated Scout with made-up data, so you can try every screen. Data from
+  the demo Scout is never sent to NS Analytics.
 
 The app asks for two permissions:
 
-- **Bluetooth**, to talk to your board. It is asked the first time you open
-  Boards.
+- **Bluetooth**, to talk to your Scout. It is asked the first time you open
+  Scouts.
 - **Location (While Using)**, to place each record on the map. Allow
   **Precise** location; with approximate location the map is not useful. The
   app never asks for "Always": a survey you start keeps location running in
   the background until you stop it.
 
-## Pairing a board
+## Installing the Scout software
 
-1. Power the board. Its LED gives a short blue blink every 2 seconds while it
+A new board needs the Scout software once. On a computer with Chrome or Edge,
+go to <https://install.networksurvey.app/>, plug the board in with a USB data
+cable, and click **Install** for your board. Later updates install from the app
+over Bluetooth. Where to buy a board: <https://networksurvey.app/scout>.
+
+## Pairing a Scout
+
+1. Power the Scout. Its LED gives a short blue blink every 2 seconds while it
    waits for a phone.
-2. In the app, open **Survey** and tap **Boards** (or **Find boards** in the
+2. In the app, open **Survey** and tap **Scouts** (or **Find Scouts** in the
    Still to do list).
-3. Hold the board next to your iPhone. It appears under **Nearby** as
+3. Hold the Scout next to your iPhone. It appears under **Nearby** as
    `NS-XXXX`, where `XXXX` is its short ID (also shown by the web installer).
-4. Tap the board. When iOS asks, tap **Pair**. The board moves to **Your
-   boards** and its LED turns solid blue.
+4. Tap the Scout. When iOS asks, tap **Pair**. The Scout moves to **Your
+   Scouts** and its LED turns solid blue.
 
-A board that has never been paired is always ready to pair. A board that
-already has a phone is shown as **Paired with another phone** or **Not in
-pairing mode**. To pair it with this iPhone, hold its **BOOT** button for about
-3 seconds until the LED blinks cyan, then tap it within 60 seconds. A board
+A Scout that has never been paired is always ready to pair. A Scout that
+already has a phone is shown as **Paired with another phone** or **Not ready
+to pair**. To pair it with this iPhone, hold its **BOOT** button for about
+3 seconds until the LED blinks cyan, then tap it within 60 seconds. A Scout
 keeps one pairing: pairing a new phone replaces the old one.
 
-After pairing, the app reconnects to the board on its own whenever it is in
+After pairing, the app reconnects to the Scout on its own whenever it is in
 range. You do not need to pair again.
 
-Tap a board under **Your boards** to see its details: model, firmware version,
+Tap a Scout under **Your Scouts** to see its details: model, firmware version,
 battery, GPS, what it is doing now, and its role. From there you can
-**Connect** or **Disconnect** it, update its firmware, or **Forget this
-board**.
+**Connect** or **Disconnect** it, update its firmware, or **Remove Scout**.
 
-**Forgetting a board** deletes the pairing on the board and in the app. iOS
-keeps its own copy of the pairing, so to pair the board again later, also open
-iOS **Settings > Bluetooth**, tap the info button next to the board and choose
-**Forget This Device**.
+**Removing a Scout** stops the app from connecting to it. Both the Scout and
+the iPhone keep their pairing, so it shows under **Nearby** as **Used with this
+iPhone before** and you can add it back with one tap, without pairing again.
 
-## Using several boards
+**Erase pairings on the Scout** (under Advanced, while connected) makes the
+Scout forget every phone. You only need it before giving a Scout away for good:
+to pair it with another phone, holding BOOT for 3 seconds is enough. iOS keeps
+its own copy of the pairing and apps cannot remove it, so after an erase the
+app walks you through **Settings > Bluetooth > Forget This Device**.
 
-You can use up to four boards at once, for example two ESP32-C5 boards to
-cover 2.4 and 5 GHz faster, or a third board just for Bluetooth. Pair each one
+## Using several Scouts
+
+You can use up to four Scouts at once, for example two ESP32-C5 Scouts to
+cover 2.4 and 5 GHz faster, or a third Scout just for Bluetooth. Pair each one
 as above.
 
-By default every board is on **Automatic**: the app splits the channels
-between the boards, so each one hops fewer channels and misses less. When you
-mix ESP32-C5 boards with 2.4 GHz-only boards, the 2.4 GHz boards take 2.4 GHz
-and the ESP32-C5 boards take 5 GHz. With BLE on and two or more boards on
+By default every Scout is on **Automatic**: the app splits the channels
+between the Scouts, so each one hops fewer channels and misses less. When you
+mix ESP32-C5 Scouts with 2.4 GHz-only Scouts, the 2.4 GHz Scouts take 2.4 GHz
+and the ESP32-C5 Scouts take 5 GHz. With BLE on and two or more Scouts on
 Automatic, one of them listens to Bluetooth full time.
 
-To set a board's role yourself, tap its chip on the Survey screen or open its
+To set a Scout's role yourself, tap its chip on the Survey screen or open its
 details:
 
-| Role | What the board does |
+| Role | What the Scout does |
 |---|---|
-| Automatic | Shares the channels with your other boards. Recommended. |
+| Automatic | Shares the channels with your other Scouts. Recommended. |
 | 2.4 GHz only | Hops the 2.4 GHz channels. |
-| 5 GHz only | Hops the 5 GHz channels (ESP32-C5 boards). |
+| 5 GHz only | Hops the 5 GHz channels (ESP32-C5 Scouts). |
 | One channel | Stays on one channel, so nothing on it is missed. |
 | Bluetooth only | Listens to Bluetooth all the time, no Wi-Fi. |
 
@@ -97,7 +109,7 @@ Role changes apply right away, even during a survey.
 
 The **Survey** tab is where a survey starts and stops.
 
-**Still to do** lists anything that blocks a survey: Bluetooth off, no board
+**Still to do** lists anything that blocks a survey: Bluetooth off, no Scout
 connected, location not allowed. Each item has a button that fixes it or takes
 you to the right place.
 
@@ -110,7 +122,7 @@ you to the right place.
 | BLE | Bluetooth Low Energy advertisements | Off |
 | Raw frames | Raw 802.11 frames, saved to a pcapng file | Off |
 
-Raw frames are limited by the board's Bluetooth link, so the pcapng file is a
+Raw frames are limited by the Scout's Bluetooth link, so the pcapng file is a
 sample of the traffic, not a full capture. They are only saved to files.
 
 **Where should the data go?** Turn on one or more destinations: **Files**,
@@ -129,9 +141,11 @@ To change them, stop and start a new one.
 
 The Survey screen shows:
 
-- The elapsed time and the **Mission ID**, the survey's ID in every record and
-  file (tap copy to copy it).
-- A chip per board: its role and channels, the channel it is on now, battery,
+- The elapsed time and the **Mission ID**, the survey's ID in every record, in
+  your CSV files and in NS Analytics (tap copy to copy it). It is "NS", this
+  iPhone's 8-character ID and the start time, for example
+  `NS 12FE3A4B 20261023-140300`.
+- A chip per Scout: its role and channels, the channel it is on now, battery,
   records per second and records lost.
 - How many unique access points, clients and Bluetooth devices this survey
   has seen.
@@ -141,11 +155,11 @@ The Survey screen shows:
 
 You can lock the phone and put it in a pocket. The survey keeps recording,
 iOS shows the blue location indicator, and a Live Activity on the Lock Screen
-and in the Dynamic Island shows the record count and board state. While the
+and in the Dynamic Island shows the record count and Scout state. While the
 Survey tab is open and the app is in front, the screen stays on.
 
-If a board goes out of range, its chip shows **Reconnecting** and the app
-reconnects when it comes back. The board keeps surveying and buffering in the
+If a Scout goes out of range, its chip shows **Reconnecting** and the app
+reconnects when it comes back. The Scout keeps surveying and buffering in the
 meantime, and the survey keeps the same Mission ID.
 
 Tap **Stop**, then **Stop survey** to end it. If the app was closed while a
@@ -167,8 +181,6 @@ survey gets its own folder of files:
 - Network Survey CSV files for Wi-Fi access points, Bluetooth, clients and
   probe requests (the Wi-Fi and Bluetooth files use the same format as the
   Network Survey Android app).
-- A **WiGLE CSV** (on by default) in the WiGLE upload format. Rows without a
-  location are left out.
 - A pcapng file of raw frames, when **Raw frames** is on.
 
 The **Files** tab lists the surveys with their files. Tap a file to preview
@@ -235,7 +247,7 @@ NS Analytics receives access points, Bluetooth devices and device status.
 Analytics does not store these yet, so leave them off unless you have been
 asked to test them.
 
-Surveys that use the demo board are never uploaded.
+Surveys that use the demo Scout are never uploaded.
 
 **Unregister this phone** stops uploads. Records that were not uploaded yet
 stay on the phone and go up if you register again.
@@ -305,68 +317,70 @@ Lists filter hides them.
   means a virtual access point (one radio serving several networks), and the
   details say so.
 
-## Updating board firmware
+## Updating Scout firmware
 
-Board firmware updates go over Bluetooth from the app.
+Scout firmware updates go over Bluetooth from the app.
 
-1. Open **Survey > Boards**, tap the board, then **Update firmware**.
+1. Open **Survey > Scouts**, tap the Scout, then **Update firmware**.
 2. Tap **Check for update**. The app downloads the latest release and checks
    its signature.
 3. If a newer version is available, tap **Install**. Keep the phone next to
-   the board and the app open until it finishes (usually a minute or two);
+   the Scout and the app open until it finishes (usually a minute or two);
    the screen stays on during the update.
-4. The board restarts into the new firmware and the app reconnects.
+4. The Scout restarts into the new firmware and the app reconnects.
 
-Updates are not possible during a survey, or for the demo board. If the link
+Updates are not possible during a survey, or for the demo Scout. If the link
 drops during an update, the app resumes where it left off; **Resume update**
 continues after a failure. If the new firmware does not start properly, the
-board goes back to its previous version by itself.
+Scout goes back to its previous version by itself.
 
-When the app says a board **Needs a firmware update**, the board speaks an
+When the app says a Scout **Needs a firmware update**, the Scout speaks an
 older protocol version than the app. Update it before surveying.
 
-**Install firmware from file** (on the board's page) installs a firmware image
-you have on the phone, for example a build of your own or a board that has no
+**Install firmware from file** (on the Scout's page) installs a firmware image
+you have on the phone, for example a build of your own or a Scout that has no
 official image. Choose the `.bin` file and, if you have it, its `.sig`. A file
 without a valid signature can still be installed, but the app warns you and
 asks you to confirm.
 
 ## Troubleshooting
 
-**The board does not show under Nearby.**
+**The Scout does not show under Nearby.**
 - Check that it is powered and its LED blinks blue. Hold it within a few
   meters of the iPhone.
-- A board that is connected to another phone does not advertise. Disconnect
+- A Scout that is connected to another phone does not advertise. Disconnect
   it there, or switch that phone's Bluetooth off.
 - Check that Bluetooth is on (Control Center) and that Network Survey is
   allowed to use it (**Settings > Network Survey > Bluetooth**).
 
-**"Paired with another phone" or "Pairing refused".** The board belongs to
-another phone, or its pairing window closed. Hold the board's BOOT button for
+**"Paired with another phone" or "Pairing refused".** The Scout belongs to
+another phone, or its pairing window closed. Hold the Scout's BOOT button for
 about 3 seconds until the LED blinks cyan, then connect again within 60
 seconds.
 
-**"Forget the board in iOS Settings".** The board no longer has this iPhone's
-pairing (it was forgotten, reflashed, or its pairings were deleted), but iOS
-still has its half. Open iOS **Settings > Bluetooth**, tap the info button
-next to the board, choose **Forget This Device**, then connect again in the
-app. Pairing again without this step fails.
+**"Pair this Scout again" or "Pairing lost".** The Scout no longer has this
+iPhone's pairing (it was reinstalled, its pairings were erased, or it was
+paired with another phone), but iOS still has its half. The app notices this
+as soon as the Scout is nearby. Tap **Show me how**: it lists the steps
+(**Settings > Bluetooth**, the info button next to the Scout, **Forget This
+Device**) and connects the Scout again on its own when you come back to the
+app. iOS does not let apps remove a pairing themselves.
 
-**Starting over with a board.** To delete every pairing on the board, power
+**Starting over with a Scout.** To delete every pairing on the Scout, power
 it up, then within 5 seconds press and hold BOOT for about 10 seconds until
-the LED flashes white. (Holding BOOT while the board powers up starts its
-download mode instead; just power it up again.) Then forget the board in the
-app and in iOS Settings, and pair again.
+the LED flashes white. (Holding BOOT while the Scout powers up starts its
+download mode instead; just power it up again.) Then connect it in the app
+and follow **Show me how** to forget it in iOS Settings.
 
-**Start is disabled.** The text above the button says why: no board
+**Start is disabled.** The text above the button says why: no Scout
 connected, nothing to survey, no destination turned on, or location not
 allowed.
 
-**Records are being lost.** A board chip shows records lost when the
+**Records are being lost.** A Scout chip shows records lost when the
 Bluetooth link cannot keep up, usually because the phone is too far from the
-board or the radio band is very busy. Keep the board close to the phone, turn
+Scout or the radio band is very busy. Keep the Scout close to the phone, turn
 off **Raw frames** if you do not need them, or spread the work over more
-boards.
+Scouts.
 
 **The map is empty or records are in the wrong place.** Check that location is
 allowed with **Precise** on, and that the phone has a fix (the Survey screen

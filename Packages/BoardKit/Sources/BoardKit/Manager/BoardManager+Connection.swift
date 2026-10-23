@@ -89,6 +89,18 @@ extension BoardManager {
         !busy.contains(id) && !updating.contains(id) && reconnectTasks[id] == nil && boards[id]?.isReady != true
     }
 
+    /// A known board advertising no bond was reflashed or erased: reconnecting
+    /// would fail on the phone's stale bond, so say so before it is tried. A
+    /// connect the user started (after forgetting the board in Settings) is
+    /// left alone: it pairs afresh. The transport drops a board's advertisement
+    /// when it connects, so only one heard since the last link counts.
+    func noteResetBoards(in list: [DiscoveredBoard]) {
+        for board in list where board.wasReset && !board.isRemoved && !busy.contains(board.id) && !updating.contains(board.id) {
+            guard boards[board.id]?.issue == nil, boards[board.id]?.connection.isConnected != true else { continue }
+            note(.bondMissing, for: board.id)
+        }
+    }
+
     /// Bond and pairing failures need the user, so the board is no longer reconnected.
     func note(_ error: BoardTransportError, for id: BoardID) {
         switch error {

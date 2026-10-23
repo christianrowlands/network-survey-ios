@@ -94,8 +94,8 @@ final class Session {
         } else {
             print("This Mac has not paired with the board; nothing to tell it.")
         }
-        let confirmed = await manager.forget(id)
-        print(confirmed ? "The board deleted its bonds." : "The board was not told (not connected).")
+        let confirmed = await manager.forget(id, wipeBonds: true)
+        print(confirmed ? "The board deleted its bonds." : "The board did not confirm (not connected?); it is still known here.")
         print("Also remove the board in System Settings > Bluetooth before pairing again.")
     }
 

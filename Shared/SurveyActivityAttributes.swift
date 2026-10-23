@@ -50,10 +50,10 @@ extension SurveyActivityAttributes.ContentState {
     var problem: String? {
         guard stoppedAt == nil else { return nil }
         let missing = boardsInSurvey - boardsConnected
-        if missing > 0 { return missing == 1 ? "1 board disconnected" : "\(missing) boards disconnected" }
-        if let battery = lowestBatteryPercent, battery < 15 { return "Board battery low" }
-        if losingRecords { return "Board losing records" }
-        if boardProblem { return "Board needs attention" }
+        if missing > 0 { return missing == 1 ? "1 Scout disconnected" : "\(missing) Scouts disconnected" }
+        if let battery = lowestBatteryPercent, battery < 15 { return "Scout battery low" }
+        if losingRecords { return "Scout losing records" }
+        if boardProblem { return "Scout needs attention" }
         return nil
     }
 }

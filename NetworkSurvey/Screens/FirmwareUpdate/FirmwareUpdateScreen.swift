@@ -3,7 +3,7 @@ import BoardProtocol
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Updates one board's firmware: the signed official release, or a file the
+/// Updates one Scout's firmware: the signed official release, or a file the
 /// user picks (unsigned only after an explicit warning). The app must stay in
 /// the foreground with the phone near the board while the image transfers.
 struct FirmwareUpdateScreen: View {
@@ -33,13 +33,32 @@ private struct FirmwareUpdateContent: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var importing = false
     @State private var confirmingCancel = false
+    @State private var connecting = false
+    @State private var connectFailure: String?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.panelGap) {
                 boardPanel
                 if let blocker = model.blocker, !model.isInstalling, !isFinished {
-                    NoticePanel(symbol: "exclamationmark.triangle", title: "Can't update now", message: blocker) { EmptyView() }
+                    NoticePanel(symbol: "exclamationmark.triangle", title: "Can't update now", message: blocker) {
+                        if !model.isDemo, model.board?.connection.isConnected != true, model.board?.connection != .connecting {
+                            Button(connecting ? "Connecting" : "Connect") {
+                                Task {
+                                    connecting = true
+                                    connectFailure = await app.connect(model.boardID)
+                                    connecting = false
+                                }
+                            }
+                            .disabled(connecting)
+                            .accessibilityIdentifier("firmware.connect")
+                        }
+                    }
+                    if let connectFailure {
+                        Text(connectFailure)
+                            .font(Theme.Fonts.body)
+                            .foregroundStyle(Theme.Colors.amberText)
+                    }
                 }
                 stagePanel
             }
@@ -67,7 +86,7 @@ private struct FirmwareUpdateContent: View {
                 .disabled(!model.canCancel)
             Button("Keep updating", role: .cancel) {}
         } message: {
-            Text("The transfer stops and the board keeps its current firmware.")
+            Text("The transfer stops and the Scout keeps its current firmware.")
         }
         .fileImporter(
             isPresented: $importing, allowedContentTypes: [.data], allowsMultipleSelection: true
@@ -91,8 +110,8 @@ private struct FirmwareUpdateContent: View {
 
     private var boardPanel: some View {
         Panel {
-            Overline(text: "Board")
-            Text(model.info?.modelName.nonEmpty ?? "Board")
+            Overline(text: "Scout")
+            Text(model.info?.modelName.nonEmpty ?? "Scout")
                 .font(Theme.Fonts.sectionTitle)
                 .foregroundStyle(Theme.Colors.ink)
             if let info = model.info {
@@ -192,7 +211,7 @@ private struct FirmwareUpdateContent: View {
             case .unsignedFile:
                 NoticePanel(
                     symbol: "exclamationmark.shield", title: "Unsigned firmware",
-                    message: "This file is not signed by the Network Survey project. Only install firmware you built yourself or got from someone you trust. Bad firmware can stop the board from working until it is reflashed over USB.",
+                    message: "This file is not signed by the Network Survey project. Only install firmware you built yourself or got from someone you trust. Bad firmware can stop the Scout from working until you reinstall it from a computer with the web installer.",
                     tone: .danger
                 ) { EmptyView() }
             }
@@ -249,11 +268,11 @@ private struct FirmwareUpdateContent: View {
             Label("Firmware \(result.newVersion) installed", systemImage: "checkmark.circle.fill")
                 .font(Theme.Fonts.sectionTitle)
                 .foregroundStyle(Theme.Colors.green)
-            Text("The board was on \(result.previousVersion.nonEmpty ?? "an unknown version") and restarted with the new firmware.")
+            Text("The Scout was on \(result.previousVersion.nonEmpty ?? "an unknown version") and restarted with the new firmware.")
                 .font(Theme.Fonts.body)
                 .foregroundStyle(Theme.Colors.ink2)
             if !result.compatible {
-                Text("This firmware speaks a different protocol version than this app, so the board can't survey with it. Install a matching firmware or update the app.")
+                Text("This firmware speaks a different protocol version than this app, so the Scout can't survey with it. Install a matching firmware or update the app.")
                     .font(Theme.Fonts.body)
                     .foregroundStyle(Theme.Colors.amberText)
             }
@@ -295,8 +314,8 @@ private struct FirmwareUpdateContent: View {
     private func offerHeadline(_ offer: FirmwareOffer) -> String {
         switch offer.comparison {
         case .newer: "Firmware \(offer.version) is available"
-        case .same: "The board already runs \(offer.version), the latest release"
-        case .older: "The latest release (\(offer.version)) is older than the board's firmware"
+        case .same: "The Scout already runs \(offer.version), the latest release"
+        case .older: "The latest release (\(offer.version)) is older than the Scout's firmware"
         case .unknown: "Release \(offer.version) is available (installed: \(offer.installedVersion.nonEmpty ?? "unknown"))"
         }
     }
@@ -313,19 +332,19 @@ private struct FirmwareUpdateContent: View {
         switch consent {
         case .unsigned: "I understand, install unsigned firmware"
         case .boardModel(let model): "This firmware is built for \(model)"
-        case .notNewer(.same): "Reinstall the version the board already runs"
-        case .notNewer: "Install an older version than the board runs"
+        case .notNewer(.same): "Reinstall the version the Scout already runs"
+        case .notNewer: "Install an older version than the Scout runs"
         case .staleRelease(let newer): "Install it although \(newer) was released"
         }
     }
 
     private func phaseText(_ phase: FirmwareInstallPhase) -> String {
         switch phase {
-        case .connecting: "Connecting to the board"
+        case .connecting: "Connecting to the Scout"
         case .transferring: "Sending firmware"
         case .reconnecting(let attempt): "Connection lost, reconnecting (attempt \(attempt))"
-        case .verifying: "The board is checking the firmware"
-        case .restarting: "The board is restarting"
+        case .verifying: "The Scout is checking the firmware"
+        case .restarting: "The Scout is restarting"
         case .confirming: "Checking the new version"
         }
     }

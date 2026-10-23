@@ -1,0 +1,24 @@
+import Foundation
+
+/// Every web page the app links to, in one place.
+enum Links {
+    static let website = URL(string: "https://networksurvey.app")!
+    /// The same privacy policy page the Network Survey Android app links to.
+    static let privacyPolicy = URL(string: "https://networksurvey.app/privacy-policy")!
+
+    // MARK: NS Scout
+
+    /// What an NS Scout is, what to buy and where, and how to set it up.
+    static let scout = URL(string: "https://networksurvey.app/scout")!
+    /// The web installer for the Scout firmware (Chrome or Edge on a computer).
+    static let scoutInstaller = URL(string: "https://install.networksurvey.app/")!
+
+    // MARK: NS Analytics
+
+    static let nsAnalyticsSignUp = URL(string: "https://analytics.networksurvey.app/signup")!
+    static let nsAnalyticsSignIn = URL(string: "https://analytics.networksurvey.app")!
+    /// The product page the Android app's "Learn more" opens.
+    static let nsAnalyticsLearnMore = URL(string: "https://networksurvey.app/analytics")!
+    /// The host shown in instructions, without the scheme.
+    static let nsAnalyticsHost = "analytics.networksurvey.app"
+}

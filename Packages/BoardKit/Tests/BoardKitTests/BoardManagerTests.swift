@@ -222,13 +222,104 @@ struct BoardManagerTests {
         #expect(manager.boards[id]?.connection == .disconnected(.bondMissing))
     }
 
-    @Test("Forget tells the board, which leaves the phone with a stale bond until Settings > Forget")
-    func forget() async throws {
+    @Test("Remove keeps both halves of the bond: not reconnected, but added back without pairing")
+    func removeKeepsBond() async throws {
         let rig = bleRig()
         let manager = makeManager(rig)
         let id = rig.boardIDs[0]
         try await manager.connect(rig.key(id))
         #expect(await manager.forget(id))
+        #expect(rig.central.isBonded(id))
+        #expect(rig.store.load().map(\.isRemoved) == [true])
+        #expect(await manager.knownBoards().isEmpty)
+        #expect(manager.boards[id] == nil)
+        await manager.reconnectKnownBoards()
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!rig.central.isConnected(id))
+        // Adding it back must not need a pairing prompt.
+        rig.central.setUserAcceptsPairing(false, on: id)
+        try await manager.connect(rig.key(id))
+        #expect(manager.boards[id]?.isReady == true)
+        #expect(rig.store.load().map(\.isRemoved) == [false])
+    }
+
+    @Test("A removed board shows as known and removed while scanning, not as paired with another phone")
+    func removedBoardInDiscovery() async throws {
+        let rig = bleRig()
+        let manager = makeManager(rig)
+        let id = rig.boardIDs[0]
+        try await manager.connect(rig.key(id))
+        await manager.forget(id)
+        await manager.startScanning()
+        #expect(await eventually { manager.discovered.contains { $0.id == id && $0.isKnown && $0.isRemoved && !$0.isUnavailable } })
+        #expect(manager.boards[id]?.issue == nil)
+    }
+
+    @Test("A known board that advertises no bond was reset: flagged before any connect")
+    func resetBoardFlagged() async throws {
+        let rig = bleRig()
+        let manager = makeManager(rig)
+        let id = rig.boardIDs[0]
+        try await manager.connect(rig.key(id))
+        await manager.disconnect(id)
+        rig.central.wipeBondsOnBoard(id)
+        await manager.startScanning()
+        #expect(await eventually { manager.boards[id]?.issue == .bondMissing })
+        // After Forget This Device in Settings, the user's connect pairs afresh.
+        rig.central.forgetOnPhone(id)
+        try await manager.connect(rig.key(id))
+        #expect(manager.boards[id]?.isReady == true)
+        #expect(manager.boards[id]?.issue == nil)
+    }
+
+    @Test("A stale bond reported as an encryption timeout (CBError 15) is still a missing bond")
+    func encryptionTimeoutIsBondMissing() async throws {
+        let rig = bleRig()
+        let manager = makeManager(rig)
+        let id = rig.boardIDs[0]
+        try await manager.connect(rig.key(id))
+        await manager.disconnect(id)
+        rig.central.wipeBondsOnBoard(id)
+        rig.central.reportStaleBondAsTimeout(id)
+        // The board's advertisement (no bond) is what makes the timeout a missing bond.
+        await manager.startScanning()
+        #expect(await eventually { manager.discovered.contains { $0.id == id && !$0.hasBond } })
+        await #expect(throws: BoardTransportError.bondMissing) { try await manager.connect(rig.key(id)) }
+        #expect(manager.boards[id]?.issue == .bondMissing)
+    }
+
+    @Test("An encryption timeout while the board still advertises a bond is not called a missing bond")
+    func encryptionTimeoutWithBondIsNotBondMissing() async throws {
+        let rig = bleRig()
+        let manager = makeManager(rig)
+        let id = rig.boardIDs[0]
+        try await manager.connect(rig.key(id))
+        await manager.disconnect(id)
+        // The phone has a stale bond but nothing has been heard from the board since.
+        rig.central.wipeBondsOnBoard(id)
+        rig.central.reportStaleBondAsTimeout(id)
+        await #expect(throws: BoardTransportError.pairingRejected) { try await manager.connect(rig.key(id)) }
+    }
+
+    @Test("An erase the board does not confirm keeps the board known and in use")
+    func unconfirmedEraseKeepsBoard() async throws {
+        let rig = bleRig()
+        let manager = makeManager(rig)
+        let id = rig.boardIDs[0]
+        try await manager.connect(rig.key(id))
+        rig.central.dropControlResponses(5, on: id)
+        #expect(await manager.forget(id, wipeBonds: true) == false)
+        #expect(rig.store.load().map(\.isRemoved) == [false])
+        #expect(await manager.knownBoards().map(\.id) == [id])
+    }
+
+    @Test("Erasing pairings tells the board, which leaves the phone with a stale bond until Settings > Forget")
+    func forgetWipingBonds() async throws {
+        let rig = bleRig()
+        let manager = makeManager(rig)
+        let id = rig.boardIDs[0]
+        try await manager.connect(rig.key(id))
+        #expect(await manager.forget(id, wipeBonds: true))
         #expect(rig.store.load().isEmpty)
         #expect(manager.boards[id] == nil)
         await #expect(throws: BoardTransportError.bondMissing) { try await manager.connect(rig.key(id)) }

@@ -13,7 +13,7 @@ enum SurveyProtocol: CaseIterable, Identifiable {
         switch self {
         case .wifiAP: "Wi-Fi APs"
         case .wifiClient: "Wi-Fi Clients"
-        case .ble: "BLE"
+        case .ble: "Bluetooth"
         case .rawFrames: "Raw frames"
         }
     }
@@ -22,8 +22,8 @@ enum SurveyProtocol: CaseIterable, Identifiable {
         switch self {
         case .wifiAP: "Access points and their beacons"
         case .wifiClient: "Devices and their probe requests"
-        case .ble: "Bluetooth Low Energy adverts"
-        case .rawFrames: "802.11 frames, saved as pcapng"
+        case .ble: "Bluetooth Low Energy devices"
+        case .rawFrames: "A packet capture for Wireshark"
         }
     }
 
@@ -119,7 +119,7 @@ enum SurveyDestination: CaseIterable, Identifiable {
     /// Destination kinds (snapshot keys) that make up this row.
     var kinds: [DestinationKind] {
         switch self {
-        case .logFiles: [.nsCSV, .wigle, .pcap]
+        case .logFiles: [.nsCSV, .pcap]
         case .mqtt: [.mqtt]
         case .grpc: [.grpc]
         case .nsAnalytics: [.nsAnalytics]
@@ -142,10 +142,10 @@ struct SurveySetup: Equatable {
     /// `demoBoardInUse`: made-up demo data never goes to NS Analytics.
     static func read(_ settings: SettingsStore, registered: Bool, demoBoardInUse: Bool = false) -> SurveySetup {
         var setup = SurveySetup()
-        if demoBoardInUse { setup.unavailable[.nsAnalytics] = "Not available with the demo board" }
+        if demoBoardInUse { setup.unavailable[.nsAnalytics] = "Not available with the demo Scout" }
         setup.protocols = Set(SurveyProtocol.allCases.filter { settings[$0.key] })
         setup.destinationsOn = Set(SurveyDestination.allCases.filter { settings[$0.key] })
-        setup.details[.logFiles] = settings[Settings.logWigleCSV] ? "CSV and WiGLE CSV on this iPhone" : "CSV on this iPhone"
+        setup.details[.logFiles] = "CSV files on this iPhone"
         let mqttHost = settings[Settings.mqttHost].trimmingCharacters(in: .whitespaces)
         if !mqttHost.isEmpty {
             setup.configured.insert(.mqtt)
@@ -227,9 +227,9 @@ enum StartBlock: Equatable {
     var message: String {
         switch self {
         case .storageUnavailable: "Storage is not available, so a survey can't be saved"
-        case .bluetoothOff: "Turn on Bluetooth to use your board"
+        case .bluetoothOff: "Turn on Bluetooth to use your Scout"
         case .bluetoothDenied: "Allow Bluetooth for Network Survey in Settings"
-        case .noBoard: "Connect a board to start"
+        case .noBoard: "Connect a Scout to start"
         case .boardNeedsUpdate(let name): "\(name) needs a firmware update before it can survey"
         case .nothingToSurvey: "Choose at least one thing to survey"
         case .noDestination: "Turn on a place for the data to go"

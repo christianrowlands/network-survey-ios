@@ -10,7 +10,6 @@ created when the first record of its kind arrives, so a session without BLE has 
 | `craxiom-bluetooth-<time>.csv` | BLE advertisers (one row per address per scan window) | NS CSV Bluetooth 0.3.0 |
 | `craxiom-wifi-client-<time>.csv` | Wi-Fi clients (stations) | NS CSV client 0.1.0 |
 | `craxiom-wifi-probe-<time>.csv` | Wi-Fi probe requests | NS CSV probe 0.1.0 |
-| `craxiom-wigle-<time>.csv` | APs and BLE devices for upload to WiGLE | WigleWifi-1.6 |
 | `craxiom-wifi-raw-<time>.pcapng` | Raw 802.11 frames (only with "Raw frames" on) | pcapng, radiotap |
 
 ## NS CSV conventions
@@ -48,8 +47,7 @@ Android app leaves empty because Android does not expose them: `serviceSetType`,
 
 `encryptionType` uses the NS Messaging values. OWE (Enhanced Open) has no NS value and reads
 `UNKNOWN`; enterprise networks read `WPA2` or `WPA3` and are told apart by `akmSuites`
-(`IEEE_8021X` and related values). The WiGLE file's `AuthMode` column has the full detail, for
-example `[RSN-OWE-CCMP][ESS]`.
+(`IEEE_8021X` and related values).
 
 ### Client 0.1.0
 
@@ -85,15 +83,6 @@ One row per client MAC address and requested SSID per channel dwell.
 | `probeCount` | Requests received in the dwell. |
 | `locallyAdministered` | As in the client file. |
 | `boardId`, `deviceSerialNumber`, `locationAge` | As in the client file. |
-
-## WiGLE
-
-`WigleWifi-1.6` with the standard pre-header and the 14 columns `MAC,SSID,AuthMode,FirstSeen,
-Channel,Frequency,RSSI,CurrentLatitude,CurrentLongitude,AltitudeMeters,AccuracyMeters,RCOIs,MfgrId,Type`
-(LF line endings). `FirstSeen` is UTC. BLE rows use `Misc [LE]` as AuthMode, the advertised name as
-SSID and the decimal Bluetooth company ID as `MfgrId`. Latitude and longitude have six decimals.
-Rows without a location are left out.
-`[MFPR]`/`[MFPC]` are never written because the board does not report the RSN capabilities.
 
 ## pcapng
 

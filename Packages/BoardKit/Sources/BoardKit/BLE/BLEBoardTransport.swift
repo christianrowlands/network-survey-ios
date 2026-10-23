@@ -87,6 +87,9 @@ public actor BLEBoardTransport: BoardTransport {
     var stableIDs: [UUID: BoardID] = [:]
     var peripheralsByID: [BoardID: UUID] = [:]
     var seen: [UUID: DiscoveredBoard] = [:]
+    /// Whether the board advertised a bond just before the current link came up,
+    /// kept until setup finishes, to explain an encryption failure during it.
+    var hadBondBeforeLink: [UUID: Bool] = [:]
     var waiters: [WaitKey: Waiter] = [:]
     var nextToken: UInt64 = 0
     var scanning = false
@@ -254,14 +257,30 @@ public actor BLEBoardTransport: BoardTransport {
     }
 
     public func knownBoards() async -> [KnownBoard] {
-        known.values.sorted { $0.lastConnected > $1.lastConnected }
+        known.values.filter { !$0.isRemoved }.sorted { $0.lastConnected > $1.lastConnected }
     }
 
-    public func forgetKnownBoard(_ board: BoardID) async {
+    public func forgetKnownBoard(_ board: BoardID, keepBond: Bool) async {
         let id = peripheral(for: board)
-        if let id { known[id] = nil }
-        // The board may be stored under its stable ID while `board` is provisional.
-        store.save(store.load().filter { $0.id != board && (id == nil || $0.connectionKey != id) })
+        if keepBond {
+            let now = Date()
+            if let id { known[id]?.removedAt = now }
+            store.markRemoved(board, connectionKey: id, at: now)
+        } else {
+            if let id { known[id] = nil }
+            // The board may be stored under its stable ID while `board` is provisional.
+            store.save(store.load().filter { $0.id != board && (id == nil || $0.connectionKey != id) })
+        }
+        if scanning { publishDiscoveries() }
+    }
+
+    /// CBError 15 (encryption timed out) on a board this phone has a bond with,
+    /// while the board advertises that it has none, means the board lost that
+    /// bond, the same as CBError 14. Otherwise it may be a weak link.
+    func linkError(_ error: BLEError, on id: UUID) -> BoardTransportError {
+        let advertisedBond = seen[id]?.hasBond ?? hadBondBeforeLink[id]
+        if error.kind == .encryptionTimedOut, known[id] != nil, advertisedBond == false { return .bondMissing }
+        return error.transportError
     }
 
     // MARK: - Board IDs
@@ -307,6 +326,7 @@ public actor BLEBoardTransport: BoardTransport {
             known[id] = record
             store.upsert(record)
             Self.log.info("board \(info.shortID, privacy: .public) ready, max write \(self.central.maximumWriteLength(id, withResponse: false))")
+            hadBondBeforeLink[id] = nil
             setState(.connected(info), for: id)
         } catch {
             // A characteristic missing from GATT is a broken board, not an unknown one.

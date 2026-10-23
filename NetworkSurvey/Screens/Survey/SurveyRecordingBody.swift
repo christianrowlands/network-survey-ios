@@ -12,7 +12,7 @@ struct SurveyRecordingBody: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s) {
             RecordingHero()
-            SectionHeader(title: "Boards", trailing: "\(model.boardManager.readyBoards.count) connected")
+            SectionHeader(title: "Scouts", trailing: "\(model.boardManager.readyBoards.count) connected")
             BoardStrip(onSelect: onSelectBoard)
             SectionHeader(title: "Records", trailing: "unique this survey")
             ProtocolCounts()
@@ -79,6 +79,7 @@ private struct RecordingHero: View {
                         .font(Theme.Fonts.mono)
                         .foregroundStyle(Theme.Colors.ink)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                         .truncationMode(.middle)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .accessibilityLabel("Mission ID \(missionId)")
@@ -94,6 +95,9 @@ private struct RecordingHero: View {
                     }
                     .accessibilityLabel(copied ? "Mission ID copied" : "Copy mission ID")
                 }
+                Text("Identifies this survey in your files and in NS Analytics.")
+                    .font(Theme.Fonts.caption)
+                    .foregroundStyle(Theme.Colors.ink3)
             }
         }
         .padding(Theme.Spacing.l)
@@ -145,7 +149,7 @@ private struct RecordingHero: View {
             return model.access.location.isAllowed || demoLocation ? "Finding location" : "No location: records are not placed on the map"
         }
         let accuracy = fix.horizontalAccuracy.map { "±\(Int($0.rounded())) m" } ?? "accuracy unknown"
-        let source = demoLocation ? "Demo location" : fix.source == .boardGPS ? "Board GPS" : "Location"
+        let source = demoLocation ? "Demo location" : fix.source == .boardGPS ? "Scout GPS" : "Location"
         return "\(source) · \(accuracy)"
     }
 

@@ -88,6 +88,7 @@ public final class BoardManager {
         let discoveryPump = Task { [weak self] in
             for await list in discoveries {
                 self?.discovered = list
+                self?.noteResetBoards(in: list)
             }
         }
         let eventPump = Task.detached { [weak self, router] in
@@ -251,18 +252,26 @@ public final class BoardManager {
         await rebalance()
     }
 
-    /// Tells a connected board to delete its bonds (ForgetBonds), disconnects and
-    /// forgets it locally. Returns whether the board confirmed. The phone keeps
-    /// its half of the bond either way: the user must also choose Forget This
-    /// Device in Settings > Bluetooth before pairing again.
+    /// Disconnects the board and stops using it. By default both sides keep the
+    /// bond, so the board can be added back without pairing (and without a trip
+    /// to Settings > Bluetooth). `wipeBonds` also tells a connected board to
+    /// delete its bonds (ForgetBonds); the phone keeps its half regardless, so
+    /// the user must then choose Forget This Device in Settings > Bluetooth
+    /// before pairing again. Returns whether the board confirmed the wipe (true
+    /// when no wipe was asked for); an unconfirmed wipe leaves the board in use.
     @discardableResult
-    public func forget(_ id: BoardID) async -> Bool {
+    public func forget(_ id: BoardID, wipeBonds: Bool = false) async -> Bool {
         stopWanting(id)
         releases[id, default: 0] += 1
         // ForgetBonds works before Hello; the transport fails fast when not connected.
-        let confirmed = (try? await send(.forgetBonds(NSBForgetBonds()), to: id))?.result == .ok
+        let confirmed = wipeBonds ? (try? await send(.forgetBonds(NSBForgetBonds()), to: id))?.result == .ok : true
+        if !confirmed {
+            // The board may still hold its bonds: keep using it, so the user can try again.
+            wanted.insert(id)
+            return false
+        }
         await transport.disconnect(id)
-        await transport.forgetKnownBoard(id)
+        await transport.forgetKnownBoard(id, keepBond: !wipeBonds)
         boards[id] = nil
         roles[id] = nil
         router.reset(id)

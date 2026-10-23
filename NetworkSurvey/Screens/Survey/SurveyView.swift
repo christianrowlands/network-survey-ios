@@ -34,13 +34,16 @@ struct SurveyView: View {
             }
             .screenBackground()
             .safeAreaInset(edge: .bottom, spacing: 0) { actionBar }
-            .navigationTitle("Survey")
+            .navigationTitle("Network Survey")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    BrandTile(size: 30)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink(value: SurveyRoute.boards) {
                         HStack(spacing: Theme.Spacing.xs) {
                             Image(systemName: "sensor")
-                            Text("Boards")
+                            Text("Scouts")
                         }
                     }
                     .accessibilityIdentifier("survey.boardsButton")
@@ -187,13 +190,13 @@ struct SurveyView: View {
     private var currentSetup: SurveySetup {
         var current = setup
         if model.boardManager.readyBoards.contains(where: model.isDemo) {
-            current.unavailable[.nsAnalytics] = "Not available with the demo board"
+            current.unavailable[.nsAnalytics] = "Not available with the demo Scout"
         }
         return current
     }
 
     private var stopMessage: String {
-        var message = "The boards stop recording and the files are closed."
+        var message = "The Scouts stop recording and the files are closed."
         if model.survey.destinations.contains(where: { $0.name == "nsAnalytics" }) {
             message += " Records waiting for NS Analytics keep uploading."
         }

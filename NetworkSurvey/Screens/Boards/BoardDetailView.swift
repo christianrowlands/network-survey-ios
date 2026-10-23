@@ -2,15 +2,20 @@ import BoardKit
 import BoardProtocol
 import SwiftUI
 
-/// One board: its state and any problem with the fix, what it is, its role,
-/// firmware update, connect or disconnect, and Forget.
+/// One Scout: its state and any problem with the fix, what it is, its role,
+/// firmware update, connect or disconnect, Remove, and erasing its pairings.
 struct BoardDetailView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     let board: BoardID
     @State private var busy = false
     @State private var message: String?
-    @State private var confirmingForget = false
+    @State private var confirmingRemove = false
+    @State private var confirmingErase = false
+    /// The Settings > Bluetooth walkthrough; `reconnect` false after an erase.
+    @State private var forgetGuide: ForgetGuide?
+    /// Close this screen when the walkthrough closes (the Scout is gone).
+    @State private var leaveAfterGuide = false
     /// "Up to date" or "Update available", once the latest release was checked.
     @State private var releaseStatus: String?
 
@@ -36,7 +41,7 @@ struct BoardDetailView: View {
 
             if let status = state?.status, state?.connection.isConnected == true {
                 Section("Now") {
-                    LabeledContent("Battery", value: BoardBattery.percent(status).map { "\($0)% (\(status.batteryMv) mV)" } ?? "No battery info")
+                    LabeledContent("Battery", value: BoardBattery.percent(status).map { "\($0)% (\(status.batteryMv) mV)" } ?? "None, USB powered")
                     LabeledContent("Doing", value: BoardText.assignment(state?.assignment, status: status) ?? "Waiting for a survey")
                     if status.currentChannel > 0 {
                         LabeledContent("Channel now", value: "\(status.currentChannel)")
@@ -53,7 +58,7 @@ struct BoardDetailView: View {
             }
 
             if let info = state?.info {
-                Section("Board") {
+                Section("Scout") {
                     LabeledContent("Model", value: BoardText.model(info))
                     LabeledContent("Firmware", value: firmwareText(info))
                         .accessibilityIdentifier("board.firmware")
@@ -93,43 +98,66 @@ struct BoardDetailView: View {
                 }
             } footer: {
                 if model.survey.isRunning && model.boardManager.readyBoards == [board] {
-                    Text("This is the only board in the running survey. Stop the survey to disconnect it.")
+                    Text("This is the only Scout in the running survey. Stop the survey to disconnect it.")
                 }
             }
             .panelRows()
 
             Section {
-                Button("Forget this board", role: .destructive) { confirmingForget = true }
+                Button(model.isDemo(board) ? "Remove demo Scout" : "Remove Scout", role: .destructive) { confirmingRemove = true }
                     .disabled(busy)
                     .accessibilityIdentifier("board.forget")
             } footer: {
-                Text("The board deletes its pairing with this iPhone and is no longer reconnected.")
+                Text(model.isDemo(board)
+                     ? "Disconnects the demo Scout."
+                     : "Network Survey stops connecting to it. It stays paired, so you can add it back from Scouts at any time without pairing again.")
             }
             .panelRows()
 
-            Section("Advanced") {
+            Section {
                 NavigationLink(value: SurveyRoute.firmwareUpdate(board)) {
                     Label("Install firmware from file", systemImage: "doc.badge.arrow.up")
+                }
+                if !model.isDemo(board) && state?.connection.isConnected == true {
+                    Button("Erase pairings on the Scout", role: .destructive) { confirmingErase = true }
+                        .disabled(busy || model.survey.isLocked)
+                        .accessibilityIdentifier("board.erasePairings")
+                }
+            } header: {
+                Text("Advanced")
+            } footer: {
+                if !model.isDemo(board) && state?.connection.isConnected == true {
+                    Text("Only needed before giving the Scout away for good. To pair it with another phone, holding its BOOT button for 3 seconds is enough.")
                 }
             }
             .panelRows()
         }
         .themedList()
         .navigationTitle(name)
-        .alert("Board", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
+        .alert("Scout", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(message ?? "")
         }
         .task(id: state?.info?.firmwareVersion) { await checkRelease() }
-        .confirmationDialog("Forget \(name)?", isPresented: $confirmingForget, titleVisibility: .visible) {
-            Button("Forget board", role: .destructive) {
-                Task { await forget(name: name) }
+        .confirmationDialog("Remove \(name)?", isPresented: $confirmingRemove, titleVisibility: .visible) {
+            Button("Remove", role: .destructive) {
+                Task { await remove() }
             }
         } message: {
             Text(model.isDemo(board)
-                 ? "The demo board is disconnected and forgotten."
-                 : "The board deletes its pairing with this iPhone. To pair again later, also open Settings > Bluetooth, tap the info button next to \(name) and choose Forget This Device.")
+                 ? "The demo Scout is disconnected."
+                 : "Network Survey stops connecting to \(name). Add it back from Scouts whenever you like, with no pairing needed.")
+        }
+        .confirmationDialog("Erase pairings on \(name)?", isPresented: $confirmingErase, titleVisibility: .visible) {
+            Button("Erase pairings", role: .destructive) {
+                Task { await erasePairings(name: name) }
+            }
+        } message: {
+            Text("\(name) forgets every phone it was paired with, including this iPhone. To use it here again, iOS must also forget it in Settings > Bluetooth.")
+        }
+        .sheet(item: $forgetGuide, onDismiss: { if leaveAfterGuide { dismiss() } }) { guide in
+            ForgetPairingSheet(board: board, name: guide.name, reconnect: guide.reconnect)
         }
     }
 
@@ -141,7 +169,8 @@ struct BoardDetailView: View {
         ) {
             switch issue {
             case .bondMissing:
-                Button("Open Settings") { AccessModel.openAppSettings() }
+                Button("Show me how") { forgetGuide = ForgetGuide(name: name, reconnect: true) }
+                    .accessibilityIdentifier("board.fixPairing")
             case .incompatible:
                 NavigationLink("Update firmware", value: SurveyRoute.firmwareUpdate(board))
             case .pairingRejected, .configureFailed:
@@ -154,10 +183,10 @@ struct BoardDetailView: View {
 
     private func issueTitle(_ issue: BoardIssue) -> String {
         switch issue {
-        case .bondMissing: "Forget the board in iOS Settings"
+        case .bondMissing: "Pair this Scout again"
         case .pairingRejected: "Pairing did not finish"
         case .incompatible: "Firmware update needed"
-        case .configureFailed: "The board could not start"
+        case .configureFailed: "The Scout could not start"
         }
     }
 
@@ -181,15 +210,30 @@ struct BoardDetailView: View {
         busy = false
     }
 
-    private func forget(name: String) async {
+    private func remove() async {
         busy = true
-        let confirmed = await model.forget(board)
+        await model.forget(board)
         busy = false
-        if !model.isDemo(board) {
-            model.notice = confirmed
-                ? "\(name) deleted its pairing. Before pairing again, open Settings > Bluetooth and choose Forget This Device for \(name)."
-                : "\(name) was forgotten on this iPhone. It was not connected, so it still holds its pairing: hold its BOOT button for 10 seconds while it starts to clear it."
-        }
         dismiss()
     }
+
+    private func erasePairings(name: String) async {
+        busy = true
+        let confirmed = await model.forget(board, wipeBonds: true)
+        busy = false
+        if confirmed {
+            leaveAfterGuide = true
+            forgetGuide = ForgetGuide(name: name, reconnect: false)
+        } else {
+            message = "\(name) did not confirm, so it may still have its pairings. Keep it next to your iPhone and try again."
+        }
+    }
+}
+
+/// Which Settings > Bluetooth walkthrough to show.
+private struct ForgetGuide: Identifiable {
+    /// The advertised name, as Settings > Bluetooth lists it.
+    let name: String
+    let reconnect: Bool
+    var id: Bool { reconnect }
 }

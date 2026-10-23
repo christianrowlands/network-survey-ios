@@ -2,12 +2,13 @@ import Foundation
 
 /// Mission IDs in the Network Survey Android app's format:
 /// "NS <deviceId> <yyyyMMdd-HHmmss>", with the start time in local time.
-/// On iOS the device ID is a per-install UUID.
+/// On iOS the device ID is the install ID's first 8 hex digits, the same value
+/// as `DeviceIdentity.deviceSerialNumber`.
 public enum MissionID {
     public static let prefix = "NS "
 
     public static func make(installID: UUID, startedAt: Date, timeZone: TimeZone = .current) -> String {
-        "\(prefix)\(installID.uuidString) \(timestamp(startedAt, timeZone: timeZone))"
+        "\(prefix)\(DeviceIdentity.shortID(installID)) \(timestamp(startedAt, timeZone: timeZone))"
     }
 
     /// "NS DEMO <yyyyMMdd-HHmmss>" for a survey that includes the simulated

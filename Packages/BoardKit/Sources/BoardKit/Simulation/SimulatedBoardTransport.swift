@@ -140,11 +140,11 @@ public actor SimulatedBoardTransport: BoardTransport {
     }
 
     public func knownBoards() async -> [KnownBoard] {
-        known.values.sorted { $0.lastConnected > $1.lastConnected }
+        known.values.filter { !$0.isRemoved }.sorted { $0.lastConnected > $1.lastConnected }
     }
 
-    public func forgetKnownBoard(_ id: BoardID) async {
-        known[id] = nil
+    public func forgetKnownBoard(_ id: BoardID, keepBond: Bool) async {
+        if keepBond { known[id]?.removedAt = Date() } else { known[id] = nil }
     }
 
     // MARK: - Test hooks and time
@@ -290,7 +290,7 @@ public actor SimulatedBoardTransport: BoardTransport {
                 model: profile.model, protocolMajor: profile.protocolMajor,
                 pairingMode: board.engine.pairingMode, hasBond: board.engine.bondCount > 0,
                 supports5GHz: profile.bands.contains(.ghz5), isKnown: known[profile.id] != nil,
-                isSimulated: true, lastSeen: now
+                isRemoved: known[profile.id]?.isRemoved == true, isSimulated: true, lastSeen: now
             )
         }
         discoveryBroadcaster.send(seen)

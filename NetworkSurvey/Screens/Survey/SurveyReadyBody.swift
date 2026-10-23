@@ -2,7 +2,7 @@ import BoardKit
 import SurveyCore
 import SwiftUI
 
-/// The Ready state: what is still to do, the boards, "What should it survey?"
+/// The Ready state: what is still to do, the Scouts, "What should it survey?"
 /// and "Where should the data go?", then a sentence saying what Start will do.
 struct SurveyReadyBody: View {
     @Environment(AppModel.self) private var model
@@ -14,7 +14,7 @@ struct SurveyReadyBody: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s) {
             StillToDoPanel()
             if !model.boardsInUse.isEmpty {
-                SectionHeader(title: "Boards", trailing: boardsTrailing)
+                SectionHeader(title: "Scouts", trailing: boardsTrailing)
                 BoardStrip(onSelect: onSelectBoard)
             }
 
@@ -123,14 +123,15 @@ private struct DestinationRow: View {
 
     private func detail(configured: Bool) -> String {
         if configured { return setup.details[destination] ?? "" }
-        return destination == .nsAnalytics ? "Not connected on this iPhone" : "Not set up"
+        return destination == .nsAnalytics ? "See your surveys on a team map" : "Not set up"
     }
 }
 
 /// What stands between the user and a useful survey: Bluetooth, location, a
-/// board, and records still waiting to upload from earlier surveys.
+/// Scout, and records still waiting to upload from earlier surveys.
 private struct StillToDoPanel: View {
     @Environment(AppModel.self) private var model
+    @State private var showingGuide = false
 
     var body: some View {
         let items = self.items
@@ -147,9 +148,23 @@ private struct StillToDoPanel: View {
                         }
                     }
                     .accessibilityElement(children: .contain)
+                    if item.id == "board" {
+                        Button {
+                            showingGuide = true
+                        } label: {
+                            Label("Don't have one? See what an NS Scout is and how to get one.", systemImage: "questionmark.circle")
+                                .font(Theme.Fonts.body)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .buttonStyle(.borderless)
+                        .padding(.leading, 24 + Theme.Spacing.m)
+                        .padding(.bottom, Theme.Spacing.s)
+                        .accessibilityIdentifier("survey.scoutGuide")
+                    }
                 }
             }
             .accessibilityIdentifier("survey.stillToDo")
+            .sheet(isPresented: $showingGuide) { ScoutGuideView() }
         }
     }
 
@@ -174,22 +189,22 @@ private struct StillToDoPanel: View {
         switch access.bluetooth {
         case .off:
             items.append(Item(id: "bt-off", symbol: "bolt.horizontal.circle", level: .failing, title: "Bluetooth is off",
-                              detail: ["Turn it on in Control Center or Settings to reach your board."]))
+                              detail: ["Turn it on in Control Center to reach your Scout."]))
         case .denied, .restricted:
             items.append(Item(id: "bt-denied", symbol: "bolt.horizontal.circle", level: .failing,
                               title: "Bluetooth access is off",
-                              detail: ["Network Survey needs Bluetooth to talk to your board."],
+                              detail: ["Network Survey needs Bluetooth to talk to your Scout."],
                               action: .init(title: "Open Settings") { AccessModel.openAppSettings() }))
         case .unsupported:
             items.append(Item(id: "bt-unsupported", symbol: "bolt.horizontal.circle", level: .failing,
-                              title: "Bluetooth is not available", detail: ["This device can't connect to a board."]))
+                              title: "Bluetooth is not available", detail: ["This device can't connect to a Scout."]))
         case .notDetermined, .ready:
             break
         }
         if model.boardManager.readyBoards.isEmpty && model.boardsInUse.isEmpty {
-            items.append(Item(id: "board", symbol: "sensor", level: .pending, title: "Connect a board",
-                              detail: ["Hold the board next to your iPhone, or use the demo board."],
-                              action: .init(title: "Find boards") { model.openBoards() }))
+            items.append(Item(id: "board", symbol: "sensor", level: .pending, title: "Connect your NS Scout",
+                              detail: ["The Scout listens for Wi-Fi and Bluetooth. Plug it in and hold it next to your iPhone, or try the demo Scout."],
+                              action: .init(title: "Find Scouts") { model.openBoards() }))
         }
         if let notice = LocationNotice(access.location) {
             items.append(Item(id: notice.id, symbol: notice.symbol, level: notice.level, title: notice.title,

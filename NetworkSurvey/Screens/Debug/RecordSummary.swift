@@ -53,7 +53,7 @@ nonisolated struct RecordSummary: Identifiable, Equatable, Sendable {
         case .gps(let gps):
             kind = .gps
             title = String(format: "%.5f, %.5f", gps.latitude, gps.longitude)
-            identifier = "Board GPS"
+            identifier = "Scout GPS"
             detail = "\(gps.satellites) satellites"
             rssi = nil
             tags = []

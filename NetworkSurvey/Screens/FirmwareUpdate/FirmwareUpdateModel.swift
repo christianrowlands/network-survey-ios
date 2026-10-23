@@ -35,7 +35,7 @@ final class FirmwareUpdateModel {
 
     let boardID: BoardID
     private let manager: BoardManager
-    private let isDemo: Bool
+    let isDemo: Bool
     private let catalog: FirmwareCatalog
     private(set) var stage: Stage = .start
     /// What the user explicitly accepted for the package on screen.
@@ -109,9 +109,9 @@ final class FirmwareUpdateModel {
 
     /// Why an update cannot start now, for the user; nil when it can.
     var blocker: String? {
-        if isDemo { return "The demo board is simulated and has no firmware to update." }
+        if isDemo { return "The demo Scout is simulated and has no firmware to update." }
         if manager.capture != nil { return FirmwareUpdateError.surveyRunning.userMessage }
-        if board?.connection.isConnected != true { return "Connect the board first, then come back here." }
+        if board?.connection.isConnected != true { return "Connect the Scout first." }
         return nil
     }
 

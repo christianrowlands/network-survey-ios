@@ -63,6 +63,8 @@ final class AppModel {
     /// A short message for the user (a failed start, an upload result).
     var notice: String?
     var demoBoardEnabled: Bool
+    /// The first-launch welcome is on screen.
+    var showingWelcome: Bool
     /// An NS Analytics registration link opened from outside the app, for the
     /// registration screen to pick up (and set back to nil).
     var pendingRegistrationLink: URL?
@@ -120,6 +122,7 @@ final class AppModel {
         identity = DeviceIdentity.load(from: settings)
         let demoEnabled = settings[Settings.demoBoardEnabled]
         demoBoardEnabled = demoEnabled
+        showingWelcome = !settings[Settings.hasSeenWelcome] && (!options.uiTesting || options.showWelcome)
 
         let demo = SimulatedBoardTransport(boardCount: options.demoBoards, seed: options.demoSeed)
         demoTransport = demo
@@ -244,6 +247,12 @@ final class AppModel {
     func openBoards() {
         selectedTab = .survey
         surveyPath = [.boards]
+    }
+
+    /// Closes the welcome for good (until Settings > Help > Show welcome again).
+    func finishWelcome() {
+        settings[Settings.hasSeenWelcome] = true
+        showingWelcome = false
     }
 
     // MARK: - Demo board

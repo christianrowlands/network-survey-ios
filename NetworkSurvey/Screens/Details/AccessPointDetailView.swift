@@ -74,7 +74,7 @@ private struct AccessPointDetailContent: View {
                 } header: {
                     Text("Channel")
                 } footer: {
-                    Text("Heard on lists every channel where a board received this access point, including adjacent 2.4 GHz channels.")
+                    Text("Heard on lists every channel where a Scout received this access point, including adjacent 2.4 GHz channels.")
                 }
                 ObservationSection(entity: ap)
                 Section("Connected clients") {

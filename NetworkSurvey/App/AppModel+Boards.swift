@@ -49,30 +49,32 @@ extension AppModel {
         await boardManager.disconnect(board)
     }
 
-    /// Asks the board to delete its pairing, then forgets it here. Returns
-    /// whether the board confirmed.
-    func forget(_ board: BoardID) async -> Bool {
+    /// Stops using the Scout, keeping the pairing on both sides so it can be
+    /// added back without pairing. `wipeBonds` also has a connected Scout erase
+    /// its pairings; returns whether it confirmed.
+    @discardableResult
+    func forget(_ board: BoardID, wipeBonds: Bool = false) async -> Bool {
         roleStore.save(nil, for: board)
-        return await boardManager.forget(board)
+        return await boardManager.forget(board, wipeBonds: wipeBonds)
     }
 
     static func connectMessage(_ error: any Error, name: String) -> String {
         switch error {
-        case BoardManagerError.tooManyBoards: return "Four boards are connected, the most one iPhone can use. Disconnect one first."
+        case BoardManagerError.tooManyBoards: return "Four Scouts are connected, the most one iPhone can use. Disconnect one first."
         case BoardManagerError.busy: return "\(name) is already connecting."
         case BoardManagerError.incompatible(let reason): return reason
-        case BoardManagerError.rejected(_, let message): return "\(name) refused: \(message)"
+        case BoardManagerError.rejected(_, let message): return "\(name) refused the connection (\(message)). Unplug it for a moment to restart it, then try again."
         case let error as BoardTransportError:
             switch error {
             case .bondMissing: return BoardText.issueMessage(.bondMissing, name: name)
             case .pairingRejected: return BoardText.issueMessage(.pairingRejected, name: name)
             case .timeout: return "\(name) did not answer. Hold it next to your iPhone and try again."
-            case .bluetoothUnavailable: return "Bluetooth is not available. Turn it on and allow Network Survey to use it."
+            case .bluetoothUnavailable: return "Bluetooth is not available. Turn it on in Control Center and allow Network Survey to use it."
             case .cancelled: return "Connecting was cancelled."
             default: return "Could not connect to \(name). Hold it next to your iPhone and try again."
             }
         default:
-            return "Could not connect to \(name): \(error.localizedDescription)"
+            return "Could not connect to \(name). Hold it next to your iPhone and try again. (\(error.localizedDescription))"
         }
     }
 }

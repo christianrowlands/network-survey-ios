@@ -75,21 +75,15 @@ struct HarnessClient: Sendable {
     }
 }
 
-/// A CSV file read back: comment lines (`#` in the NS formats, the WiGLE
-/// pre-header) skipped or kept, then a header and rows by column name.
+/// A CSV file read back: `#` comment lines skipped, then a header and rows by
+/// column name.
 struct CSVTable {
-    var preamble: [String] = []
     var header: [String] = []
     var rows: [[String: String]] = []
 
-    /// `preHeaderLines` lines before the header are kept raw (WiGLE has one).
-    init(url: URL, preHeaderLines: Int = 0) throws {
+    init(url: URL) throws {
         let text = try String(contentsOf: url, encoding: .utf8)
         var records = Self.parse(text)
-        while let first = records.first, preamble.count < preHeaderLines {
-            preamble.append(first.joined(separator: ","))
-            records.removeFirst()
-        }
         // The first column (deviceTime) never starts with "#", so such lines are comments.
         records.removeAll { $0.first?.hasPrefix("#") == true }
         guard let header = records.first else { return }

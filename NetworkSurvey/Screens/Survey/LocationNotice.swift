@@ -43,17 +43,17 @@ struct LocationNotice: Equatable {
             // access shows the system alert that does; the text says where it is too.
             self.init(id: "loc-services", symbol: "location.slash", level: .failing, title: "Location Services are off",
                       detail: "Turn on Location Services in Settings > Privacy & Security > Location Services. "
-                          + "Records from a board can't be placed on the map without it.",
+                          + "Records from a Scout can't be placed on the map without it.",
                       action: .turnOnServices)
         case .restricted:
             self.init(id: "loc-restricted", symbol: "location.slash", level: .failing,
                       title: "Location is restricted on this iPhone",
                       detail: "Screen Time or a device management profile blocks location access, "
-                          + "so records from a board can't be placed on the map.")
+                          + "so records from a Scout can't be placed on the map.")
         case .denied:
             self.init(id: "loc-denied", symbol: "location.slash", level: .failing, title: "Location access is off",
                       detail: "Turn on Location for Network Survey in Settings. "
-                          + "Records from a board can't be placed on the map without it.",
+                          + "Records from a Scout can't be placed on the map without it.",
                       action: .openSettings)
         case .approximate:
             self.init(id: "loc-approx", symbol: "location.circle", level: .held, title: "Precise location is off",

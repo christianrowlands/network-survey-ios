@@ -95,7 +95,7 @@ struct BoardChip: View {
         )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText(state, connected: connected, drops: drops))
-        .accessibilityHint("Sets the board's role")
+        .accessibilityHint("Sets the Scout's role")
     }
 
     private func roleLine(_ state: BoardManager.BoardState?) -> String {
@@ -106,7 +106,7 @@ struct BoardChip: View {
 
     private func accessibilityText(_ state: BoardManager.BoardState?, connected: Bool, drops: Int) -> String {
         var parts = [model.boardName(board)]
-        if model.isDemo(board) { parts.append("demo board") }
+        if model.isDemo(board) { parts.append("demo Scout") }
         parts.append(roleLine(state))
         if let percent = state?.status.flatMap(BoardBattery.percent) { parts.append("battery \(percent) percent") }
         if connected, state?.assignment != nil, let rate = state?.status?.recordsPerSec { parts.append("\(rate) records per second") }
@@ -185,7 +185,7 @@ struct BoardRoleSheet: View {
             List {
                 BoardRolePicker(board: board)
                 Section {
-                    Button("Board details") {
+                    Button("Scout details") {
                         dismiss()
                         model.surveyPath.append(.board(board))
                     }

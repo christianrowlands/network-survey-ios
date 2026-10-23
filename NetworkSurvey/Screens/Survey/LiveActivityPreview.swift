@@ -5,7 +5,7 @@ import SwiftUI
 /// with the launch argument `-NSOpenScreen liveActivity`.
 struct LiveActivityPreview: View {
     private let attributes = SurveyActivityAttributes(
-        missionID: "NS 00000000-0000-0000-0000-000000000000 20261022-140300",
+        missionID: "NS 00000000 20261022-140300",
         startedAt: Date().addingTimeInterval(-(42 * 60 + 17))
     )
     private let running = SurveyActivityAttributes.ContentState(

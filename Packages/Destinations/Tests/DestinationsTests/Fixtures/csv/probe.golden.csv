@@ -1,5 +1,5 @@
 # Created by Network Survey iOS version=1.0.0
 # CSV Version=0.1.0
 deviceTime,latitude,longitude,altitude,speed,accuracy,missionId,recordNumber,sourceAddress,destinationAddress,bssid,ssid,channel,frequencyMhz,signalStrength,snr,standard,probeCount,locallyAdministered,boardId,deviceSerialNumber,locationAge
-2026-10-14T18:03:07.25Z,38.889484,-77.035278,21.3,1.25,5,NS 8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90 20261014-180300,1,06:1a:2b:3c:4d:5e,ff:ff:ff:ff:ff:ff,ff:ff:ff:ff:ff:ff,"Cafe-Guest, upstairs",6,2437,-62.0,,IEEE80211N,3,true,NS-1A2B,8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90,800
-2026-10-14T18:03:07.25Z,38.889484,-77.035278,21.3,1.25,5,NS 8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90 20261014-180300,2,06:1a:2b:3c:4d:5e,ff:ff:ff:ff:ff:ff,ff:ff:ff:ff:ff:ff,"Cafe-Guest, upstairs",6,2437,-62.0,,IEEE80211N,3,true,NS-3C4D,8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90,800
+2026-10-14T18:03:07.25Z,38.889484,-77.035278,21.3,1.25,5,NS 8C2E1F7A 20261014-180300,1,06:1a:2b:3c:4d:5e,ff:ff:ff:ff:ff:ff,ff:ff:ff:ff:ff:ff,"Cafe-Guest, upstairs",6,2437,-62.0,,IEEE80211N,3,true,NS-1A2B,8C2E1F7A,800
+2026-10-14T18:03:07.25Z,38.889484,-77.035278,21.3,1.25,5,NS 8C2E1F7A 20261014-180300,2,06:1a:2b:3c:4d:5e,ff:ff:ff:ff:ff:ff,ff:ff:ff:ff:ff:ff,"Cafe-Guest, upstairs",6,2437,-62.0,,IEEE80211N,3,true,NS-3C4D,8C2E1F7A,800

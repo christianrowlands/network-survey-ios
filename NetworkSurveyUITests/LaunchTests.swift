@@ -18,7 +18,7 @@ final class LaunchTests: XCTestCase {
         tabBar.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
         tabBar.buttons["Survey"].tap()
-        XCTAssertTrue(app.navigationBars["Survey"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Network Survey"].waitForExistence(timeout: 5))
     }
 
     #if DEBUG

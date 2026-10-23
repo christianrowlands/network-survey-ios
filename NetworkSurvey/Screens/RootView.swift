@@ -32,6 +32,7 @@ struct RootView: View {
             }
         }
         .onChange(of: model.selectedTab) { model.updateIdleTimer() }
+        .fullScreenCover(isPresented: $model.showingWelcome) { WelcomeView() }
     }
 }
 

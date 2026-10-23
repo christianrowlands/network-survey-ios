@@ -7,7 +7,7 @@ struct ListsScreen: View {
     enum Segment: String, CaseIterable, Identifiable {
         case aps = "Wi-Fi APs"
         case clients = "Wi-Fi Clients"
-        case ble = "BLE"
+        case ble = "Bluetooth"
         var id: Self { self }
 
         var searchPrompt: String {

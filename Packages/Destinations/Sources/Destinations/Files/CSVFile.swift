@@ -6,8 +6,6 @@ final class CSVFile {
         /// Apache Commons CSV `CSVFormat.DEFAULT` as the Android app uses it:
         /// CRLF, minimal quoting, `# ` header comments.
         case commonsCSV
-        /// RFC 4180 with LF line endings, as WiGLE files use.
-        case rfc4180
     }
 
     let url: URL
@@ -30,16 +28,11 @@ final class CSVFile {
         try? handle.close()
     }
 
-    private var lineEnd: String { dialect == .commonsCSV ? "\r\n" : "\n" }
+    private let lineEnd = "\r\n"
 
     func comment(_ text: String) {
         let lines = text.replacingOccurrences(of: "\r\n", with: "\n").split(separator: "\n", omittingEmptySubsequences: false)
         for line in lines { append("# " + line + lineEnd) }
-    }
-
-    /// Writes a line as it is, for pre-header lines.
-    func raw(_ line: String) {
-        append(line + lineEnd)
     }
 
     func row(_ fields: [String]) {
@@ -70,12 +63,7 @@ final class CSVFile {
     }
 
     private func encode(_ field: String, first: Bool) -> String {
-        let needsQuotes: Bool
-        switch dialect {
-        case .commonsCSV: needsQuotes = Self.commonsNeedsQuotes(field, first: first)
-        case .rfc4180: needsQuotes = field.contains { $0 == "," || $0 == "\"" || $0 == "\n" || $0 == "\r" }
-        }
-        guard needsQuotes else { return field }
+        guard Self.commonsNeedsQuotes(field, first: first) else { return field }
         return "\"" + field.replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 

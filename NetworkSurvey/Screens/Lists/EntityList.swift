@@ -207,8 +207,8 @@ struct EntityList: View {
         if filters.isFiltering(segment) { return "Nothing matches the filters." }
         return switch segment {
         case .aps: "Access points appear here as the survey hears their beacons."
-        case .clients: "Clients appear here when Wi-Fi Client capture is on."
-        case .ble: "Bluetooth devices appear here when Bluetooth capture is on."
+        case .clients: "Clients appear here when Wi-Fi Clients is on in the Survey tab."
+        case .ble: "Bluetooth devices appear here when Bluetooth is on in the Survey tab."
         }
     }
 }

@@ -1,35 +1,27 @@
 import SwiftUI
 
-/// The project's web pages linked from About.
-enum AboutLinks {
-    static let website = URL(string: "https://networksurvey.app")!
-    /// The same privacy policy page the Network Survey Android app links to.
-    static let privacyPolicy = URL(string: "https://networksurvey.app/privacy-policy")!
-}
-
 struct AboutView: View {
     var body: some View {
         List {
             Group {
                 Section {
-                    VStack(alignment: .leading, spacing: Theme.Spacing.s) {
-                        Text("Network Survey")
-                            .font(Theme.Fonts.screenTitle)
-                            .foregroundStyle(Theme.Colors.ink)
+                    VStack(spacing: Theme.Spacing.m) {
+                        BrandLockup(width: 160)
                         Text("Version \(Bundle.main.shortVersion) (\(Bundle.main.buildNumber))")
                             .font(Theme.Fonts.body)
                             .foregroundStyle(Theme.Colors.ink2)
                     }
-                    .padding(.vertical, Theme.Spacing.xs)
-                    Text("Surveys Wi-Fi and Bluetooth with a Network Survey sensor board. The board only listens: it never transmits Wi-Fi frames.")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Theme.Spacing.m)
+                    Text("Surveys Wi-Fi and Bluetooth with an NS Scout, a small sensor that connects to your iPhone over Bluetooth. The Scout only listens: it never transmits Wi-Fi frames.")
                         .font(Theme.Fonts.body)
                         .foregroundStyle(Theme.Colors.ink2)
                 }
                 Section {
-                    Link(destination: AboutLinks.website) {
+                    Link(destination: Links.website) {
                         Label("networksurvey.app", systemImage: "safari")
                     }
-                    Link(destination: AboutLinks.privacyPolicy) {
+                    Link(destination: Links.privacyPolicy) {
                         Label("Privacy policy", systemImage: "hand.raised")
                     }
                     .accessibilityIdentifier("about.privacyPolicy")

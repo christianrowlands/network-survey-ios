@@ -13,35 +13,39 @@ extension BLEBoardTransport {
         case .discovered(let id, let advertisement, let rssi, let name):
             updateDiscovery(id, advertisement, rssi: rssi, name: name)
         case .connected(let id):
+            // A connected board stops advertising: forget its last advertisement,
+            // so nothing judges the board by one from before this link.
+            hadBondBeforeLink[id] = seen.removeValue(forKey: id)?.hasBond
             if waiters[.connect(id)] != nil {
                 resolve(.connect(id), .success(.none))
-            } else if known[id] != nil {
+            } else if known[id]?.isRemoved == false {
                 adopt(id)
             } else {
                 Self.log.notice("dropping a connection nobody asked for")
                 central.cancelConnection(id)
             }
         case .connectFailed(let id, let error):
-            resolve(.connect(id), .failure(error?.transportError ?? .connectionFailed("connect failed")))
+            resolve(.connect(id), .failure(error.map { linkError($0, on: id) } ?? .connectionFailed("connect failed")))
         case .disconnected(let id, let error):
             handleDisconnected(id, error: error)
         case .gattDiscovered(let id, let error):
-            resolve(.gatt(id), error.map { .failure($0.transportError) } ?? .success(.none))
+            resolve(.gatt(id), error.map { .failure(linkError($0, on: id)) } ?? .success(.none))
         case .valueUpdated(let id, let characteristic, let value, let error):
             if waiters[.read(id, characteristic)] != nil {
-                resolve(.read(id, characteristic), error.map { .failure($0.transportError) } ?? .success(.data(value)))
+                resolve(.read(id, characteristic), error.map { .failure(linkError($0, on: id)) } ?? .success(.data(value)))
             } else if error == nil {
                 handleNotification(value, from: characteristic, of: id)
             }
         case .wroteValue(let id, let characteristic, let error):
             guard characteristic == .control, let error else { return }
-            let failure: BoardTransportError = switch error.transportError {
-            case .bondMissing, .pairingRejected, .notConnected: error.transportError
+            let mapped = linkError(error, on: id)
+            let failure: BoardTransportError = switch mapped {
+            case .bondMissing, .pairingRejected, .notConnected: mapped
             default: .writeFailed(error.message)
             }
             resolve(.control(id), .failure(failure))
         case .notifyStateChanged(let id, let characteristic, _, let error):
-            resolve(.notify(id, characteristic), error.map { .failure($0.transportError) } ?? .success(.none))
+            resolve(.notify(id, characteristic), error.map { .failure(linkError($0, on: id)) } ?? .success(.none))
         case .readyToWriteWithoutResponse(let id):
             resolve(.writeReady(id), .success(.none))
         }
@@ -73,7 +77,7 @@ extension BLEBoardTransport {
             return
         }
         for peripheral in peripherals {
-            guard known[peripheral.id] != nil else {
+            guard known[peripheral.id]?.isRemoved == false else {
                 central.cancelConnection(peripheral.id)
                 continue
             }
@@ -95,7 +99,7 @@ extension BLEBoardTransport {
         guard waiters[.connect(id)] == nil else { return }
         let reason: BoardDisconnectReason =
             if links[id]?.disconnectRequested == true { .requested }
-            else if error?.kind == .peerRemovedPairingInformation { .bondMissing }
+            else if let error, linkError(error, on: id) == .bondMissing { .bondMissing }
             else { .linkLost }
         failWaiters(for: id, with: reason == .bondMissing ? .bondMissing : .notConnected)
         markDisconnected(id, reason: reason)
@@ -178,7 +182,7 @@ extension BLEBoardTransport {
             id: publicID(id), name: "NS-\(shortID)", shortID: shortID, rssi: rssi, model: parsed.model,
             protocolMajor: UInt32(parsed.protocolMajor), pairingMode: parsed.pairable, hasBond: parsed.hasBond,
             hasGPS: parsed.hasGPS, supports5GHz: parsed.supports5GHz, isKnown: known[id] != nil,
-            isSimulated: false, lastSeen: now
+            isRemoved: known[id]?.isRemoved == true, isSimulated: false, lastSeen: now
         )
         seen[id] = board
         let changed = existing.map {
@@ -201,6 +205,7 @@ extension BLEBoardTransport {
             .map { peripheral, board -> DiscoveredBoard in
                 var board = board
                 board.isKnown = known[peripheral] != nil
+                board.isRemoved = known[peripheral]?.isRemoved == true
                 return board
             }
             .sorted { ($0.rssi, $0.shortID) > ($1.rssi, $1.shortID) }

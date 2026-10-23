@@ -14,19 +14,21 @@ same NS Messaging records.
 
 Simple to use, your data your way. No account, no analytics, no tracking.
 
-## Why an external board
+## Why NS Scout
 
 iOS has no API for scanning Wi-Fi networks, and it hides the real addresses of
-Bluetooth devices from apps. So Network Survey uses a small ESP32 board as its
-radio. The board listens passively and sends summaries to the phone over
-Bluetooth LE; the phone adds location and does everything else.
+Bluetooth devices from apps. So Network Survey uses **NS Scout**, a small ESP32
+board running the Network Survey firmware, as its radio. The Scout listens
+passively and sends summaries to the phone over Bluetooth LE; the phone adds
+location and does everything else. What to buy and how to set one up:
+[networksurvey.app/scout](https://networksurvey.app/scout).
 
-The board is receive-only: it never transmits Wi-Fi frames (no probing, no
+The Scout is receive-only: it never transmits Wi-Fi frames (no probing, no
 deauthentication, no injection). Its firmware, the web installer and the board
 protocol are in the firmware repository:
 [network-survey-esp32](https://github.com/christianrowlands/network-survey-esp32).
 
-No board yet? Turn on the **Demo board** (Survey > Boards) to try every screen
+No board yet? Turn on the **Demo Scout** (Survey > Scouts) to try every screen
 with simulated data.
 
 ## Features
@@ -39,8 +41,7 @@ with simulated data.
   - Bluetooth LE advertisements (off by default)
   - Raw 802.11 frames into a pcapng file for Wireshark (off by default)
 - **Where the data goes** (each optional, chosen before you start)
-  - CSV files in the Network Survey formats, plus a WiGLE CSV and pcapng,
-    in the Files app
+  - CSV files in the Network Survey formats, plus pcapng, in the Files app
   - MQTT and gRPC streaming in NS Messaging format, as in the Android app
   - Upload to an NS Analytics workspace, registered with a QR code or link
 - **On the phone:** a survey screen with live counts per board and
@@ -58,7 +59,7 @@ with simulated data.
 Data stays on the iPhone unless you turn on a stream or an upload. The full
 walkthrough is in the [user guide](docs/user-guide.md).
 
-## Supported boards
+## Supported boards (NS Scout hardware)
 
 | Board | Bands | Status |
 |---|---|---|
@@ -70,7 +71,7 @@ walkthrough is in the [user guide](docs/user-guide.md).
 
 An ESP32-C5 board is recommended, since it is the only one that hears 5 GHz.
 Install the firmware from the browser with the web installer, then pair the
-board in the app. See the firmware repository's README and hardware guide.
+Scout in the app. See the firmware repository's README and hardware guide.
 
 ## Building
 
@@ -159,7 +160,7 @@ swift run boardcli stream --sim 2 --seconds 5   # two simulated boards
 | `Packages/BoardKit` | Board transports (CoreBluetooth and simulated), `BoardManager`, channel planning, firmware updates |
 | `Packages/SurveyCore` | Survey sessions, the on-device database, privacy filters, settings |
 | `Packages/NSMessaging` | NS Messaging records and their JSON form |
-| `Packages/Destinations` | CSV, WiGLE, pcapng, MQTT, gRPC and NS Analytics outputs |
+| `Packages/Destinations` | CSV, pcapng, MQTT, gRPC and NS Analytics outputs |
 | `Tools/BoardCLI` | macOS command line tool for boards |
 | `Tools/E2EHarness` | Local servers for the end-to-end test (`scripts/e2e.sh`) |
 | `proto/` | Copy of the board protocol (`ns_board.proto`) and the NS Messaging protos |
@@ -170,7 +171,7 @@ swift run boardcli stream --sim 2 --seconds 5   # two simulated boards
 
 - [User guide](docs/user-guide.md): pairing, surveying, destinations, privacy,
   firmware updates, troubleshooting
-- [Survey file formats](docs/csv-formats.md): CSV, WiGLE and pcapng
+- [Survey file formats](docs/csv-formats.md): CSV and pcapng
 - [Settings keys](docs/settings-keys.md): every stored setting, with defaults
 - [Board protocol copy](proto/README.md): how the protocol stays in sync with
   the firmware repository

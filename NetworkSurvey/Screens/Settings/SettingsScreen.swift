@@ -6,12 +6,13 @@ struct SettingsScreen: View {
     @Environment(RegistrationModel.self) private var registration
     @Environment(AppModel.self) private var app
     @State private var path: [SettingsRoute] = []
+    @State private var showingScoutGuide = false
 
     var body: some View {
         NavigationStack(path: $path) {
             List {
                 Group {
-                    Section("Where the data goes") {
+                    Section {
                         NavigationLink(value: SettingsRoute.logFiles) {
                             SettingsLinkLabel(title: "Files", symbol: "doc.text", detail: filesDetail)
                         }
@@ -30,6 +31,10 @@ struct SettingsScreen: View {
                             SettingsLinkLabel(title: "NS Analytics", symbol: "chart.bar", detail: nsAnalyticsDetail)
                         }
                         .accessibilityIdentifier("settings.nsAnalytics")
+                    } header: {
+                        Text("Where the data goes")
+                    } footer: {
+                        Text("Most people save Files and share with NS Analytics. MQTT and gRPC stream live to a server your team runs.")
                     }
                     Section("Privacy") {
                         NavigationLink { PrivacyZonesView() } label: {
@@ -46,7 +51,7 @@ struct SettingsScreen: View {
                     Section {
                         Picker(selection: settings.binding(Settings.locationSource)) {
                             Text("Phone").tag(LocationSourcePreference.phone)
-                            Text("Board GPS").tag(LocationSourcePreference.board)
+                            Text("Scout GPS").tag(LocationSourcePreference.board)
                         } label: {
                             Label("Location", systemImage: "location")
                         }
@@ -74,19 +79,32 @@ struct SettingsScreen: View {
                         Text("This phone")
                     } footer: {
                         Text(settings[Settings.locationSource] == .phone
-                            ? "Records use the phone's location. A board GPS fills in when the phone has no recent, accurate fix."
-                            : "Records use a board GPS when one has a fix, and the phone's location otherwise.")
+                            ? "Records use the phone's location. A Scout GPS fills in when the phone has no recent, accurate fix."
+                            : "Records use a Scout GPS when one has a fix, and the phone's location otherwise.")
                     }
                     #if DEBUG
                     Section("Developer") {
                         NavigationLink {
                             DebugRecordsView()
                         } label: {
-                            Label("Live records (demo board)", systemImage: "list.bullet.rectangle")
+                            Label("Live records (demo Scout)", systemImage: "list.bullet.rectangle")
                         }
                         .accessibilityIdentifier("settings.debugRecords")
                     }
                     #endif
+                    Section("Help") {
+                        Button {
+                            showingScoutGuide = true
+                        } label: {
+                            SettingsLinkLabel(title: "NS Scout guide", symbol: "sensor", detail: "")
+                        }
+                        .accessibilityIdentifier("settings.scoutGuide")
+                        Button {
+                            app.showingWelcome = true
+                        } label: {
+                            SettingsLinkLabel(title: "Show welcome again", symbol: "hand.wave", detail: "")
+                        }
+                    }
                     Section {
                         NavigationLink { AboutView() } label: {
                             SettingsLinkLabel(title: "About", symbol: "info.circle", detail: "Version \(Bundle.main.shortVersion)")
@@ -100,6 +118,7 @@ struct SettingsScreen: View {
             }
             .themedList()
             .navigationTitle("Settings")
+            .sheet(isPresented: $showingScoutGuide) { ScoutGuideView() }
             .navigationDestination(for: SettingsRoute.self) { route in
                 switch route {
                 case .logFiles: FileSettingsView()
@@ -118,8 +137,7 @@ struct SettingsScreen: View {
     }
 
     private var filesDetail: String {
-        guard settings[Settings.destinationLogFiles] else { return "Off" }
-        return settings[Settings.logWigleCSV] ? "CSV, WiGLE" : "CSV"
+        settings[Settings.destinationLogFiles] ? "CSV" : "Off"
     }
 
     private func streamDetail(_ enabled: SettingKey<Bool>, host: SettingKey<String>) -> String {

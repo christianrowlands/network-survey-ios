@@ -22,7 +22,8 @@ nonisolated struct SurveyFile: Identifiable, Equatable, Sendable {
     var id: URL { url }
     var name: String { url.lastPathComponent }
 
-    /// "Wi-Fi CSV", "WiGLE CSV", "Packet capture" from the file name.
+    /// "Wi-Fi CSV", "Packet capture" from the file name. "WiGLE CSV" names files
+    /// from older surveys; the app no longer writes them.
     var kindName: String {
         let lower = name.lowercased()
         if lower.hasSuffix(".pcapng") { return "Packet capture" }

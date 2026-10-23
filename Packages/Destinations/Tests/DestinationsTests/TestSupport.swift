@@ -29,8 +29,8 @@ enum Samples {
 
     static func session(_ directory: URL, deviceName: String = "Field kit 2") -> SessionInfo {
         SessionInfo(
-            missionId: "NS 8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90 20261014-180300", startedAt: start,
-            directory: directory, deviceSerialNumber: "8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90", deviceName: deviceName,
+            missionId: "NS 8C2E1F7A 20261014-180300", startedAt: start,
+            directory: directory, deviceSerialNumber: "8C2E1F7A", deviceName: deviceName,
             deviceModel: "iPhone17,3", osVersion: "18.0", appVersion: "1.0.0", timeZone: utc
         )
     }
@@ -43,8 +43,8 @@ enum Samples {
 
     static func context(_ number: Int32, location: Bool = true) -> RecordContext {
         RecordContext(
-            deviceSerialNumber: "8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90",
-            missionId: "NS 8C2E1F7A-0B5D-4E16-9A3F-2D7C4B6E1A90 20261014-180300",
+            deviceSerialNumber: "8C2E1F7A",
+            missionId: "NS 8C2E1F7A 20261014-180300",
             recordNumber: number, deviceTime: start.addingTimeInterval(7.25),
             location: location ? LocationFix(latitude: 38.889484, longitude: -77.035278, altitude: 21.3,
                                              horizontalAccuracy: 4.6, speed: 1.25,

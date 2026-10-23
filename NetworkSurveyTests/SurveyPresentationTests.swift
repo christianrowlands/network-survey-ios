@@ -34,7 +34,7 @@ struct SurveyPresentationTests {
         // A demo board in use takes NS Analytics out of the survey.
         let demo = SurveySetup.read(settings, registered: true, demoBoardInUse: true)
         #expect(demo.activeDestinations == [.logFiles, .mqtt])
-        #expect(demo.unavailable[.nsAnalytics] == "Not available with the demo board")
+        #expect(demo.unavailable[.nsAnalytics] == "Not available with the demo Scout")
     }
 
     @Test("Raw frames without Files are flagged")

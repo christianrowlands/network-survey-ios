@@ -130,9 +130,9 @@ nonisolated final class CombinedBoardTransport: BoardTransport, Sendable {
         return (await bluetooth?.knownBoards() ?? []) + demoKnown
     }
 
-    func forgetKnownBoard(_ board: BoardID) async {
+    func forgetKnownBoard(_ board: BoardID, keepBond: Bool) async {
         guard let owner = try? owner(of: board, allowHiddenDemo: true) else { return }
-        await owner.forgetKnownBoard(board)
+        await owner.forgetKnownBoard(board, keepBond: keepBond)
     }
 
     // MARK: - Routing

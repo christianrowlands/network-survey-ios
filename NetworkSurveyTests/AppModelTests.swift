@@ -146,7 +146,7 @@ struct AppModelTests {
         dropped.boardsConnected = 1
         #expect(send(&throttle, dropped, at: 11) == false)
         #expect(send(&throttle, dropped, at: 12) == true)
-        #expect(dropped.problem == "1 board disconnected")
+        #expect(dropped.problem == "1 Scout disconnected")
         // Nothing changes for a minute: the content is sent again to move its stale date.
         #expect(send(&throttle, dropped, at: 50) == false)
         #expect(send(&throttle, dropped, at: 72) == true)
@@ -163,13 +163,13 @@ struct AppModelTests {
         var state = SurveyActivityAttributes.ContentState(boardsConnected: 2, boardsInSurvey: 2)
         #expect(state.problem == nil)
         state.boardProblem = true
-        #expect(state.problem == "Board needs attention")
+        #expect(state.problem == "Scout needs attention")
         state.losingRecords = true
-        #expect(state.problem == "Board losing records")
+        #expect(state.problem == "Scout losing records")
         state.lowestBatteryPercent = 9
-        #expect(state.problem == "Board battery low")
+        #expect(state.problem == "Scout battery low")
         state.boardsConnected = 0
-        #expect(state.problem == "2 boards disconnected")
+        #expect(state.problem == "2 Scouts disconnected")
         state.stoppedAt = Date()
         #expect(state.problem == nil)
     }

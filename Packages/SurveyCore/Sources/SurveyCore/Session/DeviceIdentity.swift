@@ -1,13 +1,14 @@
 import Foundation
 
-/// Who produced the records: `deviceSerialNumber` is a per-install UUID kept in
-/// the Keychain (iOS has no IMEI), `deviceName` is the user's setting or a
-/// readable per-install default ("iPhone-12FE").
+/// Who produced the records: `deviceSerialNumber` is the short form of a
+/// per-install UUID kept in the Keychain (iOS has no IMEI), `deviceName` is the
+/// user's setting or a readable per-install default ("iPhone-12FE").
 public struct DeviceIdentity: Sendable, Equatable {
     public var installID: UUID
     public var deviceName: String
 
-    public var deviceSerialNumber: String { installID.uuidString }
+    /// The install ID's first 8 hex digits, as in the mission ID ("12FE3A4B").
+    public var deviceSerialNumber: String { Self.shortID(installID) }
 
     public init(installID: UUID, deviceName: String) {
         self.installID = installID
@@ -43,6 +44,12 @@ public struct DeviceIdentity: Sendable, Equatable {
     public static func name(settings: SettingsStore, installID: UUID) -> String {
         let name = settings[Settings.deviceName].trimmingCharacters(in: .whitespacesAndNewlines)
         return name.isEmpty ? defaultName(installID: installID) : name
+    }
+
+    /// The first 8 hex digits of the install ID, upper case: short enough to read
+    /// in a mission ID and, with the start time, unique within a workspace.
+    public static func shortID(_ installID: UUID) -> String {
+        String(installID.uuidString.prefix(8)).uppercased()
     }
 
     /// "iPhone-" plus the first four hex digits of the install ID, upper case:

@@ -90,7 +90,7 @@ struct SessionTests {
         // A rename in Settings applies to the next survey without a relaunch.
         rig.settings[Settings.deviceName] = "Van 2"
         let row = try await rig.controller.start()
-        #expect(row.missionId.hasPrefix("NS \(Fixtures.installID.uuidString) "))
+        #expect(row.missionId.hasPrefix("NS \(DeviceIdentity.shortID(Fixtures.installID)) "))
         #expect(row.deviceName == "Van 2")
         #expect(rig.sink.state.withLock { $0.started.map(\.deviceName) } == ["Van 2"])
         #expect(await rig.controller.snapshot.state == .running)
@@ -252,7 +252,7 @@ struct SessionTests {
         let row = try await rig.controller.start()
         #expect(row.missionId == MissionID.makeDemo(startedAt: row.startedAt))
         #expect(row.missionId.hasPrefix("NS DEMO "))
-        #expect(row.deviceSerialNumber == Fixtures.installID.uuidString)
+        #expect(row.deviceSerialNumber == DeviceIdentity.shortID(Fixtures.installID))
         await rig.controller.stop()
         await rig.transport.shutdown()
     }

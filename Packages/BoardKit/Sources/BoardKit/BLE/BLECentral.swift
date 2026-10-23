@@ -138,6 +138,7 @@ public struct BLEError: Error, Sendable, Equatable {
     }
 
     public static let peerRemovedPairing = BLEError(domain: cbErrorDomain, code: 14, message: "Peer removed pairing information")
+    public static let encryptionTimedOut = BLEError(domain: cbErrorDomain, code: 15, message: "Encryption timed out")
     public static let insufficientAuthentication = BLEError(domain: attErrorDomain, code: 0x05, message: "Authentication is insufficient")
     public static let insufficientAuthorization = BLEError(domain: attErrorDomain, code: 0x08, message: "Authorization is insufficient")
 

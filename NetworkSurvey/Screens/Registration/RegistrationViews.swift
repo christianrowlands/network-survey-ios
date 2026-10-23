@@ -101,16 +101,19 @@ struct RegistrationLinkField: View {
 
     var body: some View {
         HStack {
-            TextField("https://networksurvey.app/app/register?...", text: $text)
+            // A verbatim prompt: a URL in a string literal is drawn as a link.
+            TextField("Registration link", text: $text, prompt: Text(verbatim: "Paste or type the registration link"))
                 .keyboardType(.URL)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .submitLabel(.go)
                 .onSubmit(submit)
-                .accessibilityLabel("Registration link")
                 .accessibilityIdentifier("registration.link")
-            Button("Use", action: submit)
-                .disabled(text.trimmingCharacters(in: .whitespaces).isEmpty)
+            if !text.trimmingCharacters(in: .whitespaces).isEmpty {
+                Button("Use", action: submit)
+                    .buttonStyle(.borderless)
+                    .accessibilityIdentifier("registration.use")
+            }
         }
     }
 

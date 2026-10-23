@@ -257,7 +257,7 @@ final class MockOtaBoard: BoardTransport {
     }
 
     func knownBoards() async -> [KnownBoard] { [] }
-    func forgetKnownBoard(_ board: BoardID) async {}
+    func forgetKnownBoard(_ board: BoardID, keepBond: Bool) async {}
 
     // MARK: Board behaviour
 

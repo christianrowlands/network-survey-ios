@@ -32,7 +32,7 @@ struct SurveyLiveActivity: Widget {
             } compactLeading: {
                 Image(systemName: context.state.problem != nil ? "exclamationmark.triangle.fill" : "dot.radiowaves.left.and.right")
                     .foregroundStyle(context.state.problem != nil ? Theme.Colors.amber : Theme.Colors.wifi)
-                    .accessibilityLabel(context.state.problem != nil ? "Board problem" : "Surveying")
+                    .accessibilityLabel(context.state.problem != nil ? "Scout problem" : "Surveying")
             } compactTrailing: {
                 SurveyActivityElapsed(attributes: context.attributes, state: context.state)
                     .font(Theme.Fonts.caption.monospacedDigit())

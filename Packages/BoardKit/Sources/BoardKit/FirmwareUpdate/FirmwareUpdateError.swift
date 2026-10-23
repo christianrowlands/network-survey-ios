@@ -66,39 +66,39 @@ public enum FirmwareUpdateError: Error, Equatable, Sendable {
         case .fileChoice:
             "Choose one app image (.bin), and optionally its .sig file."
         case .wrongChip(let board, let image):
-            "This firmware is built for \(image), but the board has an \(board)."
+            "This firmware is built for \(image), but this Scout is a \(board)."
         case .surveyRunning:
             "Stop the survey before updating the board."
         case .boardBusy:
-            "The board is busy. Wait a moment and try again."
+            "The Scout is busy. Wait a moment and try again."
         case .notConnected:
-            "The board is not connected. Connect it and try again."
+            "The Scout is not connected. Connect it and try again."
         case .connectionLost:
-            "The connection to the board was lost and could not be restored. Move the phone closer to the board and try again; the update continues where it stopped."
+            "The connection to the Scout was lost and could not be restored. Move the phone closer to the Scout and try again; the update continues where it stopped."
         case .bondMissing:
-            "The board no longer knows this phone. Forget it in Settings > Bluetooth, then pair again."
+            "The Scout no longer knows this phone. Open the Scout's page and tap Show me how to pair it again."
         case .pairingRejected:
-            "The board refused the connection. Hold its BOOT button for 3 seconds to allow pairing, then try again."
+            "The Scout refused the connection. Hold its BOOT button for 3 seconds to allow pairing, then try again."
         case .boardRejected(let detail):
-            "The board refused the update (\(detail))."
+            "The Scout refused the update (\(detail)). Restart it by unplugging it for a moment, then try again."
         case .imageTooLarge:
-            "The firmware does not fit on this board."
+            "The firmware does not fit on this Scout."
         case .flashWriteFailed:
-            "The board could not write the firmware to its flash memory. Try again; if it keeps failing, reflash the board over USB."
+            "The Scout could not write the firmware to its memory. Try again. If it keeps failing, reinstall it from a computer with the web installer."
         case .verifyFailed:
-            "The board rejected the firmware after the transfer (checksum or image check failed). The board keeps its current firmware."
+            "The Scout rejected the firmware after the transfer (checksum or image check failed). It keeps its current firmware."
         case .protocolError(let detail):
-            "The update stopped because of an unexpected answer from the board (\(detail))."
+            "The update stopped because of an unexpected answer from the Scout (\(detail)). Try again."
         case .boardDidNotReturn:
-            "The board did not reconnect after restarting. Check that it is powered and nearby, then connect it from the Boards screen."
+            "The Scout did not reconnect after restarting. Check that it is powered and nearby, then connect it from the Scouts screen."
         case .rolledBack(let version):
-            "The board went back to firmware \(version): the new firmware did not start correctly."
+            "The Scout went back to firmware \(version): the new firmware did not start correctly."
         case .notConfirmed(let version):
-            "The board restarted with firmware \(version) but did not confirm the new image, so it may have gone back to its previous copy. Check the board and install again if needed."
+            "The Scout restarted with firmware \(version) but did not confirm the new image, so it may have gone back to its previous copy. Check the Scout and install again if needed."
         case .unexpectedVersion(let expected, let found):
-            "The board restarted with firmware \(found) instead of \(expected)."
+            "The Scout restarted with firmware \(found) instead of \(expected)."
         case .cancelled:
-            "The update was cancelled. The board keeps its current firmware."
+            "The update was cancelled. The Scout keeps its current firmware."
         }
     }
 

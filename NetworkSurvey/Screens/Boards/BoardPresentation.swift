@@ -2,7 +2,7 @@ import BoardKit
 import BoardProtocol
 import Foundation
 
-/// Board battery from the reported cell voltage (a single LiPo cell).
+/// Scout battery from the reported cell voltage (a single LiPo cell).
 enum BoardBattery {
     /// Open-circuit voltage to charge, piecewise linear: 4.20 V full, 3.30 V empty.
     private static let curve: [(mv: Double, percent: Double)] = [
@@ -57,7 +57,7 @@ extension BoardRolePreference {
 
     var explanation: String {
         switch self {
-        case .auto: "Shares the channels with your other boards. Recommended."
+        case .auto: "Shares the channels with your other Scouts. Recommended."
         case .band24: "Hops the 2.4 GHz channels."
         case .band5: "Hops the 5 GHz channels."
         case .fixedChannel(let channel): "Stays on channel \(channel), so nothing on it is missed."
@@ -85,7 +85,7 @@ enum BoardText {
         case .esp32C6Generic: "ESP32-C6"
         case .esp32S3Generic: "ESP32-S3"
         case .esp32C3Generic: "ESP32-C3"
-        default: "Unknown board"
+        default: "Unknown model"
         }
     }
 
@@ -148,13 +148,13 @@ enum BoardText {
     static func issueMessage(_ issue: BoardIssue, name: String) -> String {
         switch issue {
         case .bondMissing:
-            "\(name) no longer has this iPhone's pairing. Open Settings > Bluetooth, tap the info button next to \(name), choose Forget This Device, then connect again."
+            "\(name) no longer has this iPhone's pairing: it was reinstalled, erased or paired with another phone. iOS still remembers the old pairing, so it needs one step in Settings before \(name) can pair again."
         case .pairingRejected:
-            "Pairing did not finish. If \(name) is paired with another phone, hold its BOOT button for 3 seconds until the light blinks fast, then connect again."
+            "Pairing did not finish. Connect again and tap Pair when iOS asks. If \(name) is paired with another phone, first hold its BOOT button for 3 seconds until the light blinks cyan."
         case .incompatible(let reason):
             reason
         case .configureFailed(let reason):
-            "The board refused its survey settings: \(reason)"
+            "The Scout refused its survey settings (\(reason)). Disconnect it and connect again. If that does not help, update its firmware."
         }
     }
 }

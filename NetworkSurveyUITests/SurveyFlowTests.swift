@@ -17,15 +17,15 @@ final class SurveyFlowTests: XCTestCase {
         let start = app.buttons["survey.start"]
         XCTAssertTrue(start.waitForExistence(timeout: 10))
         XCTAssertFalse(start.isEnabled, "Start must wait for a board")
-        XCTAssertEqual(app.staticTexts["survey.startBlock"].label, "Connect a board to start")
+        XCTAssertEqual(app.staticTexts["survey.startBlock"].label, "Connect a Scout to start")
 
-        app.buttons["Find boards"].tap()
-        XCTAssertTrue(app.navigationBars["Boards"].waitForExistence(timeout: 5))
+        app.buttons["Find Scouts"].tap()
+        XCTAssertTrue(app.navigationBars["Scouts"].waitForExistence(timeout: 5))
         let demo = app.buttons.matching(identifier: "boards.nearby").firstMatch
         XCTAssertTrue(demo.waitForExistence(timeout: 10), "demo board not listed")
         demo.tap()
         XCTAssertTrue(app.buttons.matching(identifier: "boards.yours").firstMatch.waitForExistence(timeout: 10))
-        app.navigationBars["Boards"].buttons.firstMatch.tap()
+        app.navigationBars["Scouts"].buttons.firstMatch.tap()
 
         let chip = app.descendants(matching: .any).matching(identifier: "survey.boardChip").firstMatch
         XCTAssertTrue(chip.waitForExistence(timeout: 10))

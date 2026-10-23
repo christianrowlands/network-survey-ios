@@ -36,14 +36,6 @@ struct NSAnalyticsSettingsView: View {
                         Text("Uploads also run when a survey stops and finish in the background. Records without a location are not uploaded.")
                     }
                     Section {
-                        Toggle("Upload probe requests", isOn: settings.binding(Settings.nsAnalyticsUploadProbeRecords))
-                        Toggle("Upload client records", isOn: settings.binding(Settings.nsAnalyticsUploadClientRecords))
-                    } header: {
-                        Text("Experimental")
-                    } footer: {
-                        AppliesNextSurveyFooter(extra: "NS Analytics does not store these record types yet and skips them.")
-                    }
-                    Section {
                         Button("Register with another workspace") { scanning = true }
                         Button("Unregister this phone", role: .destructive) { confirmingUnregister = true }
                             .accessibilityIdentifier("nsa.unregister")
@@ -51,30 +43,7 @@ struct NSAnalyticsSettingsView: View {
                         if let unregisterNote { Text(unregisterNote) }
                     }
                 } else {
-                    Section {
-                        Text("Upload surveys to an NS Analytics workspace to see coverage from every phone on one map. A workspace admin creates a registration QR code or link in NS Analytics.")
-                            .font(Theme.Fonts.body)
-                            .foregroundStyle(Theme.Colors.ink2)
-                    }
-                    Section {
-                        Button {
-                            scanning = true
-                        } label: {
-                            Label("Scan QR code", systemImage: "qrcode.viewfinder")
-                        }
-                        .accessibilityIdentifier("nsa.scan")
-                    } footer: {
-                        if let unregisterNote { Text(unregisterNote) }
-                    }
-                    Section {
-                        RegistrationLinkField()
-                        PasteLinkButton()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    } header: {
-                        Text("Registration link")
-                    } footer: {
-                        Text("Copy the registration link in NS Analytics first, then tap Paste, or enter it above.")
-                    }
+                    NSAnalyticsIntroSections(scanning: $scanning, note: unregisterNote)
                 }
             }
             .panelRows()

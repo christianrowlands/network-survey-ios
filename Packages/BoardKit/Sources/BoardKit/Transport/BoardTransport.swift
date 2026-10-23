@@ -44,9 +44,12 @@ public protocol BoardTransport: AnyObject, Sendable {
     /// late subscriber catch up (for example boards restored at app launch).
     func connectionStates() async -> [BoardID: BoardConnectionState]
 
-    /// Boards this phone has paired with, for silent reconnects.
+    /// Boards this phone has paired with and not removed, for silent reconnects.
     func knownBoards() async -> [KnownBoard]
-    func forgetKnownBoard(_ board: BoardID) async
+    /// Stops treating the board as in use. `keepBond`: the board stays known as
+    /// removed (both sides keep the bond, so adding it back needs no pairing);
+    /// otherwise it is forgotten entirely.
+    func forgetKnownBoard(_ board: BoardID, keepBond: Bool) async
 }
 
 /// Control response timeouts from the protocol: 5 s, and 30 s for OtaEnd.
@@ -139,15 +142,18 @@ public struct DiscoveredBoard: Identifiable, Hashable, Sendable {
     public var hasBond: Bool
     public var hasGPS: Bool
     public var supports5GHz: Bool
-    /// This phone has paired with the board before.
+    /// This phone has paired with the board before (including a removed board).
     public var isKnown: Bool
+    /// Known, but the user removed it in the app. Both sides still hold the
+    /// bond, so connecting again needs no pairing.
+    public var isRemoved: Bool
     public var isSimulated: Bool
     public var lastSeen: Date
 
     public init(
         id: BoardID, name: String, shortID: String, rssi: Int, model: NSBBoardModel,
         protocolMajor: UInt32, pairingMode: Bool, hasBond: Bool, hasGPS: Bool = false,
-        supports5GHz: Bool = false, isKnown: Bool = false, isSimulated: Bool, lastSeen: Date
+        supports5GHz: Bool = false, isKnown: Bool = false, isRemoved: Bool = false, isSimulated: Bool, lastSeen: Date
     ) {
         self.id = id
         self.name = name
@@ -160,12 +166,17 @@ public struct DiscoveredBoard: Identifiable, Hashable, Sendable {
         self.hasGPS = hasGPS
         self.supports5GHz = supports5GHz
         self.isKnown = isKnown
+        self.isRemoved = isRemoved
         self.isSimulated = isSimulated
         self.lastSeen = lastSeen
     }
 
     /// Bonded to another phone and not pairable: this phone cannot use it now.
     public var isUnavailable: Bool { hasBond && !pairingMode && !isKnown }
+
+    /// Known to this phone but advertising no bond: it was reflashed or its
+    /// pairings were erased, so the phone's half of the bond is stale.
+    public var wasReset: Bool { isKnown && !hasBond && !isSimulated }
 }
 
 public enum BoardConnectionState: Equatable, Sendable {

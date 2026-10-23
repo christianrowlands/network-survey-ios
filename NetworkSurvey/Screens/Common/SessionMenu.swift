@@ -55,6 +55,7 @@ struct SessionTitle: View {
 struct NoSurveyView: View {
     let message: String
     @Environment(SurveyData.self) private var data
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         if let error = data.loadError {
@@ -65,6 +66,11 @@ struct NoSurveyView: View {
                 Label("No surveys yet", systemImage: "dot.radiowaves.left.and.right")
             } description: {
                 Text(message)
+            } actions: {
+                Button("Go to Survey") { model.selectedTab = .survey }
+                    .buttonStyle(.borderedProminent)
+                    .foregroundStyle(Theme.Colors.onAccent)
+                    .accessibilityIdentifier("noSurvey.goToSurvey")
             }
         }
     }

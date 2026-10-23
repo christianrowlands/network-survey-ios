@@ -28,7 +28,6 @@ struct EndToEndTests {
         var bluetooth: CSVTable
         var client: CSVTable
         var probe: CSVTable
-        var wigle: CSVTable
         var pcap: URL
     }
 
@@ -128,7 +127,7 @@ struct EndToEndTests {
         print("E2E summary: unique \(model.survey.uniqueCounts)")
         print("E2E summary: MQTT \(counts.mqtt.mapValues(\.count)), gRPC \(counts.grpc.mapValues(\.count))")
         print("E2E summary: NS Analytics \(counts.nsAnalytics.mapValues(\.count)) skipped \(counts.nsAnalyticsSkipped) in \(counts.nsAnalyticsBatches) batches")
-        print("E2E summary: WiGLE rows \(files.wigle.rows.count), gaps \(try await model.store.read { try StoreQueries.gapEvents($0, sessionID: sessionID) }.map { "\($0.reason) \(($0.endedAt ?? $0.startedAt).timeIntervalSince($0.startedAt)) s" })")
+        print("E2E summary: gaps \(try await model.store.read { try StoreQueries.gapEvents($0, sessionID: sessionID) }.map { "\($0.reason) \(($0.endedAt ?? $0.startedAt).timeIntervalSince($0.startedAt)) s" })")
     }
 
     // MARK: - Setup
@@ -140,7 +139,6 @@ struct EndToEndTests {
         settings[Settings.surveyBLE] = true
         settings[Settings.surveyRawFrames] = true
         settings[Settings.destinationLogFiles] = true
-        settings[Settings.logWigleCSV] = true
         settings[Settings.destinationMQTT] = true
         settings[Settings.mqttHost] = "127.0.0.1"
         settings[Settings.mqttPort] = ports.mqttPort
@@ -195,7 +193,6 @@ struct EndToEndTests {
             bluetooth: try CSVTable(url: file("craxiom-bluetooth-")),
             client: try CSVTable(url: file("craxiom-wifi-client-")),
             probe: try CSVTable(url: file("craxiom-wifi-probe-")),
-            wigle: try CSVTable(url: try #require(snapshots[DestinationKind.wigle.rawValue]?.files.first?.url), preHeaderLines: 1),
             pcap: try #require(snapshots[DestinationKind.pcap.rawValue]?.files.first?.url)
         )
     }
@@ -242,14 +239,10 @@ struct EndToEndTests {
         let csvRows = tables.reduce(0) { $0 + $1.1.rows.count }
         #expect(snapshots[DestinationKind.nsCSV.rawValue]?.recordsAccepted == csvRows)
 
-        // WiGLE: the 1.6 pre-header and header, one row per located AP and BLE record.
-        #expect(files.wigle.preamble.first?.hasPrefix("WigleWifi-1.6,appRelease=") == true)
-        #expect(files.wigle.header == WiGLEDestination.header)
+        // Located records, for the NS Analytics counts below.
         let locatedAPs = files.wifi.rows.filter { !GeoPoint(row: $0).isZero }.count
         let locatedBLE = files.bluetooth.rows.filter { !GeoPoint(row: $0).isZero }.count
         let locatedProbes = files.probe.rows.filter { !GeoPoint(row: $0).isZero }.count
-        #expect(files.wigle.rows.count == locatedAPs + locatedBLE)
-        #expect(files.wigle.rows.filter { $0["Type"] == "WIFI" }.count == locatedAPs)
         #expect(Double(locatedAPs) > Double(count(.wifiBeacon)) * 0.9, "most records located")
 
         // MQTT: one message per record on each NS Messaging topic, none on the
@@ -331,10 +324,6 @@ struct EndToEndTests {
         for table in [files.wifi, files.bluetooth, files.client, files.probe] {
             #expect(!table.rows.contains { inside(GeoPoint(row: $0), accuracy: Double($0["accuracy"] ?? "") ?? 0) })
         }
-        #expect(!files.wigle.rows.contains {
-            inside(GeoPoint(latitude: Double($0["CurrentLatitude"] ?? "") ?? 0, longitude: Double($0["CurrentLongitude"] ?? "") ?? 0),
-                   accuracy: Double($0["AccuracyMeters"] ?? "") ?? 0)
-        })
         for channel in Array(counts.mqtt.values) + Array(counts.grpc.values) + Array(counts.nsAnalytics.values) {
             #expect(!channel.locations.contains { inside(GeoPoint(latitude: $0[0], longitude: $0[1]), accuracy: 0) })
         }
@@ -344,7 +333,6 @@ struct EndToEndTests {
         #expect(!files.wifi.column("bssid").contains(ignored))
         #expect(!files.client.column("bssid").contains(ignored))
         #expect(!files.probe.column("bssid").contains(ignored))
-        #expect(!files.wigle.column("MAC").contains(ignored))
         for channel in [counts.mqtt[Self.topicPrefix + MQTTTopic.wifiBeacon], counts.grpc["StreamWifiBeaconSurvey"], counts.nsAnalytics["wifi"]] {
             #expect(channel?.addresses.contains(ignored) == false)
         }

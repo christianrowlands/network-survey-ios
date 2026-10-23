@@ -19,6 +19,8 @@ struct LaunchOptions {
     /// A screen to open at launch: "boards", "board" (first demo board), "debugRecords" (Debug builds),
     /// "liveActivity" (the Live Activity layouts, for design review).
     var openScreen: String?
+    /// Shows the first-launch welcome, which UI-testing launches otherwise skip.
+    var showWelcome = false
 
     init() {}
 
@@ -30,6 +32,7 @@ struct LaunchOptions {
         autoConnectDemo = defaults.bool(forKey: "NSAutoConnectDemo") || autoStartSurvey
         simulatedWalk = defaults.bool(forKey: "NSSimulatedWalk")
         openScreen = defaults.string(forKey: "NSOpenScreen")
+        showWelcome = defaults.bool(forKey: "NSShowWelcome")
         if defaults.bool(forKey: "NSOpenDebugRecords") { openScreen = "debugRecords" }
     }
 }

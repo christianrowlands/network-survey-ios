@@ -18,9 +18,6 @@ public enum Settings {
     public static let destinationGRPC = SettingKey<Bool>("destination_grpc", default: false)
     public static let destinationNSAnalytics = SettingKey<Bool>("destination_ns_analytics", default: false)
 
-    // MARK: File logging
-    public static let logWigleCSV = SettingKey<Bool>("log_wigle_csv", default: true)
-
     // MARK: MQTT
     public static let mqttHost = SettingKey<String>("mqtt_connection_host", default: "")
     public static let mqttPort = SettingKey<Int>("mqtt_connection_port", default: 8883, range: 1...65535)
@@ -67,18 +64,20 @@ public enum Settings {
     // MARK: Advanced
     /// Show the simulated "Demo board" in the board list.
     public static let demoBoardEnabled = SettingKey<Bool>("demo_board_enabled", default: false)
+    /// The first-launch welcome was shown and closed.
+    public static let hasSeenWelcome = SettingKey<Bool>("has_seen_welcome", default: false)
 
     /// Every plain setting's name, for docs and a future managed configuration layer.
     public static let allKeyNames = [
         surveyWifiAP.name, surveyWifiClient.name, surveyBLE.name, surveyRawFrames.name,
         destinationLogFiles.name, destinationMQTT.name, destinationGRPC.name, destinationNSAnalytics.name,
-        logWigleCSV.name, mqttHost.name, mqttPort.name, mqttTLSEnabled.name, mqttClientID.name,
+        mqttHost.name, mqttPort.name, mqttTLSEnabled.name, mqttClientID.name,
         mqttUsername.name, mqttTopicPrefix.name, streamingQueueLimit.name, mqttStreamClientRecords.name,
         grpcHost.name, grpcPort.name, grpcTLSEnabled.name, nsAnalyticsAPIURL.name,
         nsAnalyticsWorkspaceID.name, nsAnalyticsWorkspaceName.name, nsAnalyticsUploadIntervalMinutes.name,
         nsAnalyticsUploadProbeRecords.name, nsAnalyticsUploadClientRecords.name,
         deviceName.name, deviceStatusIntervalSeconds.name, locationSource.name, units.name, privacyZones.name,
-        ignoreList.name, demoBoardEnabled.name,
+        ignoreList.name, demoBoardEnabled.name, hasSeenWelcome.name,
     ]
 }
 

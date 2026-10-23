@@ -64,12 +64,19 @@ targets:
         NSSupportsLiveActivities: true
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
-        NSBluetoothAlwaysUsageDescription: Network Survey connects to your survey sensor board over Bluetooth to receive Wi-Fi and Bluetooth measurements.
+        NSBluetoothAlwaysUsageDescription: Network Survey connects to your NS Scout over Bluetooth to receive the Wi-Fi and Bluetooth it hears.
         NSLocationWhenInUseUsageDescription: Your location is added to each measurement during a survey you start, so coverage can be shown on a map. Location stays on this iPhone unless you set up an export.
         NSLocationTemporaryUsageDescriptionDictionary:
           SurveyAccuracy: Precise location is needed to place measurements accurately on the coverage map.
         NSCameraUsageDescription: The camera is used only to scan a workspace registration QR code.
         NSLocalNetworkUsageDescription: Needed to stream survey data to an MQTT broker or gRPC server on your local network.
+    entitlements:
+      path: NetworkSurvey/NetworkSurvey.entitlements
+      properties:
+        # NS Analytics registration links (https://networksurvey.app/app/register?...)
+        # open the app. networksurvey.app serves the matching apple-app-site-association.
+        com.apple.developer.associated-domains:
+          - applinks:networksurvey.app
 
   NetworkSurveyLiveActivity:
     type: app-extension

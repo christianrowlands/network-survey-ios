@@ -24,7 +24,7 @@ struct SurveyActivityLockScreen: View {
     }
 }
 
-/// "Recording", "Stopped" or "Check the board", with a dot.
+/// "Recording", "Stopped" or "Check the Scout", with a dot.
 struct SurveyActivityBadge: View {
     let state: SurveyActivityAttributes.ContentState
 
@@ -125,8 +125,8 @@ struct SurveyActivityBoards: View {
 
     private var boardsText: String {
         if state.boardsInSurvey > state.boardsConnected {
-            return "\(state.boardsConnected) of \(state.boardsInSurvey) boards connected"
+            return "\(state.boardsConnected) of \(state.boardsInSurvey) Scouts connected"
         }
-        return state.boardsConnected == 1 ? "1 board connected" : "\(state.boardsConnected) boards connected"
+        return state.boardsConnected == 1 ? "1 Scout connected" : "\(state.boardsConnected) Scouts connected"
     }
 }

@@ -35,7 +35,7 @@ struct DebugRecordsView: View {
         let status = state?.status
         return VStack(alignment: .leading, spacing: Theme.Spacing.s) {
             HStack {
-                Text(state?.info.map { "NS-\($0.shortID)" } ?? "Demo board")
+                Text(state?.info.map { "NS-\($0.shortID)" } ?? "Demo Scout")
                     .font(Theme.Fonts.sectionTitle)
                     .foregroundStyle(Theme.Colors.ink)
                 TagPill(text: "Demo", color: Theme.Colors.accentInk)
@@ -173,7 +173,7 @@ final class DebugRecordsModel {
                 try await manager.configure(id, configure)
                 try await manager.start(id)
             } catch {
-                self.error = "Demo board: \(error)"
+                self.error = "Demo Scout: \(error)"
             }
         }
         var pending: [RecordSummary] = []

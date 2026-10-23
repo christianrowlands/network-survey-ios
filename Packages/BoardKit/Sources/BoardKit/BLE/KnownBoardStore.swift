@@ -3,7 +3,10 @@ import Foundation
 import Synchronization
 
 /// A board this phone has paired with. Only known boards are reconnected
-/// silently; an unknown board is never connected without a user action.
+/// silently; an unknown board is never connected without a user action. A
+/// removed board keeps its entry (and both halves of the bond) so it is
+/// recognised and can be added back without pairing again, but it is not
+/// reconnected.
 public struct KnownBoard: Codable, Hashable, Sendable, Identifiable {
     /// The stable board ID (or a provisional one stored by an older version).
     public var id: BoardID
@@ -15,6 +18,8 @@ public struct KnownBoard: Codable, Hashable, Sendable, Identifiable {
     public var modelRawValue: Int
     public var modelName: String
     public var lastConnected: Date
+    /// When the user removed the board in the app; nil while it is in use.
+    public var removedAt: Date?
 
     public init(
         id: BoardID, shortID: String, name: String, modelRawValue: Int, modelName: String = "", lastConnected: Date,
@@ -45,6 +50,7 @@ public struct KnownBoard: Codable, Hashable, Sendable, Identifiable {
     var connectionKey: UUID? { peripheralID ?? id.peripheralUUID }
 
     public var model: NSBBoardModel { NSBBoardModel(rawValue: modelRawValue) ?? .unspecified }
+    public var isRemoved: Bool { removedAt != nil }
 }
 
 /// Persistence for known boards. Small and synchronous; implementations must be
@@ -64,6 +70,15 @@ extension KnownBoardStore {
 
     func remove(_ id: BoardID) {
         save(load().filter { $0.id != id })
+    }
+
+    func markRemoved(_ id: BoardID, connectionKey: UUID?, at date: Date) {
+        save(load().map { board in
+            guard board.id == id || (connectionKey != nil && board.connectionKey == connectionKey) else { return board }
+            var removed = board
+            removed.removedAt = date
+            return removed
+        })
     }
 }
 

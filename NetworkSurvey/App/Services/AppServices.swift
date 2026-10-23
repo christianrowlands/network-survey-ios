@@ -31,7 +31,6 @@ nonisolated enum DestinationFactory {
         var destinations: [any Destination] = []
         if plan.logFiles {
             destinations.append(NSCSVDestination())
-            if settings[Settings.logWigleCSV] { destinations.append(WiGLEDestination()) }
             if plan.rawFrames { destinations.append(PcapDestination()) }
         }
         if plan.mqtt {
