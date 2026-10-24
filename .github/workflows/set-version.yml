@@ -1,0 +1,71 @@
+name: Set Version
+run-name: Set the version to ${{ inputs.version }}
+
+# Sets MARKETING_VERSION, increments CURRENT_PROJECT_VERSION in
+# Config/Base.xcconfig, commits to main and pushes a v<version> tag. The tag
+# starts the release workflow, which uploads the build to TestFlight.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version to release (for example 1.0.0)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  set-version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check the version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version must look like 1.2.3, got '$VERSION'"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          # A tag pushed with GITHUB_TOKEN does not start other workflows, so
+          # this needs a personal access token with contents write access.
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Set the version and next build number
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          file=Config/Base.xcconfig
+          build=$(sed -n -E 's/^CURRENT_PROJECT_VERSION = ([0-9]+)$/\1/p' "$file")
+          if [ -z "$build" ]; then
+            echo "::error::no CURRENT_PROJECT_VERSION line in $file"
+            exit 1
+          fi
+          build=$((build + 1))
+          sed -i -E \
+            -e "s/^MARKETING_VERSION = .*/MARKETING_VERSION = $VERSION/" \
+            -e "s/^CURRENT_PROJECT_VERSION = .*/CURRENT_PROJECT_VERSION = $build/" \
+            "$file"
+          echo "BUILD=$build" >> "$GITHUB_ENV"
+          git diff
+
+      - name: Commit, tag and push
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          tag="v$VERSION"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "::error::tag $tag already exists"
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Bump version to $VERSION (build $BUILD)"
+          git push origin main
+          git tag "$tag"
+          git push origin "$tag"

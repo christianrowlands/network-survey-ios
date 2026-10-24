@@ -4,6 +4,8 @@ on:
   push:
     branches: ["**"]
   pull_request:
+  # The release workflow runs this as its test gate.
+  workflow_call:
 
 permissions:
   contents: read

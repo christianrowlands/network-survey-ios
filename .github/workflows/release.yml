@@ -1,0 +1,163 @@
+name: Release
+
+# Runs on the v* tag the Set Version workflow pushes: tests, then archives a
+# signed Release build and uploads it to App Store Connect, where it shows up
+# in TestFlight once processed. Submitting for App Review stays manual.
+#
+# Secrets:
+#   LOCAL_XCCONFIG       contents of Config/Local.xcconfig (team ID, Sentry settings)
+#   ASC_KEY_ID           App Store Connect API key ID (Admin access, for cloud signing)
+#   ASC_ISSUER_ID        App Store Connect API issuer ID
+#   ASC_KEY_P8           the key's .p8 file, base64
+#   BUILD_CERT_P12       an Apple Development certificate and key, .p12 base64
+#   BUILD_CERT_PASSWORD  the .p12 password
+#   SENTRY_AUTH_TOKEN    optional, for the dSYM upload to Sentry
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ios.yml
+
+  upload:
+    name: Archive and upload to App Store Connect
+    needs: ci
+    runs-on: xcode-27
+    timeout-minutes: 60
+    env:
+      # Same Xcode as ios.yml.
+      DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+    steps:
+      - name: Set paths
+        run: |
+          {
+            echo "ARCHIVE=$RUNNER_TEMP/NetworkSurvey.xcarchive"
+            echo "KEYCHAIN=$RUNNER_TEMP/signing.keychain-db"
+            echo "ASC_KEY_PATH=$RUNNER_TEMP/AuthKey.p8"
+            echo "LOGS=$RUNNER_TEMP/logs"
+          } >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v7
+      - run: xcodebuild -version
+
+      - name: Install XcodeGen and sentry-cli
+        run: brew install xcodegen getsentry/tools/sentry-cli
+
+      - name: Write Config/Local.xcconfig
+        env:
+          LOCAL_XCCONFIG: ${{ secrets.LOCAL_XCCONFIG }}
+        run: |
+          if [ -z "$LOCAL_XCCONFIG" ]; then
+            echo "::error::secret LOCAL_XCCONFIG is not set"
+            exit 1
+          fi
+          printf '%s\n' "$LOCAL_XCCONFIG" > Config/Local.xcconfig
+
+      - name: Write the App Store Connect API key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          if [ -z "$ASC_KEY_P8" ] || [ -z "$ASC_KEY_ID" ] || [ -z "$ASC_ISSUER_ID" ]; then
+            echo "::error::secrets ASC_KEY_P8, ASC_KEY_ID and ASC_ISSUER_ID must all be set"
+            exit 1
+          fi
+          printf '%s' "$ASC_KEY_P8" | base64 --decode > "$ASC_KEY_PATH"
+
+      # The archive is signed with a development identity. Without one on the
+      # runner, Xcode creates a new development certificate on every run and
+      # the team soon reaches Apple's certificate limit. The export step signs
+      # for distribution with the cloud-managed certificate.
+      - name: Import the development certificate
+        env:
+          BUILD_CERT_P12: ${{ secrets.BUILD_CERT_P12 }}
+          BUILD_CERT_PASSWORD: ${{ secrets.BUILD_CERT_PASSWORD }}
+        run: |
+          if [ -z "$BUILD_CERT_P12" ]; then
+            echo "::error::secret BUILD_CERT_P12 is not set"
+            exit 1
+          fi
+          password=$(openssl rand -base64 24)
+          p12="$RUNNER_TEMP/build.p12"
+          printf '%s' "$BUILD_CERT_P12" | base64 --decode > "$p12"
+          security create-keychain -p "$password" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$password" "$KEYCHAIN"
+          security import "$p12" -P "$BUILD_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -k "$password" "$KEYCHAIN" >/dev/null
+          # shellcheck disable=SC2046
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          rm -f "$p12"
+
+      - name: Generate project
+        run: xcodegen generate
+
+      - name: Archive
+        env:
+          # Read by the scripts/upload-dsyms.sh build phase.
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          mkdir -p "$LOGS"
+          xcodebuild archive \
+            -project NetworkSurvey.xcodeproj \
+            -scheme NetworkSurvey \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "$ARCHIVE" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            2>&1 | tee "$LOGS/archive.log"
+
+      - name: Export and upload
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE" \
+            -exportOptionsPlist Config/ExportOptions.plist \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            2>&1 | tee "$LOGS/export.log"
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: xcodebuild-logs
+          path: ${{ runner.temp }}/logs
+
+      - name: Clean up signing files
+        if: always()
+        run: |
+          security delete-keychain "$KEYCHAIN" 2>/dev/null || true
+          rm -f "$ASC_KEY_PATH" Config/Local.xcconfig
+
+  github-release:
+    name: GitHub Release
+    needs: upload
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: ncipollo/release-action@v1
+        with:
+          commit: ${{ github.sha }}
+          generateReleaseNotes: true
+          draft: false
