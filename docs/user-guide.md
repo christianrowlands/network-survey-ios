@@ -42,20 +42,23 @@ The app asks for two permissions:
 ## Installing the Scout software
 
 A new board needs the Scout software once. On a computer with Chrome or Edge,
-go to <https://install.networksurvey.app/>, plug the board in with a USB data
-cable, and click **Install** for your board. Later updates install from the app
-over Bluetooth. Where to buy a board: <https://networksurvey.app/scout>.
+go to <https://install.networksurvey.app/> and plug the board in with a USB
+data cable. Click **Connect board** and pick the board from the list your
+browser shows, choose which board it is, then click **Install NS Scout**. It
+takes about a minute, and the installer then shows the Scout's name. Later
+updates install from the app over Bluetooth. Where to buy a board:
+<https://networksurvey.app/scout>.
 
 ## Pairing a Scout
 
-1. Power the Scout. Its LED gives a short blue blink every 2 seconds while it
-   waits for a phone.
+1. Power the Scout. When its LED blinks cyan fast (yellow on the XIAO
+   ESP32-C5), it is ready to pair.
 2. In the app, open **Survey** and tap **Scouts** (or **Find Scouts** in the
    Still to do list).
 3. Hold the Scout next to your iPhone. It appears under **Nearby** as
    `NS-XXXX`, where `XXXX` is its short ID (also shown by the web installer).
 4. Tap the Scout. When iOS asks, tap **Pair**. The Scout moves to **Your
-   Scouts** and its LED turns solid blue.
+   Scouts** and its LED turns solid blue (solid yellow on the XIAO).
 
 A Scout that has never been paired is always ready to pair. A Scout that
 already has a phone is shown as **Paired with another phone** or **Not ready
@@ -326,6 +329,9 @@ you turn it off: **Settings > Send crash reports**.
 - A report holds the app version, the iPhone model and iOS version, and what
   the app's code was doing. It never includes survey data, location, network
   names, addresses, screenshots or anything about you.
+- The same switch covers session records: a short note each time you use
+  the app, with the app version, how long the session lasted and whether it
+  ended in a crash, so the crash-free rate can be measured.
 - Reports go to Sentry, a crash reporting service. Builds made from the
   source code send nothing, and there the switch is not shown.
 
@@ -358,8 +364,9 @@ asks you to confirm.
 ## Troubleshooting
 
 **The Scout does not show under Nearby.**
-- Check that it is powered and its LED blinks blue. Hold it within a few
-  meters of the iPhone.
+- Check that it is powered and its LED blinks: cyan fast when it is ready to
+  pair, or a short blue blink every 2 seconds when it is waiting for the phone
+  it is paired with. Hold it within a few meters of the iPhone.
 - A Scout that is connected to another phone does not advertise. Disconnect
   it there, or switch that phone's Bluetooth off.
 - Check that Bluetooth is on (Control Center) and that Network Survey is
