@@ -104,6 +104,9 @@ jobs:
       - name: Generate project
         run: xcodegen generate
 
+      - name: Resolve packages
+        run: scripts/resolve-packages.sh build/SourcePackages
+
       - name: Archive
         env:
           # Read by the scripts/upload-dsyms.sh build phase.
@@ -116,6 +119,8 @@ jobs:
             -configuration Release \
             -destination "generic/platform=iOS" \
             -archivePath "$ARCHIVE" \
+            -clonedSourcePackagesDirPath build/SourcePackages \
+            -disableAutomaticPackageResolution \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$ASC_KEY_ID" \

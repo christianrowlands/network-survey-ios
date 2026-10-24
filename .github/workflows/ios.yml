@@ -115,6 +115,9 @@ jobs:
       - name: Generate project
         run: xcodegen generate
 
+      - name: Resolve packages
+        run: scripts/resolve-packages.sh build/SourcePackages
+
       - name: Pick a simulator
         id: sim
         run: |
@@ -133,4 +136,6 @@ jobs:
             -scheme NetworkSurvey \
             -destination "$DESTINATION" \
             -only-testing:NetworkSurveyTests \
+            -clonedSourcePackagesDirPath build/SourcePackages \
+            -disableAutomaticPackageResolution \
             CODE_SIGNING_ALLOWED=NO
