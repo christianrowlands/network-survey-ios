@@ -9,7 +9,8 @@
 #   --check            change nothing; fail if the JSON is stale.
 #   --checkouts <dir>  package checkouts to read licenses from (for example
 #                      <DerivedData>/SourcePackages/checkouts). By default the
-#                      SurveyCore package is resolved and its checkouts used.
+#                      SurveyCore and CrashReporting packages are resolved and
+#                      their checkouts used.
 #
 # Needs git and python3.
 set -euo pipefail
@@ -28,8 +29,12 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -z "$CHECKOUTS" ]; then
-  swift package resolve --package-path "$ROOT/Packages/SurveyCore" >/dev/null
-  CHECKOUTS="$ROOT/Packages/SurveyCore/.build/checkouts"
+  # SurveyCore depends on every other package except CrashReporting.
+  CHECKOUTS=""
+  for package in SurveyCore CrashReporting; do
+    swift package resolve --package-path "$ROOT/Packages/$package" >/dev/null
+    CHECKOUTS="$CHECKOUTS${CHECKOUTS:+:}$ROOT/Packages/$package/.build/checkouts"
+  done
 fi
 
 WORK="$(mktemp -d)"
@@ -40,6 +45,8 @@ python3 -I - "$ROOT" "$CHECKOUTS" "$OUT" <<'PY'
 import glob, json, os, subprocess, sys
 
 root, checkouts, out = sys.argv[1:4]
+# One or more checkout folders, separated by colons.
+checkouts = checkouts.split(":")
 
 # Swift packages, from the committed Package.resolved files of the local packages.
 pins = {}
@@ -55,11 +62,12 @@ names = {
     "swift-log": "SwiftLog", "swift-nio": "SwiftNIO", "swift-nio-extras": "SwiftNIO Extras",
     "swift-nio-http2": "SwiftNIO HTTP/2", "swift-nio-ssl": "SwiftNIO SSL",
     "swift-nio-transport-services": "SwiftNIO Transport Services", "swift-numerics": "Swift Numerics",
-    "swift-protobuf": "SwiftProtobuf", "swift-service-lifecycle": "Swift Service Lifecycle", "swift-system": "Swift System",
+    "sentry-cocoa": "Sentry Cocoa", "swift-protobuf": "SwiftProtobuf",
+    "swift-service-lifecycle": "Swift Service Lifecycle", "swift-system": "Swift System",
 }
 
 # License files of vendored code compiled into the app, beyond the top-level ones.
-nested = {"swift-nio": ["Sources/CNIOLLHTTP/LICENSE"]}
+nested = {"swift-nio": ["Sources/CNIOLLHTTP/LICENSE"], "sentry-cocoa": ["THIRD_PARTY_NOTICES.md"]}
 
 def spdx(text):
     if "Apache License" in text and "Version 2.0" in text:
@@ -81,9 +89,10 @@ entries = []
 problems = []
 for identity, pin in sorted(pins.items()):
     location = pin["location"]
-    folder = os.path.join(checkouts, location.rstrip("/").split("/")[-1].removesuffix(".git"))
-    if not os.path.isdir(folder):
-        problems.append(f"missing checkout for {identity} in {checkouts}")
+    name = location.rstrip("/").split("/")[-1].removesuffix(".git")
+    folder = next((os.path.join(c, name) for c in checkouts if os.path.isdir(os.path.join(c, name))), None)
+    if folder is None:
+        problems.append(f"missing checkout for {identity} in {', '.join(checkouts)}")
         continue
     head = subprocess.run(["git", "-C", folder, "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     if head and head != pin["state"]["revision"]:
@@ -136,7 +145,9 @@ entries.insert(0, {
     "text": app_notice + "\n\n" + app_license,
 })
 with open(os.path.join(out, "third-party-licenses.json"), "w", encoding="utf-8") as f:
-    json.dump(entries, f, indent=1, ensure_ascii=False, sort_keys=True)
+    # Third-party notices are copied verbatim; their em dashes are written as
+    # JSON escapes so the file passes scripts/check-text.sh.
+    f.write(json.dumps(entries, indent=1, ensure_ascii=False, sort_keys=True).replace("\u2014", "\\u2014"))
     f.write("\n")
 PY
 

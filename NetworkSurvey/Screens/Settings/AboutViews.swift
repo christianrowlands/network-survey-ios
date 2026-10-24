@@ -29,7 +29,7 @@ struct AboutView: View {
                         Label("Open-source licenses", systemImage: "doc.plaintext")
                     }
                 } footer: {
-                    Text("Network Survey is open source under the Apache License 2.0. No analytics or tracking.")
+                    Text("Network Survey is open source under the Apache License 2.0. No analytics or tracking. Crash reports, if on, never include survey data.")
                 }
             }
             .panelRows()

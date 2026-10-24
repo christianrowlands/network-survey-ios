@@ -30,7 +30,10 @@ repository's security policy.
 ## What the app protects
 
 - **Survey data stays on the phone** unless the user sets up a destination.
-  The app has no analytics or tracking, and sends nothing to its developers.
+  The app has no analytics or tracking. The only thing it sends its
+  developers is crash reports (Sentry), in App Store builds and only while
+  Settings > Send crash reports is on. They hold the app version, iPhone
+  model and the crashed code, never survey data or location.
 - **Credentials** (MQTT password, NS Analytics device token) are kept in the
   iOS Keychain, readable only on this device after its first unlock. They
   are deleted on the first launch after a reinstall.

@@ -60,6 +60,8 @@ public enum Settings {
     // MARK: Privacy
     public static let privacyZones = SettingKey<[PrivacyZone]>.json("privacy_zones", default: [])
     public static let ignoreList = SettingKey<[IgnoreEntry]>.json("ignore_list", default: [])
+    /// Send crash and hang reports, in builds configured with a crash reporting DSN.
+    public static let crashReports = SettingKey<Bool>("send_crash_reports", default: true)
 
     // MARK: Advanced
     /// Show the simulated "Demo board" in the board list.
@@ -77,7 +79,7 @@ public enum Settings {
         nsAnalyticsWorkspaceID.name, nsAnalyticsWorkspaceName.name, nsAnalyticsUploadIntervalMinutes.name,
         nsAnalyticsUploadProbeRecords.name, nsAnalyticsUploadClientRecords.name,
         deviceName.name, deviceStatusIntervalSeconds.name, locationSource.name, units.name, privacyZones.name,
-        ignoreList.name, demoBoardEnabled.name, hasSeenWelcome.name,
+        ignoreList.name, crashReports.name, demoBoardEnabled.name, hasSeenWelcome.name,
     ]
 }
 

@@ -13,6 +13,8 @@ sibling of the Network Survey Android app, with the same file formats and the
 same NS Messaging records.
 
 Simple to use, your data your way. No account, no analytics, no tracking.
+App Store builds send anonymous crash reports, which you can turn off in
+Settings; they never include survey data or location.
 
 ## Why NS Scout
 
@@ -94,7 +96,9 @@ real board needs one; the simulator has no Bluetooth), copy
 identifier of your own.
 
 Swift packages are pinned in each `Package.resolved`. The app has no
-analytics, crash reporting or ad SDKs.
+analytics or ad SDKs. Crash reporting (Sentry, in `Packages/CrashReporting`)
+starts only when `SENTRY_DSN` is set in `Config/Local.xcconfig`, so builds from
+source send nothing.
 
 ## Running tests
 

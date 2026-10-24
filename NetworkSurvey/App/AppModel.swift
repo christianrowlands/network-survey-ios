@@ -271,11 +271,18 @@ final class AppModel {
 
     // MARK: - Loops
 
-    /// Follows settings changed elsewhere (the Settings screen's demo switch).
+    /// Follows settings changed elsewhere (the Settings screen's demo and crash report switches).
     private func watchSettings() async {
-        for await name in settings.changes() where name == Settings.demoBoardEnabled.name {
-            let enabled = settings[Settings.demoBoardEnabled]
-            if enabled != demoBoardEnabled { await setDemoBoardEnabled(enabled) }
+        for await name in settings.changes() {
+            switch name {
+            case Settings.demoBoardEnabled.name:
+                let enabled = settings[Settings.demoBoardEnabled]
+                if enabled != demoBoardEnabled { await setDemoBoardEnabled(enabled) }
+            case Settings.crashReports.name:
+                CrashReportingController.apply(enabled: settings[Settings.crashReports])
+            default:
+                break
+            }
         }
     }
 

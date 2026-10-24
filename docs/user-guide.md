@@ -317,6 +317,18 @@ Lists filter hides them.
   means a virtual access point (one radio serving several networks), and the
   details say so.
 
+### Crash reports
+
+App Store builds send a report to the developers when the app crashes or
+hangs, so the bug can be fixed. Unlike the controls above, this is on until
+you turn it off: **Settings > Send crash reports**.
+
+- A report holds the app version, the iPhone model and iOS version, and what
+  the app's code was doing. It never includes survey data, location, network
+  names, addresses, screenshots or anything about you.
+- Reports go to Sentry, a crash reporting service. Builds made from the
+  source code send nothing, and there the switch is not shown.
+
 ## Updating Scout firmware
 
 Scout firmware updates go over Bluetooth from the app.

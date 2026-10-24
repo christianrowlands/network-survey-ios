@@ -73,6 +73,7 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 | `display_units` | String | `metric` | `metric` or `imperial` |
 | `privacy_zones` | JSON array | [] | `[{"id", "name", "center": {"latitude", "longitude"}, "radiusMeters"}]`. Records and track points that may be inside (distance minus the fix's accuracy within the radius) are never stored. Without a current fix the last fix up to 5 minutes old decides. Stored in UserDefaults, which is included in device backups |
 | `ignore_list` | JSON array | [] | `[{"id", "kind", "value", "note"}]`, kind `ssid` (exact, case-sensitive), `bssid`, `mac` or `macPrefix` |
+| `send_crash_reports` | Bool | true | Send crash and hang reports to the developers. Only builds with a Sentry DSN configured (App Store builds) send anything; builds from source never do |
 
 ## Advanced
 

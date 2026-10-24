@@ -36,7 +36,7 @@ struct SettingsScreen: View {
                     } footer: {
                         Text("Most people save Files and share with NS Analytics. MQTT and gRPC stream live to a server your team runs.")
                     }
-                    Section("Privacy") {
+                    Section {
                         NavigationLink { PrivacyZonesView() } label: {
                             SettingsLinkLabel(title: "Privacy zones", symbol: "hand.raised",
                                               detail: countText(settings[Settings.privacyZones].count))
@@ -47,6 +47,18 @@ struct SettingsScreen: View {
                                               detail: countText(settings[Settings.ignoreList].count))
                         }
                         .accessibilityIdentifier("settings.ignoreList")
+                        if CrashReportingController.isAvailable {
+                            Toggle(isOn: settings.binding(Settings.crashReports)) {
+                                Label("Send crash reports", systemImage: "ant")
+                            }
+                            .accessibilityIdentifier("settings.crashReports")
+                        }
+                    } header: {
+                        Text("Privacy")
+                    } footer: {
+                        if CrashReportingController.isAvailable {
+                            Text("Crash reports help fix bugs. They include the app version, iPhone model and what the app was doing, never survey data or location.")
+                        }
                     }
                     Section {
                         Picker(selection: settings.binding(Settings.locationSource)) {
@@ -90,6 +102,13 @@ struct SettingsScreen: View {
                             Label("Live records (demo Scout)", systemImage: "list.bullet.rectangle")
                         }
                         .accessibilityIdentifier("settings.debugRecords")
+                        if CrashReportingController.isAvailable {
+                            Button(role: .destructive) {
+                                CrashReportingController.crash()
+                            } label: {
+                                Label("Send test crash", systemImage: "ant")
+                            }
+                        }
                     }
                     #endif
                     Section("Help") {

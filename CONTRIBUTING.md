@@ -21,7 +21,10 @@ results with real boards and ideas are all welcome.
 - **Passive and professional.** The app is a site survey tool. No features
   that make a board transmit Wi-Fi frames, crack or capture handshakes, or
   track people. No gamification.
-- **No telemetry.** No analytics, crash reporting, ad or tracking SDKs.
+- **No telemetry.** No analytics, ad or tracking SDKs. The one exception is
+  crash reporting with Sentry (`Packages/CrashReporting`): it runs only in
+  builds with a DSN configured, the user can turn it off in Settings, and it
+  must never carry survey data, location, screenshots or personal data.
 - **Few dependencies.** Each new Swift package needs a good reason, an
   Apache-2.0 compatible license, and an exact version pin. Run
   `scripts/gen-licenses.sh` after changing dependencies so the in-app license

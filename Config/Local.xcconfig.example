@@ -3,3 +3,10 @@ DEVELOPMENT_TEAM =
 // A bundle identifier of your own, needed to sign for a device (the default is
 // in Base.xcconfig). Extensions and test bundles append a suffix to it.
 // NS_BUNDLE_ID = com.example.networksurvey
+// Crash reports go to Sentry only when a DSN is set. "//" starts a comment in
+// an xcconfig file, so write the DSN's "//" as "/$()/".
+// SENTRY_DSN = https:/$()/<key>@<org>.ingest.us.sentry.io/<project>
+// For the dSYM upload when archiving a Release build (also needs sentry-cli and
+// SENTRY_AUTH_TOKEN in the environment).
+// SENTRY_ORG = <org slug>
+// SENTRY_PROJECT = <project slug>

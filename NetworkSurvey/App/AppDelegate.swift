@@ -1,3 +1,4 @@
+import SurveyCore
 import UIKit
 
 /// Owns the app model so work can start before any scene exists: after a
@@ -10,6 +11,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
         _ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        // Before the model exists, so a crash while it starts is reported.
+        CrashReportingController.apply(enabled: SettingsStore()[Settings.crashReports])
         let restored = launchOptions?[.bluetoothCentrals] != nil
         let model = model
         Task { await model.launch(restoredByBluetooth: restored) }

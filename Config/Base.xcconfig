@@ -15,4 +15,8 @@ IPHONEOS_DEPLOYMENT_TARGET = 18.0
 SWIFT_VERSION = 6.0
 SWIFT_STRICT_CONCURRENCY = complete
 
+// Crash reporting (Sentry). Empty here, so builds from source never send
+// anything; release builds set SENTRY_DSN in Config/Local.xcconfig.
+SENTRY_DSN =
+
 #include? "Local.xcconfig"
