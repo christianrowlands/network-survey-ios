@@ -48,7 +48,8 @@ final class SurveyFlowTests: XCTestCase {
         XCTAssertTrue(stop.waitForExistence(timeout: 5))
         stop.tap()
         XCTAssertTrue(app.staticTexts["Stop this survey?"].waitForExistence(timeout: 5))
-        app.buttons["survey.confirmStop"].tap()
+        // iOS 26 and later expose the popover's button as two nested elements.
+        app.buttons["survey.confirmStop"].firstMatch.tap()
         XCTAssertTrue(start.waitForExistence(timeout: 10), "Start did not come back after Stop")
         XCTAssertTrue(start.isEnabled)
     }
@@ -65,6 +66,8 @@ final class SurveyFlowTests: XCTestCase {
         wait(for: [connected], timeout: 10)
 
         let band = app.buttons["role.2.4 GHz only"]
+        // On taller layouts the role rows start below the fold, where the list has not built them yet.
+        if !band.waitForExistence(timeout: 2) { app.swipeUp() }
         XCTAssertTrue(band.waitForExistence(timeout: 5))
         XCTAssertFalse(band.isSelected)
         band.tap()

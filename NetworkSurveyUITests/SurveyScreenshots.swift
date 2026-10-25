@@ -60,7 +60,6 @@ final class SurveyScreenshots: XCTestCase {
         app.buttons["survey.stop"].tap()
         sleep(1)
         shot(app, "survey-stop-confirm-\(mode)")
-        app.buttons["Keep recording"].firstMatch.tap()
 
         app.terminate()
 
