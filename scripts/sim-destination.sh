@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Prints an xcodebuild destination ("id=<udid>") for an available iPhone
-# simulator on the newest installed iOS runtime, so commands work whatever
-# simulators this Xcode created. CI uses it too. Warns when that runtime is
-# older than the Xcode SDK, since newer iOS versions change how system UI
-# (dialogs, sheets, toolbars) is laid out.
+# Prints an xcodebuild destination ("id=<udid>") for an available regular
+# iPhone simulator on the newest installed iOS runtime that has one, so
+# commands work whatever simulators this Xcode created. The iPhone Duo is
+# skipped: its sidebar tab bar is not the layout most people use. CI uses it
+# too. Warns when that runtime is older than the Xcode SDK, since newer iOS
+# versions change how system UI (dialogs, sheets, toolbars) is laid out.
 #
 # Usage: xcodebuild test ... -destination "$(scripts/sim-destination.sh)"
 set -euo pipefail
@@ -15,11 +16,11 @@ devices = json.load(sys.stdin)["devices"]
 ios = [(tuple(int(n) for n in r.split(".iOS-")[1].split("-")), r) for r in devices if ".iOS-" in r]
 for _, runtime in sorted(ios, reverse=True):
     for d in devices[runtime]:
-        if d["name"].startswith("iPhone"):
+        if d["name"].startswith("iPhone") and "Duo" not in d["name"]:
             print(d["udid"], runtime.split(".iOS-")[1].replace("-", ".")); sys.exit()
 ') || true
 if [ -z "$udid" ]; then
-    echo "sim-destination: no iPhone simulator found; add one in Xcode (Window > Devices and Simulators)" >&2
+    echo "sim-destination: no regular iPhone simulator found; add one in Xcode (Window > Devices and Simulators)" >&2
     exit 1
 fi
 sdk=$(xcrun --sdk iphonesimulator --show-sdk-version)

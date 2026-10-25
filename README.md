@@ -115,8 +115,11 @@ xcodebuild test -project NetworkSurvey.xcodeproj -scheme NetworkSurvey \
   -only-testing:NetworkSurveyUITests
 ```
 
-`scripts/sim-destination.sh` picks an iPhone simulator on the newest installed
-iOS runtime. Any iPhone simulator works; to choose one, pass
+`scripts/sim-destination.sh` picks a regular iPhone simulator (not the iPhone
+Duo) on the newest installed iOS runtime that has one, and warns when that
+runtime is older than the Xcode SDK. Test on the current iOS: newer versions
+change how system UI such as dialogs is laid out. Install the current runtime
+with `xcodebuild -downloadPlatform iOS`. To choose a simulator, pass
 `-destination 'platform=iOS Simulator,name=<simulator name>'` instead.
 
 The MQTT tests in `Packages/Destinations` start a private `mosquitto` broker
