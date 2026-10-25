@@ -107,6 +107,15 @@ struct BoardDetailView: View {
                 Button(model.isDemo(board) ? "Remove demo Scout" : "Remove Scout", role: .destructive) { confirmingRemove = true }
                     .disabled(busy)
                     .accessibilityIdentifier("board.forget")
+                    .confirmationDialog("Remove \(name)?", isPresented: $confirmingRemove, titleVisibility: .visible) {
+                        Button("Remove", role: .destructive) {
+                            Task { await remove() }
+                        }
+                    } message: {
+                        Text(model.isDemo(board)
+                             ? "The demo Scout is disconnected."
+                             : "Network Survey stops connecting to \(name). Add it back from Scouts whenever you like, with no pairing needed.")
+                    }
             } footer: {
                 Text(model.isDemo(board)
                      ? "Disconnects the demo Scout."
@@ -122,6 +131,13 @@ struct BoardDetailView: View {
                     Button("Erase pairings on the Scout", role: .destructive) { confirmingErase = true }
                         .disabled(busy || model.survey.isLocked)
                         .accessibilityIdentifier("board.erasePairings")
+                        .confirmationDialog("Erase pairings on \(name)?", isPresented: $confirmingErase, titleVisibility: .visible) {
+                            Button("Erase pairings", role: .destructive) {
+                                Task { await erasePairings(name: name) }
+                            }
+                        } message: {
+                            Text("\(name) forgets every phone it was paired with, including this iPhone. To use it here again, iOS must also forget it in Settings > Bluetooth.")
+                        }
                 }
             } header: {
                 Text("Advanced")
@@ -140,22 +156,6 @@ struct BoardDetailView: View {
             Text(message ?? "")
         }
         .task(id: state?.info?.firmwareVersion) { await checkRelease() }
-        .confirmationDialog("Remove \(name)?", isPresented: $confirmingRemove, titleVisibility: .visible) {
-            Button("Remove", role: .destructive) {
-                Task { await remove() }
-            }
-        } message: {
-            Text(model.isDemo(board)
-                 ? "The demo Scout is disconnected."
-                 : "Network Survey stops connecting to \(name). Add it back from Scouts whenever you like, with no pairing needed.")
-        }
-        .confirmationDialog("Erase pairings on \(name)?", isPresented: $confirmingErase, titleVisibility: .visible) {
-            Button("Erase pairings", role: .destructive) {
-                Task { await erasePairings(name: name) }
-            }
-        } message: {
-            Text("\(name) forgets every phone it was paired with, including this iPhone. To use it here again, iOS must also forget it in Settings > Bluetooth.")
-        }
         .sheet(item: $forgetGuide, onDismiss: { if leaveAfterGuide { dismiss() } }) { guide in
             ForgetPairingSheet(board: board, name: guide.name, reconnect: guide.reconnect)
         }

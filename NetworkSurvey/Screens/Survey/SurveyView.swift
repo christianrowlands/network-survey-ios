@@ -63,15 +63,6 @@ struct SurveyView: View {
             .sheet(item: $roleBoard) { selection in
                 BoardRoleSheet(board: selection.board)
             }
-            .confirmationDialog("Stop this survey?", isPresented: $confirmingStop, titleVisibility: .visible) {
-                Button("Stop survey", role: .destructive) {
-                    Task { await model.stopSurvey() }
-                }
-                .accessibilityIdentifier("survey.confirmStop")
-                Button("Keep recording", role: .cancel) {}
-            } message: {
-                Text(stopMessage)
-            }
             .task { await followSettings() }
             .onChange(of: model.survey.isRunning) { _, running in
                 // A double tap on Start must not land on Stop.
@@ -146,6 +137,15 @@ struct SurveyView: View {
                 .buttonStyle(StopButtonStyle())
                 .disabled(model.survey.state == .stopping || stopGuarded)
                 .accessibilityIdentifier("survey.stop")
+                .confirmationDialog("Stop this survey?", isPresented: $confirmingStop, titleVisibility: .visible) {
+                    Button("Stop survey", role: .destructive) {
+                        Task { await model.stopSurvey() }
+                    }
+                    .accessibilityIdentifier("survey.confirmStop")
+                    Button("Keep recording", role: .cancel) {}
+                } message: {
+                    Text(stopMessage)
+                }
             } else {
                 let block = startBlock
                 if let block {

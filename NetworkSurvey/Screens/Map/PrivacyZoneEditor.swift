@@ -45,6 +45,15 @@ struct PrivacyZoneEditor: View {
                         Section {
                             Button("Delete zone", role: .destructive) { confirmingDelete = true }
                                 .accessibilityIdentifier("zone.delete")
+                                .confirmationDialog("Delete this privacy zone?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+                                    Button("Delete zone", role: .destructive) {
+                                        finished = true
+                                        onDelete()
+                                        dismiss()
+                                    }
+                                } message: {
+                                    Text("Records inside it will be stored again from now on.")
+                                }
                         }
                     }
                 }
@@ -78,15 +87,6 @@ struct PrivacyZoneEditor: View {
                         Button("Done") { dismiss() }
                     }
                 }
-            }
-            .confirmationDialog("Delete this privacy zone?", isPresented: $confirmingDelete, titleVisibility: .visible) {
-                Button("Delete zone", role: .destructive) {
-                    finished = true
-                    onDelete()
-                    dismiss()
-                }
-            } message: {
-                Text("Records inside it will be stored again from now on.")
             }
         }
         .interactiveDismissDisabled(isNew)

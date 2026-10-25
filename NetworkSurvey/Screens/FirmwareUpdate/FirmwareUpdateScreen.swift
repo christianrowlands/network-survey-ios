@@ -78,15 +78,15 @@ private struct FirmwareUpdateContent: View {
                     Button("Cancel") { confirmingCancel = true }
                         .disabled(!model.canCancel)
                         .accessibilityIdentifier("firmware.cancel")
+                        .confirmationDialog("Cancel the update?", isPresented: $confirmingCancel, titleVisibility: .visible) {
+                            Button("Cancel update", role: .destructive) { model.cancel() }
+                                .disabled(!model.canCancel)
+                            Button("Keep updating", role: .cancel) {}
+                        } message: {
+                            Text("The transfer stops and the Scout keeps its current firmware.")
+                        }
                 }
             }
-        }
-        .confirmationDialog("Cancel the update?", isPresented: $confirmingCancel, titleVisibility: .visible) {
-            Button("Cancel update", role: .destructive) { model.cancel() }
-                .disabled(!model.canCancel)
-            Button("Keep updating", role: .cancel) {}
-        } message: {
-            Text("The transfer stops and the Scout keeps its current firmware.")
         }
         .fileImporter(
             isPresented: $importing, allowedContentTypes: [.data], allowsMultipleSelection: true

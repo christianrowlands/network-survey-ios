@@ -10,7 +10,6 @@ struct FilesScreen: View {
     @State private var folders: [SurveyFolder] = []
     @State private var loaded = false
     @State private var preview: URL?
-    @State private var pendingDelete: SurveyFolder?
     @State private var deleteError: String?
 
     var body: some View {
@@ -19,7 +18,7 @@ struct FilesScreen: View {
                 Group {
                     ForEach(folders) { folder in
                         FolderSection(folder: folder, preview: $preview) {
-                            pendingDelete = folder
+                            delete(folder)
                         }
                     }
                 }
@@ -50,14 +49,6 @@ struct FilesScreen: View {
             }
             .refreshable { await reload() }
             .quickLookPreview($preview)
-            .confirmationDialog(
-                "Delete this survey?", isPresented: Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
-                titleVisibility: .visible, presenting: pendingDelete
-            ) { folder in
-                Button("Delete files and survey data", role: .destructive) { delete(folder) }
-            } message: { folder in
-                Text("Deletes \(folder.files.count) files (\(DataFormat.bytes(folder.totalBytes))) and removes the survey from the Map and Lists. This cannot be undone.")
-            }
             .alert("Could not delete", isPresented: Binding(get: { deleteError != nil }, set: { if !$0 { deleteError = nil } })) {
                 Button("OK") {}
             } message: {
@@ -115,7 +106,9 @@ struct FilesScreen: View {
 private struct FolderSection: View {
     let folder: SurveyFolder
     @Binding var preview: URL?
+    /// Runs once the delete is confirmed.
     let onDelete: () -> Void
+    @State private var confirmingDelete = false
 
     var body: some View {
         Section {
@@ -185,7 +178,7 @@ private struct FolderSection: View {
                     ShareLink(items: folder.files.map(\.url)) {
                         Label("Share all files", systemImage: "square.and.arrow.up")
                     }
-                    Button(role: .destructive, action: onDelete) {
+                    Button(role: .destructive) { confirmingDelete = true } label: {
                         Label("Delete survey", systemImage: "trash")
                     }
                 } label: {
@@ -195,6 +188,11 @@ private struct FolderSection: View {
                 }
                 .accessibilityLabel("Survey actions")
                 .accessibilityIdentifier("files.folderActions")
+                .confirmationDialog("Delete this survey?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+                    Button("Delete files and survey data", role: .destructive, action: onDelete)
+                } message: {
+                    Text("Deletes \(folder.files.count) files (\(DataFormat.bytes(folder.totalBytes))) and removes the survey from the Map and Lists. This cannot be undone.")
+                }
             }
         }
     }

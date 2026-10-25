@@ -39,6 +39,18 @@ struct NSAnalyticsSettingsView: View {
                         Button("Register with another workspace") { scanning = true }
                         Button("Unregister this phone", role: .destructive) { confirmingUnregister = true }
                             .accessibilityIdentifier("nsa.unregister")
+                            .confirmationDialog("Unregister this phone?", isPresented: $confirmingUnregister, titleVisibility: .visible) {
+                                Button("Unregister", role: .destructive) {
+                                    Task {
+                                        let confirmed = await registration.unregister()
+                                        unregisterNote = confirmed
+                                            ? "This phone is no longer registered."
+                                            : "Removed on this phone, but NS Analytics could not be reached. A workspace admin can remove the phone there."
+                                    }
+                                }
+                            } message: {
+                                Text("Uploads stop. Records not uploaded yet stay on this phone and upload after you register again.")
+                            }
                     } footer: {
                         if let unregisterNote { Text(unregisterNote) }
                     }
@@ -54,18 +66,6 @@ struct NSAnalyticsSettingsView: View {
         .sheet(isPresented: $scanning) {
             RegistrationScanSheet()
                 .environment(registration)
-        }
-        .confirmationDialog("Unregister this phone?", isPresented: $confirmingUnregister, titleVisibility: .visible) {
-            Button("Unregister", role: .destructive) {
-                Task {
-                    let confirmed = await registration.unregister()
-                    unregisterNote = confirmed
-                        ? "This phone is no longer registered."
-                        : "Removed on this phone, but NS Analytics could not be reached. A workspace admin can remove the phone there."
-                }
-            }
-        } message: {
-            Text("Uploads stop. Records not uploaded yet stay on this phone and upload after you register again.")
         }
     }
 
