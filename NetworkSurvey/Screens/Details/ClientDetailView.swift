@@ -74,7 +74,7 @@ private struct ClientDetailContent: View {
                     } else {
                         ForEach(detail.probes, id: \.ssid) { probe in
                             HStack {
-                                Text(probe.isWildcard ? "Any network (wildcard)" : probe.ssid)
+                                Text(DataFormat.probedNetwork(probe.ssid))
                                     .foregroundStyle(probe.isWildcard ? Theme.Colors.ink2 : Theme.Colors.ink)
                                 Spacer()
                                 Text(DataFormat.count(probe.frameCount))

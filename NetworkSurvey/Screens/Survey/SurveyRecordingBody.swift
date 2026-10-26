@@ -159,9 +159,12 @@ private struct RecordingHero: View {
     }
 }
 
-/// Live counts for each protocol in the session.
+/// Live counts for each protocol in the session. A count with a list opens
+/// it in the Lists tab.
 private struct ProtocolCounts: View {
     @Environment(AppModel.self) private var model
+    @Environment(SurveyData.self) private var data
+    @Environment(ListsNavigation.self) private var lists
 
     var body: some View {
         let survey = model.survey
@@ -170,20 +173,20 @@ private struct ProtocolCounts: View {
         Panel {
             if session?.wifiAP ?? true {
                 row("Wi-Fi APs", symbol: SurveyProtocol.wifiAP.symbol, color: SurveyProtocol.wifiAP.color,
-                    unique: counts.accessPoints, records: delivered(.wifiBeacon))
+                    unique: counts.accessPoints, records: delivered(.wifiBeacon), list: .aps)
             }
             if session?.wifiClient ?? true {
                 Divider().overlay(Theme.Colors.rule)
                 row("Wi-Fi Clients", symbol: SurveyProtocol.wifiClient.symbol, color: Theme.Colors.wifiClient,
-                    unique: counts.clients, records: delivered(.wifiStation))
+                    unique: counts.clients, records: delivered(.wifiStation), list: .clients)
                 Divider().overlay(Theme.Colors.rule)
                 row("Probe requests", subtitle: "Client and network pairs", symbol: "magnifyingglass",
-                    color: Theme.Colors.wifiClient, unique: counts.probes, records: delivered(.wifiProbeRequest))
+                    color: Theme.Colors.wifiClient, unique: counts.probes, records: delivered(.wifiProbeRequest), list: .probes)
             }
             if session?.ble ?? false {
                 Divider().overlay(Theme.Colors.rule)
                 row("BLE devices", symbol: SurveyProtocol.ble.symbol, color: SurveyProtocol.ble.color,
-                    unique: counts.bleDevices, records: delivered(.bluetooth))
+                    unique: counts.bleDevices, records: delivered(.bluetooth), list: .ble)
             }
             if session?.rawFrames ?? false {
                 Divider().overlay(Theme.Colors.rule)
@@ -191,6 +194,7 @@ private struct ProtocolCounts: View {
                     unique: survey.counters.rawFrames, records: nil, unit: "frames")
             }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("survey.counts")
     }
 
@@ -198,9 +202,42 @@ private struct ProtocolCounts: View {
         model.survey.counters.delivered[type] ?? 0
     }
 
-    private func row(
+    /// Lists show the session the Lists tab picked; from here, follow the
+    /// running survey.
+    private func open(_ list: ListsScreen.Segment) {
+        data.pickedSessionID = nil
+        lists.show(list)
+        model.selectedTab = .lists
+    }
+
+    @ViewBuilder private func row(
         _ title: String, subtitle: String? = nil, symbol: String, color: Color, unique: Int, records: Int?,
-        unit: String? = nil
+        unit: String? = nil, list: ListsScreen.Segment? = nil
+    ) -> some View {
+        if let list {
+            Button {
+                open(list)
+            } label: {
+                HStack(spacing: Theme.Spacing.m) {
+                    countRow(title, subtitle: subtitle, symbol: symbol, color: color, unique: unique, records: records, unit: unit)
+                    Image(systemName: "chevron.right")
+                        .font(Theme.Fonts.caption.weight(.semibold))
+                        .foregroundStyle(Theme.Colors.ink3)
+                        .accessibilityHidden(true)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens the list")
+            .accessibilityIdentifier("survey.count.\(title)")
+        } else {
+            countRow(title, subtitle: subtitle, symbol: symbol, color: color, unique: unique, records: records, unit: unit)
+                .accessibilityIdentifier("survey.count.\(title)")
+        }
+    }
+
+    private func countRow(
+        _ title: String, subtitle: String?, symbol: String, color: Color, unique: Int, records: Int?, unit: String?
     ) -> some View {
         HStack(spacing: Theme.Spacing.m) {
             Image(systemName: symbol)
@@ -230,7 +267,6 @@ private struct ProtocolCounts: View {
         }
         .frame(minHeight: Theme.Spacing.rowMinHeight)
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("survey.count.\(title)")
     }
 }
 

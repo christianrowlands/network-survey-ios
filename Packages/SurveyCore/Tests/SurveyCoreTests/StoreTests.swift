@@ -125,6 +125,69 @@ struct StoreTests {
         #expect(ble.isEmpty)
     }
 
+    @Test("Probe lists group by network and by client")
+    func probeLists() async throws {
+        let store = try await makeStore()
+        try await store.write(sessionID: "S1", records: [
+            record(Fixtures.ap("00:00:5E:00:53:01", ssid: "HomeNet")),
+            record(Fixtures.ap("00:00:5E:00:53:02", ssid: "HomeNet")),
+            record(Fixtures.probe("00:00:5E:00:53:A1", ssid: "HomeNet", rssi: -50)),
+            record(Fixtures.probe("00:00:5E:00:53:A1", ssid: "Cafe-Guest", rssi: -55), at: 1),
+            record(Fixtures.probe("00:00:5E:00:53:A1", ssid: "", rssi: -58), at: 2),
+            record(Fixtures.probe("0A:00:00:00:00:02", ssid: "HomeNet", rssi: -80), at: 3),
+            record(Fixtures.probe("0A:00:00:00:00:02", ssid: "HomeNet", rssi: -82), at: 4),
+            record(Fixtures.probe("0A:00:00:00:00:03", ssid: "", rssi: -40), at: 5),
+        ], trackPoints: [])
+        func networks(_ query: ListQuery) async throws -> [ProbeNetworkRow] {
+            try await store.read { try StoreQueries.probeNetworks($0, sessionID: "S1", query: query) }
+        }
+        func clients(_ query: ListQuery) async throws -> [ProbeClientRow] {
+            try await store.read { try StoreQueries.probeClients($0, sessionID: "S1", query: query) }
+        }
+
+        let all = try await networks(ListQuery(sort: .count))
+        #expect(all.map(\.ssid) == ["HomeNet", "", "Cafe-Guest"])
+        let home = try #require(all.first { $0.ssid == "HomeNet" })
+        #expect(home.clientCount == 2 && home.frameCount == 3 && home.rssiLast == -50 && home.accessPointCount == 2)
+        #expect(all.first { $0.isWildcard }?.accessPointCount == 0)
+        #expect(try await networks(ListQuery(sort: .name)).map(\.ssid) == ["Cafe-Guest", "HomeNet", ""])
+        #expect(try await networks(ListQuery()).map(\.ssid) == ["", "HomeNet", "Cafe-Guest"])
+        #expect(try await networks(ListQuery(search: "cafe")).map(\.ssid) == ["Cafe-Guest"])
+        // Filters apply to the probes, so the counts shrink with them.
+        let real = try await networks(ListQuery(sort: .name, hideRandomized: true))
+        #expect(real.map(\.ssid) == ["Cafe-Guest", "HomeNet", ""])
+        #expect(real.map(\.clientCount) == [1, 1, 1])
+        #expect(try await networks(ListQuery(bands: [.ghz5])).isEmpty)
+
+        let byClient = try await clients(ListQuery(sort: .count))
+        #expect(byClient.map(\.mac) == ["00:00:5E:00:53:A1", "0A:00:00:00:00:02", "0A:00:00:00:00:03"])
+        let first = byClient[0]
+        #expect(first.ssids == ["Cafe-Guest", "HomeNet"] && first.sentWildcard && first.frameCount == 3)
+        // The latest probe's signal, not the strongest.
+        #expect(first.rssiLast == -58)
+        #expect(byClient[1].ssids == ["HomeNet"] && !byClient[1].sentWildcard && byClient[1].randomized)
+        #expect(byClient[2].ssids.isEmpty && byClient[2].sentWildcard)
+        #expect(try await clients(ListQuery()).map(\.mac).first == "0A:00:00:00:00:03")
+        // A network search keeps the client's other networks.
+        let cafe = try await clients(ListQuery(search: "cafe"))
+        #expect(cafe.map(\.mac) == ["00:00:5E:00:53:A1"] && cafe.first?.ssids == ["Cafe-Guest", "HomeNet"])
+        #expect(try await clients(ListQuery(search: "00:02")).map(\.mac) == ["0A:00:00:00:00:02"])
+        #expect(try await clients(ListQuery(hideRandomized: true)).map(\.mac) == ["00:00:5E:00:53:A1"])
+
+        let detail = try #require(try await store.read {
+            try StoreQueries.probeNetworkDetail($0, sessionID: "S1", ssid: "HomeNet")
+        })
+        #expect(detail.network.clientCount == 2)
+        #expect(detail.clients.map(\.clientMac) == ["00:00:5E:00:53:A1", "0A:00:00:00:00:02"])
+        #expect(detail.accessPoints.map(\.bssid) == ["00:00:5E:00:53:01", "00:00:5E:00:53:02"])
+        let wildcard = try #require(try await store.read {
+            try StoreQueries.probeNetworkDetail($0, sessionID: "S1", ssid: "", limit: 1)
+        })
+        #expect(wildcard.network.clientCount == 2 && wildcard.clients.map(\.clientMac) == ["0A:00:00:00:00:03"])
+        #expect(wildcard.accessPoints.isEmpty)
+        #expect(try await store.read { try StoreQueries.probeNetworkDetail($0, sessionID: "S1", ssid: "Nope") } == nil)
+    }
+
     @Test("Details: RSSI history, channels, associated clients, PNL")
     func details() async throws {
         let store = try await makeStore()

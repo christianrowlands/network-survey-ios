@@ -65,6 +65,66 @@ struct ClientRowView: View {
     }
 }
 
+struct ProbeNetworkRowView: View {
+    let network: ProbeNetworkRow
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.m) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+                Text(DataFormat.probedNetwork(network.ssid))
+                    .font(Theme.Fonts.rowTitle.weight(.medium))
+                    .foregroundStyle(network.isWildcard ? Theme.Colors.ink2 : Theme.Colors.ink)
+                    .lineLimit(1)
+                Text("\(DataFormat.count(network.clientCount, "client")) · \(DataFormat.count(network.frameCount, "request"))")
+                    .font(Theme.Fonts.body)
+                    .foregroundStyle(Theme.Colors.ink2)
+                if network.accessPointCount > 0 {
+                    TagPill(text: "AP seen", color: Theme.Colors.wifi)
+                        .accessibilityLabel("An access point with this name was seen")
+                }
+            }
+            Spacer(minLength: Theme.Spacing.s)
+            SignalColumn(rssi: network.rssiLast, lastSeen: network.lastSeen)
+        }
+        .padding(.vertical, Theme.Spacing.xs)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct ProbeClientRowView: View {
+    let client: ProbeClientRow
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.m) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+                Text(client.mac)
+                    .font(Theme.Fonts.mono)
+                    .foregroundStyle(Theme.Colors.ink)
+                Text(networks)
+                    .font(Theme.Fonts.body)
+                    .foregroundStyle(Theme.Colors.ink2)
+                    .lineLimit(2)
+                if client.randomized {
+                    RandomizedBadge()
+                }
+            }
+            Spacer(minLength: Theme.Spacing.s)
+            SignalColumn(rssi: client.rssiLast, lastSeen: client.lastSeen)
+        }
+        .padding(.vertical, Theme.Spacing.xs)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// The first few network names, then how many more.
+    private var networks: String {
+        let shown = 3
+        guard !client.ssids.isEmpty else { return "Wildcard probes only" }
+        var names = client.ssids.prefix(shown).joined(separator: ", ")
+        if client.ssids.count > shown { names += " and \(client.ssids.count - shown) more" }
+        return "Looked for \(names)"
+    }
+}
+
 struct BLERowView: View {
     let device: BLEDeviceRow
 

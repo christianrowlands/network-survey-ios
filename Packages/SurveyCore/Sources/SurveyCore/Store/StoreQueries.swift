@@ -296,7 +296,7 @@ public enum StoreQueries {
         return "%\(escaped)%"
     }
 
-    private static func inFilter(_ column: String, _ values: [Int]) -> String {
+    static func inFilter(_ column: String, _ values: [Int]) -> String {
         values.isEmpty ? "" : " AND \(column) IN (\(values.sorted().map(String.init).joined(separator: ",")))"
     }
 
@@ -309,7 +309,7 @@ public enum StoreQueries {
         }
     }
 
-    private static func limit(_ limit: Int?) -> String {
+    static func limit(_ limit: Int?) -> String {
         limit.map { " LIMIT \(max($0, 0))" } ?? ""
     }
 }

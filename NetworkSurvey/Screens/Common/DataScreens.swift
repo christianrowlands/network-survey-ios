@@ -10,6 +10,7 @@ final class DataScreens {
     let settings: SettingsModel
     let registration: RegistrationModel
     let mapCommands = MapCommands()
+    let lists = ListsNavigation()
 
     init(app: AppModel) {
         data = SurveyData(store: app.store)
@@ -37,6 +38,7 @@ extension View {
             .environment(screens.settings)
             .environment(screens.registration)
             .environment(screens.mapCommands)
+            .environment(screens.lists)
             .modifier(RegistrationLinkHandling(registration: screens.registration))
     }
 }

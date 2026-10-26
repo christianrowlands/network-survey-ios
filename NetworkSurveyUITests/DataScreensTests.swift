@@ -47,6 +47,42 @@ final class DataScreensTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Access points (BSSID)"].exists)
     }
 
+    /// The survey's counts open the matching list, and probe requests drill
+    /// in by network and by client.
+    @MainActor
+    func testSurveyCountsOpenListsAndProbes() {
+        let app = launchSurveying()
+        let probes = app.buttons["survey.count.Probe requests"]
+        XCTAssertTrue(probes.waitForExistence(timeout: 15))
+        probes.tap()
+        XCTAssertTrue(app.navigationBars["Lists"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Probes"].isSelected)
+
+        let byNetwork = NSPredicate(format: "label CONTAINS ' client' AND NOT (label BEGINSWITH 'Any network')")
+        let network = app.cells.containing(byNetwork).firstMatch
+        XCTAssertTrue(network.waitForExistence(timeout: 30), "no probed network appeared")
+        network.tap()
+        XCTAssertTrue(app.navigationBars["Probed network"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Clients that looked for it"].waitForExistence(timeout: 5))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        app.buttons["By client"].tap()
+        let client = app.cells.containing(NSPredicate(format: "label CONTAINS 'Looked for'")).firstMatch
+        XCTAssertTrue(client.waitForExistence(timeout: 10), "no probing client appeared")
+        client.tap()
+        XCTAssertTrue(app.navigationBars["Client"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Networks it looked for"].waitForExistence(timeout: 5))
+
+        // Another count closes the open detail and shows its list.
+        app.tabBars.buttons["Survey"].tap()
+        let aps = app.buttons["survey.count.Wi-Fi APs"]
+        XCTAssertTrue(aps.waitForExistence(timeout: 5))
+        aps.tap()
+        XCTAssertTrue(app.navigationBars["Lists"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["APs"].isSelected)
+        XCTAssertFalse(app.segmentedControls["lists.probeGrouping"].exists)
+    }
+
     @MainActor
     func testMQTTSettingsSave() {
         let app = XCUIApplication()

@@ -146,6 +146,11 @@ enum DataFormat {
         return hidden ? "Hidden network" : "No name"
     }
 
+    /// A network name from probe requests; empty for a wildcard probe.
+    static func probedNetwork(_ ssid: String) -> String {
+        ssid.isEmpty ? "Any network (wildcard)" : ssid
+    }
+
     /// "12 s ago", "4 min ago", relative to `now`.
     static func ago(_ date: Date, now: Date = .now) -> String {
         let seconds = max(0, Int(now.timeIntervalSince(date)))
@@ -164,6 +169,11 @@ enum DataFormat {
 
     static func count(_ value: Int) -> String {
         value.formatted(.number)
+    }
+
+    /// "1 client", "1,204 clients".
+    static func count(_ value: Int, _ noun: String) -> String {
+        "\(count(value)) \(value == 1 ? noun : noun + "s")"
     }
 
     static func bytes(_ value: Int64) -> String {

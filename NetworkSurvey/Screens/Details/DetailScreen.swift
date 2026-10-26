@@ -6,6 +6,8 @@ import SwiftUI
 enum DetailRoute: Hashable {
     case accessPoint(sessionID: String, bssid: String)
     case client(sessionID: String, mac: String)
+    /// A network name from probe requests; empty for wildcard probes.
+    case probeNetwork(sessionID: String, ssid: String)
     case ble(sessionID: String, address: String)
 }
 
@@ -16,6 +18,7 @@ struct DetailScreen: View {
         switch route {
         case .accessPoint(let sessionID, let bssid): AccessPointDetailView(sessionID: sessionID, bssid: bssid)
         case .client(let sessionID, let mac): ClientDetailView(sessionID: sessionID, mac: mac)
+        case .probeNetwork(let sessionID, let ssid): ProbeNetworkDetailView(sessionID: sessionID, ssid: ssid)
         case .ble(let sessionID, let address): BLEDetailView(sessionID: sessionID, address: address)
         }
     }
@@ -133,7 +136,7 @@ struct DetailRow: View {
     }
 }
 
-/// First seen, last seen, counts and signal, shared by the three detail screens.
+/// First seen, last seen, counts and signal, shared by the entity detail screens.
 struct ObservationSection: View {
     let entity: any SurveyEntity
 

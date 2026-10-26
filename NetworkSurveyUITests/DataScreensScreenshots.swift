@@ -51,7 +51,7 @@ final class DataScreensScreenshots: XCTestCase {
         save(app, "detail-ap-2")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
-        app.buttons["Wi-Fi Clients"].tap()
+        app.buttons["Clients"].tap()
         let connected = app.cells.containing(NSPredicate(format: "label CONTAINS 'Connected to'")).firstMatch
         _ = connected.waitForExistence(timeout: 10)
         save(app, "lists-clients")

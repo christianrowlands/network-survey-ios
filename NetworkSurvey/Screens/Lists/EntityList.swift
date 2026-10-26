@@ -8,7 +8,7 @@ import SwiftUI
 /// `reorderInterval`, and nothing changes while the list scrolls or a detail
 /// screen is open (`isPaused`).
 struct EntityList: View {
-    let segment: ListsScreen.Segment
+    let kind: ListKind
     let sessionID: String
     let filters: ListFilters
     let isPaused: Bool
@@ -26,7 +26,7 @@ struct EntityList: View {
 
     /// The list identity; a change replaces the rows instead of merging.
     private struct Shown: Equatable {
-        var segment: ListsScreen.Segment
+        var kind: ListKind
         var sessionID: String
         var filters: ListFilters
     }
@@ -35,6 +35,8 @@ struct EntityList: View {
         case none
         case aps([AccessPointRow])
         case clients([ClientListItem])
+        case probeNetworks([ProbeNetworkRow])
+        case probeClients([ProbeClientRow])
         case ble([BLEDeviceRow])
 
         var count: Int {
@@ -42,6 +44,8 @@ struct EntityList: View {
             case .none: 0
             case .aps(let rows): rows.count
             case .clients(let rows): rows.count
+            case .probeNetworks(let rows): rows.count
+            case .probeClients(let rows): rows.count
             case .ble(let rows): rows.count
             }
         }
@@ -52,6 +56,8 @@ struct EntityList: View {
             switch (self, new) {
             case (.aps(let old), .aps(let fresh)): .aps(StableOrder.merge(old, fresh, id: \.bssid))
             case (.clients(let old), .clients(let fresh)): .clients(StableOrder.merge(old, fresh, id: \.client.mac))
+            case (.probeNetworks(let old), .probeNetworks(let fresh)): .probeNetworks(StableOrder.merge(old, fresh, id: \.ssid))
+            case (.probeClients(let old), .probeClients(let fresh)): .probeClients(StableOrder.merge(old, fresh, id: \.mac))
             case (.ble(let old), .ble(let fresh)): .ble(StableOrder.merge(old, fresh, id: \.address))
             default: new
             }
@@ -74,6 +80,20 @@ struct EntityList: View {
                 ForEach(clients, id: \.client.mac) { item in
                     NavigationLink(value: DetailRoute.client(sessionID: sessionID, mac: item.client.mac)) {
                         ClientRowView(item: item)
+                    }
+                    .listRowBackground(Theme.Colors.ground)
+                }
+            case .probeNetworks(let networks):
+                ForEach(networks, id: \.ssid) { network in
+                    NavigationLink(value: DetailRoute.probeNetwork(sessionID: sessionID, ssid: network.ssid)) {
+                        ProbeNetworkRowView(network: network)
+                    }
+                    .listRowBackground(Theme.Colors.ground)
+                }
+            case .probeClients(let clients):
+                ForEach(clients, id: \.mac) { client in
+                    NavigationLink(value: DetailRoute.client(sessionID: sessionID, mac: client.mac)) {
+                        ProbeClientRowView(client: client)
                     }
                     .listRowBackground(Theme.Colors.ground)
                 }
@@ -115,14 +135,14 @@ struct EntityList: View {
                 }
             }
         }
-        .task(id: Shown(segment: segment, sessionID: sessionID, filters: filters)) {
+        .task(id: Shown(kind: kind, sessionID: sessionID, filters: filters)) {
             await observe()
         }
     }
 
     private func observe() async {
-        let key = Shown(segment: segment, sessionID: sessionID, filters: filters)
-        if shown?.segment != key.segment || shown?.sessionID != key.sessionID {
+        let key = Shown(kind: kind, sessionID: sessionID, filters: filters)
+        if shown?.kind != key.kind || shown?.sessionID != key.sessionID {
             // Another list: do not show the previous one's rows meanwhile.
             rows = .none
             loaded = false
@@ -131,9 +151,9 @@ struct EntityList: View {
         failure = nil
         let store = data.store
         let id = sessionID
-        let query = filters.query(for: segment)
+        let query = filters.query(for: kind)
         do {
-            switch segment {
+            switch kind {
             case .aps:
                 for try await value in store.observe({ try StoreQueries.accessPoints($0, sessionID: id, query: query) }) {
                     receive(.aps(value), key: key)
@@ -141,6 +161,14 @@ struct EntityList: View {
             case .clients:
                 for try await value in store.observe({ try StoreQueries.clients($0, sessionID: id, query: query) }) {
                     receive(.clients(value), key: key)
+                }
+            case .probeNetworks:
+                for try await value in store.observe({ try StoreQueries.probeNetworks($0, sessionID: id, query: query) }) {
+                    receive(.probeNetworks(value), key: key)
+                }
+            case .probeClients:
+                for try await value in store.observe({ try StoreQueries.probeClients($0, sessionID: id, query: query) }) {
+                    receive(.probeClients(value), key: key)
                 }
             case .ble:
                 for try await value in store.observe({ try StoreQueries.bleDevices($0, sessionID: id, query: query) }) {
@@ -183,31 +211,38 @@ struct EntityList: View {
         if count >= ListFilters.rowLimit {
             return "Showing the first \(DataFormat.count(count)). Search or filter to narrow the list."
         }
-        let noun = switch segment {
+        let noun = switch kind {
         case .aps: count == 1 ? "access point" : "access points"
-        case .clients: count == 1 ? "client" : "clients"
+        case .clients, .probeClients: count == 1 ? "client" : "clients"
+        case .probeNetworks: count == 1 ? "network" : "networks"
         case .ble: count == 1 ? "Bluetooth device" : "Bluetooth devices"
         }
         return "\(DataFormat.count(count)) \(noun)"
     }
 
     private var emptyTitle: String {
-        switch segment {
+        switch kind {
         case .aps: "No access points"
         case .clients: "No clients"
+        case .probeNetworks, .probeClients: "No probe requests"
         case .ble: "No Bluetooth devices"
         }
     }
 
     private var emptySymbol: String {
-        segment == .ble ? "dot.radiowaves.right" : "wifi"
+        switch kind {
+        case .ble: "dot.radiowaves.right"
+        case .probeNetworks, .probeClients: "magnifyingglass"
+        default: "wifi"
+        }
     }
 
     private var emptyMessage: String {
-        if filters.isFiltering(segment) { return "Nothing matches the filters." }
-        return switch segment {
+        if filters.isFiltering(kind) { return "Nothing matches the filters." }
+        return switch kind {
         case .aps: "Access points appear here as the survey hears their beacons."
         case .clients: "Clients appear here when Wi-Fi Clients is on in the Survey tab."
+        case .probeNetworks, .probeClients: "Probe requests appear here when Wi-Fi Clients is on in the Survey tab."
         case .ble: "Bluetooth devices appear here when Bluetooth is on in the Survey tab."
         }
     }
