@@ -57,6 +57,20 @@ extension Theme {
         static let tagHidden = Color(light: 0x4F6672, dark: 0x9AADB7)
         static let tagRandomized = Color(light: 0x7B2F8E, dark: 0xCE93D8)
 
+        // One per Scout on the signal chart, in this fixed order. Checked for
+        // color vision deficiency against the panel in both appearances.
+        static let scouts = [
+            Color(light: 0x2A78D6, dark: 0x3987E5),
+            Color(light: 0xEB6834, dark: 0xE0702F),
+            Color(light: 0x1A9E6F, dark: 0x199E70),
+            Color(light: 0xA8489A, dark: 0xC060B0),
+        ]
+
+        /// The chart color for the Scout in `slot`; Scouts past the palette share a gray.
+        static func scout(_ slot: Int) -> Color {
+            slot < scouts.count ? scouts[slot] : ink3
+        }
+
         /// dBm text color on the five-step ramp (-55, -67, -75, -85).
         static func signal(_ rssi: Int32) -> Color {
             switch rssi {

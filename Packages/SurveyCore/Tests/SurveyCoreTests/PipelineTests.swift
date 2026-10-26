@@ -233,4 +233,17 @@ struct PipelineTests {
         let ap = try #require(try await store.read { try StoreQueries.accessPoints($0, sessionID: "S1").first })
         #expect(ap.observationCount == 31)
     }
+
+    @Test("Each board is thinned on its own")
+    func thinningPerBoard() async throws {
+        let (pipeline, store, _) = try await makePipeline()
+        // Board B reads within 3 dB of board A; a shared thinner would drop it.
+        await pipeline.ingest(Fixtures.batch([Fixtures.ap("02:00:5E:00:00:01", rssi: -60, time: t0)]), from: boardA)
+        await pipeline.ingest(Fixtures.batch([Fixtures.ap("02:00:5E:00:00:01", rssi: -61, time: t0 + 1)]), from: boardB)
+        await pipeline.flush()
+        let history = try await store.read {
+            try StoreQueries.rssiHistory($0, sessionID: "S1", kind: .ap, identity: "02:00:5E:00:00:01")
+        }
+        #expect(history.map(\.boardId) == [boardA.description, boardB.description])
+    }
 }

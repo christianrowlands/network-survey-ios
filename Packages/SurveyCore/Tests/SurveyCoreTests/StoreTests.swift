@@ -286,6 +286,25 @@ struct StoreTests {
         #expect(history.count == 1)
     }
 
+    @Test("RSSI history covers the two minutes up to the latest reading, however many rows")
+    func rssiHistoryWindow() async throws {
+        let store = try await makeStore()
+        // Four boards, five readings a second for three minutes: 3,600 rows.
+        var records: [StoredRecord] = []
+        for tenth in stride(from: 0, to: 1_800, by: 2) {
+            for board in ["B1", "B2", "B3", "B4"] {
+                records.append(record(Fixtures.ap("02:00:5E:00:00:01", rssi: -60), board: board, at: TimeInterval(tenth) / 10))
+            }
+        }
+        try await store.write(sessionID: "S1", records: records, trackPoints: [])
+        let history = try await store.read {
+            try StoreQueries.rssiHistory($0, sessionID: "S1", kind: .ap, identity: "02:00:5E:00:00:01")
+        }
+        #expect(history.first?.time == t0 + 59.8)
+        #expect(history.last?.time == t0 + 179.8)
+        #expect(history.count == 601 * 4)
+    }
+
     @Test("Relaunch closes open gaps and records the downtime")
     func relaunchGap() async throws {
         let store = try await makeStore()

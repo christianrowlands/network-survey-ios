@@ -64,6 +64,13 @@ public struct RSSIPoint: Sendable, Equatable {
     public var rssi: Int
     public var boardId: String
     public var channel: Int
+
+    public init(time: Date, rssi: Int, boardId: String, channel: Int) {
+        self.time = time
+        self.rssi = rssi
+        self.boardId = boardId
+        self.channel = channel
+    }
 }
 
 public struct AccessPointDetail: Sendable, Equatable {
@@ -232,15 +239,20 @@ public enum StoreQueries {
         )
     }
 
-    /// Signal over time, oldest first, at most `limit` most recent points.
+    /// Signal over the `window` seconds up to the latest reading, oldest first.
+    /// Bounded by time rather than a row count, so several boards reporting
+    /// at once still fill the whole window.
     public static func rssiHistory(
-        _ db: Database, sessionID: String, kind: ObservationKind, identity: String, limit: Int = 500
+        _ db: Database, sessionID: String, kind: ObservationKind, identity: String, window: TimeInterval = 120
     ) throws -> [RSSIPoint] {
-        try Row.fetchAll(db, sql: """
-            SELECT * FROM (SELECT time, rssi, boardId, channel FROM observation
-                WHERE sessionId = ? AND kind = ? AND identity = ? ORDER BY time DESC LIMIT ?)
-            ORDER BY time
-            """, arguments: [sessionID, kind.rawValue, identity, limit]
+        let arguments: StatementArguments = [sessionID, kind.rawValue, identity]
+        guard let latest = try Date.fetchOne(db, sql: """
+            SELECT max(time) FROM observation WHERE sessionId = ? AND kind = ? AND identity = ?
+            """, arguments: arguments) else { return [] }
+        return try Row.fetchAll(db, sql: """
+            SELECT time, rssi, boardId, channel FROM observation
+            WHERE sessionId = ? AND kind = ? AND identity = ? AND time >= ? ORDER BY time
+            """, arguments: arguments + [latest.addingTimeInterval(-window)]
         ).map { RSSIPoint(time: $0["time"], rssi: $0["rssi"], boardId: $0["boardId"], channel: $0["channel"]) }
     }
 

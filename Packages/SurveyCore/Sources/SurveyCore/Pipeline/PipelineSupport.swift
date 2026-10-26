@@ -35,9 +35,12 @@ public struct PipelineCounters: Sendable, Equatable {
 /// map detail). Entity rows are always updated; observations are kept for
 /// the first sighting, a new strongest signal, an RSSI change of
 /// `rssiDelta` dB, a move of `distance` meters, or every `interval` seconds.
-/// This bounds the database to roughly one row per item per interval.
+/// Each board is thinned on its own, so one board's readings never hide
+/// another's. This bounds the database to roughly one row per item per board
+/// per interval.
 struct ObservationThinner {
     private struct Key: Hashable {
+        var board: String
         var kind: UInt8
         var address: Data
         var ssid: Data
@@ -55,13 +58,13 @@ struct ObservationThinner {
     var distance: Double = 10
     private var last: [Key: Last] = [:]
 
-    mutating func keep(_ kind: NSBRecord.OneOf_Kind, time: Date, point: GeoPoint?) -> Bool {
+    mutating func keep(_ kind: NSBRecord.OneOf_Kind, board: String, time: Date, point: GeoPoint?) -> Bool {
         let key: Key, rssi: Int32, rssiMax: Int32
         switch kind {
-        case .ap(let r): (key, rssi, rssiMax) = (Key(kind: 0, address: r.bssid, ssid: Data()), r.rssiLast, r.rssiMax)
-        case .client(let r): (key, rssi, rssiMax) = (Key(kind: 1, address: r.clientMac, ssid: Data()), r.rssiLast, r.rssiMax)
-        case .probe(let r): (key, rssi, rssiMax) = (Key(kind: 2, address: r.clientMac, ssid: r.ssid), r.rssiLast, r.rssiMax)
-        case .ble(let r): (key, rssi, rssiMax) = (Key(kind: 3, address: r.address, ssid: Data()), r.rssiLast, r.rssiMax)
+        case .ap(let r): (key, rssi, rssiMax) = (Key(board: board, kind: 0, address: r.bssid, ssid: Data()), r.rssiLast, r.rssiMax)
+        case .client(let r): (key, rssi, rssiMax) = (Key(board: board, kind: 1, address: r.clientMac, ssid: Data()), r.rssiLast, r.rssiMax)
+        case .probe(let r): (key, rssi, rssiMax) = (Key(board: board, kind: 2, address: r.clientMac, ssid: r.ssid), r.rssiLast, r.rssiMax)
+        case .ble(let r): (key, rssi, rssiMax) = (Key(board: board, kind: 3, address: r.address, ssid: Data()), r.rssiLast, r.rssiMax)
         case .gps: return false
         }
         if let previous = last[key] {

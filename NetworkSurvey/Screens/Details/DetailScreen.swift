@@ -1,4 +1,3 @@
-import Charts
 import SurveyCore
 import SwiftUI
 
@@ -66,56 +65,6 @@ struct LiveDetail<Updates: AsyncSequence, Value, Content: View>: View where Upda
             }
             finished = true
         }
-    }
-}
-
-/// Signal over time as a line, with the strongest value marked.
-struct RSSIChart: View {
-    let points: [RSSIPoint]
-
-    var body: some View {
-        if points.count < 2 {
-            Text("Signal history appears after a few observations.")
-                .font(Theme.Fonts.body)
-                .foregroundStyle(Theme.Colors.ink2)
-        } else {
-            Chart(Array(points.enumerated()), id: \.offset) { _, point in
-                LineMark(x: .value("Time", point.time), y: .value("Signal", point.rssi))
-                    .foregroundStyle(Theme.Colors.accent)
-            }
-            .chartYAxisLabel("dBm")
-            .chartYScale(domain: yDomain)
-            .chartXAxis {
-                AxisMarks(preset: .aligned, values: .automatic(desiredCount: 3)) { _ in
-                    AxisGridLine()
-                    AxisValueLabel(format: timeFormat)
-                }
-            }
-            .frame(height: 140)
-            .accessibilityElement()
-            .accessibilityLabel("Signal over time")
-            .accessibilityValue(summary)
-        }
-    }
-
-    /// Seconds matter when the history spans only a few minutes.
-    private var timeFormat: Date.FormatStyle {
-        guard let first = points.first?.time, let last = points.last?.time,
-              last.timeIntervalSince(first) < 600 else { return .dateTime.hour().minute() }
-        return .dateTime.hour().minute().second()
-    }
-
-    private var yDomain: ClosedRange<Int> {
-        let values = points.map(\.rssi)
-        let low = (values.min() ?? -100) - 5
-        let high = (values.max() ?? -30) + 5
-        return low...max(high, low + 10)
-    }
-
-    private var summary: String {
-        let values = points.map(\.rssi)
-        guard let min = values.min(), let max = values.max(), let last = values.last else { return "" }
-        return "\(points.count) readings, from \(min) to \(max) dBm, latest \(last) dBm"
     }
 }
 

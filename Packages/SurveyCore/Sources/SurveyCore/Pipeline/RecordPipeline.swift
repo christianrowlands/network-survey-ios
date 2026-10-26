@@ -93,7 +93,7 @@ public actor RecordPipeline {
             counters.filtered += 1
             return
         }
-        let keep = thinner.keep(kind, time: time, point: location?.point)
+        let keep = thinner.keep(kind, board: board.description, time: time, point: location?.point)
         pending.append(StoredRecord(boardID: board.description, time: time, location: location, kind: kind, keepObservation: keep))
         counters.lastRecordAt = max(counters.lastRecordAt ?? time, time)
     }
