@@ -16,7 +16,7 @@ struct BrandTile: View {
 }
 
 /// The stacked Network Survey lockup (mark over the outlined wordmark), with
-/// the white colourway in dark mode. At least 120 points wide.
+/// the white colorway in dark mode. At least 120 points wide.
 struct BrandLockup: View {
     var width: CGFloat = 160
 
