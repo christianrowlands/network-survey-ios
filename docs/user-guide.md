@@ -266,14 +266,45 @@ characters from this install's ID.
 - **Map** shows what the current survey (or one you pick from the title menu)
   has seen, at the place each one was strongest. Nearby markers group into
   clusters; tap a cluster to zoom in, or a marker to open its details. The
-  options menu filters by type and band, shows your track, and edits privacy
-  zones.
+  options menu filters by type and band, shows your track, switches to
+  satellite imagery, and edits privacy zones.
+- **Towers** on the Map shows cell towers near you, also without a survey. See
+  [Cell towers](#cell-towers).
 - **Lists** has tabs for access points, clients and Bluetooth devices, with
   search, sort (signal, last seen, frame count, name) and filters (band,
   security, hide randomized addresses).
 - **Details** show everything known about one access point, client or
   Bluetooth device, a signal chart, and related devices (an access point's
   clients, a client's access points and the networks it probes for).
+
+### Cell towers
+
+Tap **Towers** at the top of the Map to show cell towers. The iPhone does not
+survey cellular networks; the towers come from the Network Survey tower
+service, the same one the Android app uses, with data from
+[OpenCelliD](https://opencellid.org) (CC BY-SA 4.0) and, for Poland,
+[BTSearch](https://btsearch.pl).
+
+- To find towers, the app sends the area shown on the map to the tower
+  service, with the app's version. Nothing from your surveys is sent. The first time you turn towers
+  on, the app asks before it sends anything.
+- Zoom in to a city or region to see towers. Each tower is a rounded square
+  in its operator's color (the same colors as the Android app), with its
+  generation (2G to 5G). Towers close together group into a counted bubble;
+  tap it to zoom in.
+- Tap a tower for its details: operator, area code (LAC or TAC), cell ID,
+  eNodeB and sector for LTE, PCI, estimated range, when it was first and last
+  seen, and how far it is from you. **Look Around** shows the street near the
+  tower where Apple has imagery. **Directions** opens Apple Maps. The map
+  draws the tower's range and a line from you to it.
+- The filters button next to **Towers** picks technologies (5G NR and 4G LTE
+  by default), one operator, the data source and how recently a tower must
+  have been seen.
+- **Find a tower** in the options menu looks up a tower by MCC, MNC, LAC or
+  TAC and cell ID.
+
+Tower positions are estimates from crowd-sourced measurements and can be off
+by hundreds of meters.
 
 ## Privacy controls
 
