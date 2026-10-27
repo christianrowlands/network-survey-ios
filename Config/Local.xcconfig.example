@@ -10,3 +10,6 @@ DEVELOPMENT_TEAM =
 // SENTRY_AUTH_TOKEN in the environment).
 // SENTRY_ORG = <org slug>
 // SENTRY_PROJECT = <project slug>
+// The NS Tower Service API key, for the tower map. Without it the map shows
+// no towers.
+// NS_TOWER_API_KEY = <key>

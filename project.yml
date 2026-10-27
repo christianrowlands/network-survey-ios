@@ -24,6 +24,8 @@ packages:
     path: Packages/Destinations
   CrashReporting:
     path: Packages/CrashReporting
+  Towers:
+    path: Packages/Towers
 
 targets:
   NetworkSurvey:
@@ -39,6 +41,7 @@ targets:
       - package: NSMessaging
       - package: Destinations
       - package: CrashReporting
+      - package: Towers
       - target: NetworkSurveyLiveActivity
     settings:
       base:
@@ -75,6 +78,8 @@ targets:
         NSSupportsLiveActivities: true
         # Empty unless Config/Local.xcconfig sets it: then crash reports go to Sentry.
         SentryDSN: $(SENTRY_DSN)
+        # Empty unless Config/Local.xcconfig sets it: then the map can show towers.
+        NSTowerAPIKey: $(NS_TOWER_API_KEY)
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         NSBluetoothAlwaysUsageDescription: Network Survey connects to your NS Scout over Bluetooth to receive the Wi-Fi and Bluetooth it hears.

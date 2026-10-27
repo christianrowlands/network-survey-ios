@@ -19,4 +19,9 @@ SWIFT_STRICT_CONCURRENCY = complete
 // anything; release builds set SENTRY_DSN in Config/Local.xcconfig.
 SENTRY_DSN =
 
+// NS Tower Service API key for the tower map. Empty here, so builds from source
+// show a "missing key" notice instead of towers; release builds set it in
+// Config/Local.xcconfig.
+NS_TOWER_API_KEY =
+
 #include? "Local.xcconfig"

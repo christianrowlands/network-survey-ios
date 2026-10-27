@@ -5,7 +5,8 @@ name: Release
 # in TestFlight once processed. Submitting for App Review stays manual.
 #
 # Secrets:
-#   LOCAL_XCCONFIG       contents of Config/Local.xcconfig (team ID, Sentry settings)
+#   LOCAL_XCCONFIG       contents of Config/Local.xcconfig (team ID, Sentry settings,
+#                        tower API key)
 #   ASC_KEY_ID           App Store Connect API key ID (Admin access, for cloud signing)
 #   ASC_ISSUER_ID        App Store Connect API issuer ID
 #   ASC_KEY_P8           the key's .p8 file, base64
