@@ -100,3 +100,31 @@ struct PrivacyZoneEditor: View {
         )
     }
 }
+
+/// A zone in the editor; new zones are not saved until the user adds them.
+struct ZoneEdit: Identifiable {
+    var zone: PrivacyZone
+    var isNew: Bool
+    var id: UUID { zone.id }
+}
+
+/// A zone's center while editing zones: tap to change or delete it.
+struct ZoneHandle: View {
+    let zone: PrivacyZone
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "hand.raised.fill")
+                .font(.footnote)
+                .foregroundStyle(Theme.Colors.onAccent)
+                .frame(width: 32, height: 32)
+                .background(Theme.Colors.red, in: Circle())
+                .overlay(Circle().stroke(Theme.Colors.panel, lineWidth: 2))
+                .shadow(color: Theme.Colors.shadow, radius: 2, y: 1)
+                .frame(width: Theme.Spacing.touchTarget, height: Theme.Spacing.touchTarget)
+                .contentShape(Rectangle())
+        }
+        .accessibilityLabel("Edit privacy zone \(zone.name)")
+    }
+}

@@ -1,6 +1,7 @@
 import Destinations
 import SurveyCore
 import SwiftUI
+import Towers
 
 /// The shared state of the Map, Lists, Files and Settings tabs, built once
 /// from the app model.
@@ -11,10 +12,15 @@ final class DataScreens {
     let registration: RegistrationModel
     let mapCommands = MapCommands()
     let lists = ListsNavigation()
+    let towers: TowerLayerModel
 
     init(app: AppModel) {
         data = SurveyData(store: app.store)
         settings = SettingsModel(store: app.settings)
+        towers = TowerLayerModel(client: app.options.uiTesting
+            ? TowerClient(config: TowerServiceConfig(apiKey: "ui-testing", bundleID: "test", appVersion: "test"),
+                          transport: FixtureTowerTransport())
+            : TowerClient(config: .app()))
         let identity = app.identity
         let appSettings = app.settings
         registration = RegistrationModel(
@@ -39,6 +45,7 @@ extension View {
             .environment(screens.registration)
             .environment(screens.mapCommands)
             .environment(screens.lists)
+            .environment(screens.towers)
             .modifier(RegistrationLinkHandling(registration: screens.registration))
     }
 }

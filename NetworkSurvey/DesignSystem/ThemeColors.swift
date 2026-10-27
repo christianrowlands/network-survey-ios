@@ -36,6 +36,15 @@ extension Theme {
         static let wifi = Color(light: 0x0E9BB0, dark: 0x4FD0E4)
         static let bluetooth = Color(light: 0x2F6BFF, dark: 0x7FA4FF)
         static let gnss = Color(light: 0x1E8E3E, dark: 0x5DC777)
+        static let cellular = Color(light: 0x6D4DE0, dark: 0xA48BFF)
+
+        // Tower operators, picked by `PlmnPalette` (the Android app's
+        // PlmnColorMapper hash and Material 600 palette, in its order), so an
+        // operator has the same color on both. Drawn on a white ring.
+        static let operators = [
+            0xE53935, 0xD81B60, 0x8E24AA, 0x5E35B1, 0x3949AB, 0x1E88E5, 0x039BE5, 0x00ACC1,
+            0x00897B, 0x43A047, 0x7CB342, 0x546E7A, 0x6D4C41, 0xFFB300, 0xFB8C00, 0xF4511E,
+        ].map { Color(hex: $0) }
 
         // Wi-Fi bands, always drawn with a halo.
         static let band24 = Color(hex: 0xF2C94C)

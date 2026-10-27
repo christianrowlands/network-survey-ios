@@ -3,7 +3,7 @@ import SwiftUI
 
 /// A map marker: an icon for one item, a counted bubble for a cluster.
 struct MapMarkerView: View {
-    let cluster: MapCluster
+    let cluster: MapCluster<MapPoint>
     let action: () -> Void
 
     var body: some View {

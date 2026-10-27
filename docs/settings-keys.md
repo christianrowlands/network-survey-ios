@@ -75,6 +75,18 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 | `ignore_list` | JSON array | [] | `[{"id", "kind", "value", "note"}]`, kind `ssid` (exact, case-sensitive), `bssid`, `mac` or `macPrefix` |
 | `send_crash_reports` | Bool | true | Send crash and hang reports to the developers. Only builds with a Sentry DSN configured (App Store builds) send anything; builds from source never do |
 
+## Map and towers
+
+| Key | Type | Default | Notes |
+|---|---|---|---|
+| `map_style` | String | `standard` | `standard` or `satellite` |
+| `show_towers_layer` | Bool | false | Towers from the NS Tower Service on the map. Each lookup sends the visible map area to the service. Same key as Android |
+| `last_selected_tower_source` | String | `OpenCelliD` | `OpenCelliD` or `BTSearch` (Poland only). Same key as Android |
+| `map_max_tower_age_months` | Int | 0 | Only towers seen in the last N months: 0 (any), 6, 12, 24 or 60; other values read as any. Ignored for BTSearch. Same key as Android |
+| `tower_map_technologies` | JSON array | `["LTE","NR"]` | Any of `GSM`, `CDMA`, `UMTS`, `LTE`, `NR`. Empty shows no towers |
+| `tower_map_operator` | String | "" | One operator as `mcc-mnc` (for example `310-410`), or empty for all |
+| `has_seen_tower_notice` | Bool | false | The note on what the tower layer sends was accepted, so turning towers on again does not ask |
+
 ## Advanced
 
 | Key | Type | Default | Notes |

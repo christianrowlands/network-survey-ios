@@ -12,6 +12,7 @@ let package = Package(
         .package(path: "../BoardKit"),
         .package(path: "../NSMessaging"),
         .package(path: "../Destinations"),
+        .package(path: "../Towers"),
         .package(url: "https://github.com/groue/GRDB.swift.git", exact: "7.11.1"),
     ],
     targets: [
@@ -22,6 +23,7 @@ let package = Package(
                 .product(name: "BoardKit", package: "BoardKit"),
                 .product(name: "NSMessaging", package: "NSMessaging"),
                 .product(name: "Destinations", package: "Destinations"),
+                .product(name: "Towers", package: "Towers"),
                 .product(name: "GRDB", package: "GRDB.swift"),
             ]
         ),

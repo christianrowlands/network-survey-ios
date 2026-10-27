@@ -31,6 +31,18 @@ struct AboutView: View {
                 } footer: {
                     Text("Network Survey is open source under the Apache License 2.0. No analytics or tracking. Crash reports, if on, never include survey data.")
                 }
+                Section {
+                    Link(destination: Links.openCelliD) {
+                        Label("OpenCelliD", systemImage: "antenna.radiowaves.left.and.right")
+                    }
+                    Link(destination: Links.btSearch) {
+                        Label("BTSearch", systemImage: "antenna.radiowaves.left.and.right")
+                    }
+                } header: {
+                    Text("Tower data")
+                } footer: {
+                    Text("Towers on the map come from OpenCelliD, licensed under CC BY-SA 4.0, and from BTSearch for Poland.")
+                }
             }
             .panelRows()
         }

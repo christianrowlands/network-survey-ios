@@ -21,4 +21,11 @@ enum Links {
     static let nsAnalyticsLearnMore = URL(string: "https://networksurvey.app/analytics")!
     /// The host shown in instructions, without the scheme.
     static let nsAnalyticsHost = "analytics.networksurvey.app"
+
+    // MARK: Tower data
+
+    /// OpenCelliD, the main tower source (CC BY-SA 4.0, credited on the map).
+    static let openCelliD = URL(string: "https://opencellid.org")!
+    /// BTSearch, the tower source for Poland.
+    static let btSearch = URL(string: "https://btsearch.pl")!
 }

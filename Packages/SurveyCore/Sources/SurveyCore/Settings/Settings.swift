@@ -1,4 +1,5 @@
 import Foundation
+import Towers
 
 /// Every setting the app stores, with its default (see docs/settings-keys.md):
 /// Wi-Fi APs and clients on, BLE and raw frames off, file logging on, every
@@ -57,6 +58,20 @@ public enum Settings {
     public static let locationSource = SettingKey<LocationSourcePreference>.enumeration("location_provider", default: .phone)
     public static let units = SettingKey<DisplayUnits>.enumeration("display_units", default: .metric)
 
+    // MARK: Map
+    public static let mapStyle = SettingKey<MapStylePreference>.enumeration("map_style", default: .standard)
+    /// Towers from the NS Tower Service on the map. Off until the user turns it
+    /// on, since the lookups send the visible map area to the service.
+    public static let showTowers = SettingKey<Bool>("show_towers_layer", default: false)
+    public static let towerSource = SettingKey<TowerSource>.enumeration("last_selected_tower_source", default: .openCelliD)
+    /// 0 for any age; otherwise 6, 12, 24 or 60, as on Android.
+    public static let towerMaxAgeMonths = SettingKey<Int>("map_max_tower_age_months", default: 0, range: 0...600)
+    public static let towerTechnologies = SettingKey<Set<TowerRadio>>.json("tower_map_technologies", default: [.lte, .nr])
+    /// One operator as "mcc-mnc", or empty for all.
+    public static let towerOperator = SettingKey<String>("tower_map_operator", default: "")
+    /// The note on what turning towers on sends was shown and accepted.
+    public static let hasSeenTowerNotice = SettingKey<Bool>("has_seen_tower_notice", default: false)
+
     // MARK: Privacy
     public static let privacyZones = SettingKey<[PrivacyZone]>.json("privacy_zones", default: [])
     public static let ignoreList = SettingKey<[IgnoreEntry]>.json("ignore_list", default: [])
@@ -80,6 +95,8 @@ public enum Settings {
         nsAnalyticsUploadProbeRecords.name, nsAnalyticsUploadClientRecords.name,
         deviceName.name, deviceStatusIntervalSeconds.name, locationSource.name, units.name, privacyZones.name,
         ignoreList.name, crashReports.name, demoBoardEnabled.name, hasSeenWelcome.name,
+        mapStyle.name, showTowers.name, towerSource.name, towerMaxAgeMonths.name, towerTechnologies.name,
+        towerOperator.name, hasSeenTowerNotice.name,
     ]
 }
 
@@ -104,6 +121,11 @@ public enum LocationSourcePreference: String, Sendable, Codable, CaseIterable {
     case phone
     /// Board GPS; the phone location only when no board has a fresh fix.
     case board
+}
+
+public enum MapStylePreference: String, Sendable, Codable, CaseIterable {
+    case standard
+    case satellite
 }
 
 public enum DisplayUnits: String, Sendable, Codable, CaseIterable {
