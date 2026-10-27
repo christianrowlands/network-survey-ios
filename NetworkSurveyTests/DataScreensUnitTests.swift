@@ -172,6 +172,39 @@ struct DataScreensUnitTests {
         #expect(model.pendingLink?.workspaceName == "Team")
         #expect(model.linkError == nil)
     }
+
+    /// The scan sheet shows the success screen from `phase` and the link, so
+    /// both stay until the sheet closes, and a new scan starts fresh.
+    @Test func registeringKeepsTheResultUntilTheSheetCloses() async throws {
+        let settings = SettingsModel(store: .inMemory())
+        let model = RegistrationModel(
+            client: .init(transport: RegisterTransportStub()), credentials: InMemoryCredentialStore(), settings: settings
+        ) {
+            .init(deviceID: "id", deviceName: "name", deviceModel: "model", osVersion: "iOS 18.0", appVersion: "1.0")
+        }
+        model.beginScanning()
+        #expect(model.receive("https://networksurvey.app/app/register?token=t&workspace_id=w&api_url=https://api.example.com&workspace_name=Team"))
+        let link = try #require(model.pendingLink)
+        await model.register(link)
+        #expect(model.phase == .registered)
+        #expect(model.pendingLink != nil)
+        #expect(model.registration?.workspaceName == "Team")
+
+        model.endScanning()
+        #expect(model.pendingLink == nil)
+        #expect(!model.isScanning)
+        model.beginScanning()
+        #expect(model.phase == .idle)
+        #expect(model.isScanning)
+    }
+}
+
+/// Answers the register request with a device token.
+private struct RegisterTransportStub: NSAnalyticsTransport {
+    func send(_ request: URLRequest, body: Data, taskID: String) async throws -> (Data, HTTPURLResponse) {
+        let data = try JSONSerialization.data(withJSONObject: ["device_token": "tok", "workspace_id": "w"])
+        return (data, HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    }
 }
 
 /// Never called: link validation happens before any request.

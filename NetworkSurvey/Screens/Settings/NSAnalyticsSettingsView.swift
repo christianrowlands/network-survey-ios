@@ -16,14 +16,24 @@ struct NSAnalyticsSettingsView: View {
             Group {
                 if let current = registration.registration {
                     Section {
-                        LabeledContent("Workspace", value: current.workspaceName ?? "Unnamed workspace")
-                        LabeledContent("Server") {
+                        // Mirrors the intro header, so after connecting the
+                        // page plainly changes from "how to connect" to this.
+                        VStack(spacing: Theme.Spacing.s) {
+                            NSAnalyticsIcon(size: 64)
+                            Text(current.workspaceName ?? "Unnamed workspace")
+                                .font(Theme.Fonts.screenTitle)
+                                .foregroundStyle(Theme.Colors.ink)
+                                .multilineTextAlignment(.center)
                             Text(current.apiURL.host() ?? current.apiURL.absoluteString)
                                 .font(Theme.Fonts.mono)
+                                .foregroundStyle(Theme.Colors.ink2)
+                            Label("Registered", systemImage: "checkmark.circle.fill")
+                                .font(Theme.Fonts.body.weight(.medium))
+                                .foregroundStyle(Theme.Colors.green)
+                                .accessibilityIdentifier("nsa.registered")
                         }
-                        Label("Registered", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(Theme.Colors.green)
-                            .accessibilityIdentifier("nsa.registered")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, Theme.Spacing.s)
                     }
                     Section {
                         Toggle("Upload to NS Analytics", isOn: settings.binding(Settings.destinationNSAnalytics))
@@ -36,7 +46,7 @@ struct NSAnalyticsSettingsView: View {
                         Text("Uploads also run when a survey stops and finish in the background. Records without a location are not uploaded.")
                     }
                     Section {
-                        Button("Register with another workspace") { scanning = true }
+                        Button("Switch to another workspace") { scanning = true }
                         Button("Unregister this phone", role: .destructive) { confirmingUnregister = true }
                             .accessibilityIdentifier("nsa.unregister")
                             .confirmationDialog("Unregister this phone?", isPresented: $confirmingUnregister, titleVisibility: .visible) {

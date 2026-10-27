@@ -75,11 +75,26 @@ final class RegistrationModel {
             let registration = try await client.register(link, device: device())
             credentials.save(registration)
             settings[Settings.destinationNSAnalytics] = true
-            pendingLink = nil
+            // The link stays pending so the sheet can show the result; the
+            // sheet clears it when the user taps Done.
             phase = .registered
         } catch {
             phase = .failed(Self.message(for: error))
         }
+    }
+
+    /// The scan sheet opened: start fresh instead of showing the last attempt.
+    func beginScanning() {
+        isScanning = true
+        linkError = nil
+        phase = .idle
+    }
+
+    /// The scan sheet closed (Done, Cancel or a swipe). Clears the link first
+    /// so the universal-link sheet does not pick it up.
+    func endScanning() {
+        pendingLink = nil
+        isScanning = false
     }
 
     /// Tells the server, then forgets the registration on this phone either

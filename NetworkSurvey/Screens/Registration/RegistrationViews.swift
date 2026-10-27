@@ -2,7 +2,8 @@ import AVFoundation
 import Destinations
 import SwiftUI
 
-/// Scan a registration QR code (with a paste fallback), then confirm.
+/// Scan a registration QR code (with a paste fallback), confirm, then show
+/// the result.
 struct RegistrationScanSheet: View {
     @Environment(RegistrationModel.self) private var registration
     @Environment(\.dismiss) private var dismiss
@@ -14,8 +15,10 @@ struct RegistrationScanSheet: View {
     var body: some View {
         NavigationStack {
             Group {
-                if let link = registration.pendingLink {
-                    RegistrationConfirmContent(link: link) { dismiss() }
+                if registration.phase == .registered, let current = registration.registration {
+                    RegistrationSuccessContent(current: current) { dismiss() }
+                } else if let link = registration.pendingLink {
+                    RegistrationConfirmContent(link: link)
                 } else {
                     scanner
                 }
@@ -23,17 +26,17 @@ struct RegistrationScanSheet: View {
             .screenBackground()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        registration.pendingLink = nil
-                        dismiss()
+                if registration.phase != .registered {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { dismiss() }
                     }
                 }
             }
         }
-        .onAppear { registration.isScanning = true }
+        .registrationSuccessFeedback(registration)
+        .onAppear { registration.beginScanning() }
         .task { camera = await Self.requestCamera() }
-        .onDisappear { registration.isScanning = false }
+        .onDisappear { registration.endScanning() }
     }
 
     private var scanner: some View {
@@ -122,10 +125,10 @@ struct RegistrationLinkField: View {
     }
 }
 
-/// Shows the workspace from a link and registers on confirmation.
+/// Shows the workspace from a link and registers on confirmation. The sheet
+/// around it switches to `RegistrationSuccessContent` once it succeeds.
 struct RegistrationConfirmContent: View {
     let link: NSAnalyticsLink
-    let onDone: () -> Void
 
     @Environment(RegistrationModel.self) private var registration
 
@@ -164,9 +167,59 @@ struct RegistrationConfirmContent: View {
         }
         .padding(Theme.Spacing.screenGutter)
         .navigationTitle("Register")
-        .onChange(of: registration.phase) { _, phase in
-            if phase == .registered { onDone() }
+    }
+}
+
+/// The end of registration: a clear result and what happens next, so the
+/// sheet never just closes (or falls back to the scanner) without a word.
+struct RegistrationSuccessContent: View {
+    let current: NSAnalyticsRegistration
+    let onDone: () -> Void
+
+    @State private var appeared = false
+
+    var body: some View {
+        VStack(spacing: Theme.Spacing.xl) {
+            Spacer(minLength: 0)
+            VStack(spacing: Theme.Spacing.m) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 64))
+                    .foregroundStyle(Theme.Colors.green)
+                    .symbolEffect(.bounce, value: appeared)
+                    .accessibilityHidden(true)
+                Text("Connected")
+                    .font(Theme.Fonts.screenTitle)
+                    .foregroundStyle(Theme.Colors.ink)
+                Text("This phone is registered with \(Text(current.workspaceName ?? "your workspace").bold()).")
+                    .font(Theme.Fonts.body)
+                    .foregroundStyle(Theme.Colors.ink)
+                    .multilineTextAlignment(.center)
+                Text(current.apiURL.host() ?? current.apiURL.absoluteString)
+                    .font(Theme.Fonts.mono)
+                    .foregroundStyle(Theme.Colors.ink2)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("registration.success")
+            Text("Uploading to NS Analytics is now on. Records upload while you survey and when a survey stops. You can change this any time in Settings > NS Analytics.")
+                .font(Theme.Fonts.body)
+                .foregroundStyle(Theme.Colors.ink2)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+            Button("Done", action: onDone)
+                .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier("registration.done")
         }
+        .padding(Theme.Spacing.screenGutter)
+        .navigationTitle("NS Analytics")
+        .onAppear { appeared = true }
+    }
+}
+
+extension View {
+    /// A success haptic when registration completes.
+    func registrationSuccessFeedback(_ registration: RegistrationModel) -> some View {
+        sensoryFeedback(.success, trigger: registration.phase) { _, phase in phase == .registered }
     }
 }
 
@@ -188,15 +241,24 @@ struct RegistrationLinkHandling: ViewModifier {
                 set: { if $0 == nil && !registration.isScanning { registration.pendingLink = nil } }
             )) { link in
                 NavigationStack {
-                    RegistrationConfirmContent(link: link) { registration.pendingLink = nil }
-                        .screenBackground()
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
+                    Group {
+                        if registration.phase == .registered, let current = registration.registration {
+                            RegistrationSuccessContent(current: current) { registration.pendingLink = nil }
+                        } else {
+                            RegistrationConfirmContent(link: link)
+                        }
+                    }
+                    .screenBackground()
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        if registration.phase != .registered {
                             ToolbarItem(placement: .cancellationAction) {
                                 Button("Cancel") { registration.pendingLink = nil }
                             }
                         }
+                    }
                 }
+                .registrationSuccessFeedback(registration)
                 .environment(registration)
                 .presentationDetents([.medium, .large])
             }
