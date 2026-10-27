@@ -78,6 +78,8 @@ targets:
         NSSupportsLiveActivities: true
         # Empty unless Config/Local.xcconfig sets it: then crash reports go to Sentry.
         SentryDSN: $(SENTRY_DSN)
+        # "local" unless the Release workflow sets it to "production".
+        SentryEnvironment: $(SENTRY_ENVIRONMENT)
         # Empty unless Config/Local.xcconfig sets it: then the map can show towers.
         NSTowerAPIKey: $(NS_TOWER_API_KEY)
         UIFileSharingEnabled: true

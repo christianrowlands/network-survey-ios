@@ -8,11 +8,10 @@ enum CrashReportingController {
     private static let configuration: CrashReporter.Configuration? = {
         let bundle = Bundle.main
         let build = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
-        #if DEBUG
-        let environment = "debug"
-        #else
-        let environment = "production"
-        #endif
+        // "production" only in builds from the Release workflow, so local
+        // builds with a DSN don't mix with reports from users.
+        let configured = bundle.object(forInfoDictionaryKey: "SentryEnvironment") as? String ?? ""
+        let environment = configured.isEmpty || configured.hasPrefix("$(") ? "local" : configured
         return CrashReporter.Configuration(
             dsn: bundle.object(forInfoDictionaryKey: "SentryDSN") as? String,
             release: "\(bundle.bundleIdentifier ?? "app.networksurvey.ios")@\(bundle.shortVersion)+\(build)",

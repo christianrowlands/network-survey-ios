@@ -126,6 +126,7 @@ jobs:
             -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            SENTRY_ENVIRONMENT=production \
             2>&1 | tee "$LOGS/archive.log"
 
       - name: Export and upload

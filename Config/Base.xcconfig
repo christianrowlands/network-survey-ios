@@ -18,6 +18,10 @@ SWIFT_STRICT_CONCURRENCY = complete
 // Crash reporting (Sentry). Empty here, so builds from source never send
 // anything; release builds set SENTRY_DSN in Config/Local.xcconfig.
 SENTRY_DSN =
+// The Sentry environment reports are filed under. The Release workflow sets
+// "production" on the archive command line; every other build, including a
+// local Release build with a DSN, reports as "local".
+SENTRY_ENVIRONMENT = local
 
 // NS Tower Service API key for the tower map. Empty here, so builds from source
 // show a "missing key" notice instead of towers; release builds set it in
