@@ -49,7 +49,7 @@ final class OnboardingScreenshots: XCTestCase {
         app = launch([])
         app.tabBars.buttons["Settings"].tap()
         app.buttons["settings.nsAnalytics"].tap()
-        XCTAssertTrue(app.buttons["nsa.signUp"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["nsa.scan"].waitForExistence(timeout: 5))
         shot(app, "nsa-intro-\(mode)")
         app.swipeUp()
         sleep(1)

@@ -130,8 +130,7 @@ entries.append({
     "text": "The Bluetooth company identifiers and member service UUIDs are the Bluetooth SIG Assigned Numbers, "
             "from https://bitbucket.org/bluetooth-SIG/public (assigned_numbers/company_identifiers/"
             "company_identifiers.yaml, assigned_numbers/uuids/member_uuids.yaml and assigned_numbers/uuids/"
-            "service_uuids.yaml). The company and member lists are the same files the Network Survey Android "
-            "app ships. Refresh them with scripts/update-bluetooth-numbers.sh.\n\n"
+            "service_uuids.yaml). Refresh them with scripts/update-bluetooth-numbers.sh.\n\n"
             + sig_notice.strip(),
 })
 entries.sort(key=lambda e: e["name"].lower())

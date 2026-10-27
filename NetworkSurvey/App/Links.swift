@@ -15,10 +15,6 @@ enum Links {
 
     // MARK: NS Analytics
 
-    static let nsAnalyticsSignUp = URL(string: "https://analytics.networksurvey.app/signup")!
-    static let nsAnalyticsSignIn = URL(string: "https://analytics.networksurvey.app")!
-    /// The product page the Android app's "Learn more" opens.
-    static let nsAnalyticsLearnMore = URL(string: "https://networksurvey.app/analytics")!
     /// The host shown in instructions, without the scheme.
     static let nsAnalyticsHost = "analytics.networksurvey.app"
 

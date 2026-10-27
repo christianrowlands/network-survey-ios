@@ -1,13 +1,12 @@
 import SwiftUI
 
 /// The NS Analytics page before this phone is registered: what NS Analytics
-/// is, how to get an account, and the three steps to connect. Modeled on the
-/// Android app's connect walkthrough. Sections for the settings `Form`.
+/// is and the two steps to connect. Workspaces are created and managed on the
+/// web; the app only registers with a code from one. Sections for the
+/// settings `Form`.
 struct NSAnalyticsIntroSections: View {
     @Binding var scanning: Bool
     var note: String?
-
-    @State private var page: WebPage?
 
     var body: some View {
         Group {
@@ -28,28 +27,15 @@ struct NSAnalyticsIntroSections: View {
                 benefit("chart.bar.xaxis", "An analysis page for each record type, and export when you need the raw records")
                 benefit("icloud.and.arrow.up", "Records upload from the field, so nobody copies files off phones")
             } footer: {
-                Text("The Starter plan is free.")
+                Text("Uploading is optional. Everything else in Network Survey works without it.")
             }
 
             Section {
-                step(1, "Create a free account", "Takes a minute. You get your own workspace.") {
-                    HStack(spacing: Theme.Spacing.m) {
-                        Button {
-                            page = WebPage(url: Links.nsAnalyticsSignUp)
-                        } label: {
-                            Text("Create account").foregroundStyle(Theme.Colors.onAccent)
-                        }
-                        .buttonStyle(.borderedProminent)
-                            .accessibilityIdentifier("nsa.signUp")
-                        Button("Sign in") { page = WebPage(url: Links.nsAnalyticsSignIn) }
-                            .buttonStyle(.borderless)
-                    }
-                }
-                step(2, "Open Devices, then Register Device",
-                     "On a computer, go to \(Links.nsAnalyticsHost) and scan the QR code it shows. On this iPhone, tap Copy Link instead, then come back here.") {
+                step(1, "Get a registration code",
+                     "In your NS Analytics workspace (\(Links.nsAnalyticsHost)), a workspace admin opens Devices, then Register Device. Showing it on this iPhone? Tap Copy Link there, then come back here.") {
                     EmptyView()
                 }
-                step(3, "Scan the code or paste the link", "That links this phone to the workspace. No password to type.") {
+                step(2, "Scan the code or paste the link", "That links this phone to the workspace. No password to type.") {
                     HStack(spacing: Theme.Spacing.m) {
                         Button {
                             scanning = true
@@ -73,16 +59,7 @@ struct NSAnalyticsIntroSections: View {
                     Text("Only records from surveys that send to NS Analytics are uploaded, and only to this workspace.")
                 }
             }
-
-            Section {
-                Button {
-                    page = WebPage(url: Links.nsAnalyticsLearnMore)
-                } label: {
-                    Label("Learn more about NS Analytics", systemImage: "info.circle")
-                }
-            }
         }
-        .sheet(item: $page) { SafariView(url: $0.url).ignoresSafeArea() }
     }
 
     private func benefit(_ symbol: String, _ text: String) -> some View {
