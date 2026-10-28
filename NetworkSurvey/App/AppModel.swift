@@ -2,6 +2,7 @@ import BoardKit
 import CoreBluetooth
 import Destinations
 import Foundation
+import NearbyKit
 import Observation
 import OSLog
 import SurveyCore
@@ -65,6 +66,8 @@ final class AppModel {
     var demoBoardEnabled: Bool
     /// The first-launch welcome is on screen.
     var showingWelcome: Bool
+    /// Nearby Bluetooth (this iPhone's own radio) is on screen.
+    var showingNearby = false
     /// An NS Analytics registration link opened from outside the app, for the
     /// registration screen to pick up (and set back to nil).
     var pendingRegistrationLink: URL?
@@ -249,6 +252,12 @@ final class AppModel {
         surveyPath = [.boards]
     }
 
+    /// The scanner behind Nearby Bluetooth: made-up devices in UI tests, else
+    /// this iPhone's radio. Separate from the Scout connection.
+    func makeNearbyScanner() -> any NearbyScanner {
+        options.uiTesting ? SimulatedNearbyScanner(seed: options.demoSeed) : CoreBluetoothNearbyScanner()
+    }
+
     /// Closes the welcome for good (until Settings > Help > Show welcome again).
     func finishWelcome() {
         settings[Settings.hasSeenWelcome] = true
@@ -318,6 +327,7 @@ final class AppModel {
         case "debugRecords": surveyPath = [.debugRecords]
         #endif
         case "liveActivity": surveyPath = [.liveActivityPreview]
+        case "nearby": showingNearby = !showingWelcome && survey.state == .idle
         default: break
         }
     }

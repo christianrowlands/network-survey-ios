@@ -49,7 +49,7 @@ struct WelcomeView: View {
     private var scout: some View {
         GuidePage(symbol: "sensor.fill", title: "You'll need an NS Scout") {
             GuideText("iPhones don't let apps scan Wi-Fi, so Network Survey uses an NS Scout: a small sensor that listens for Wi-Fi and Bluetooth and sends what it hears to this iPhone.")
-            GuideText("It's an inexpensive ESP32 board you can buy online and set up in a few minutes. No Scout yet? Try the demo Scout and see how a survey works.")
+            GuideText("It's an inexpensive ESP32 board you can buy online and set up in a few minutes. No Scout yet? Try the demo Scout to see how a survey works, or see which Bluetooth devices this iPhone can hear on its own.")
         }
     }
 

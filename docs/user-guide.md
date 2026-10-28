@@ -14,9 +14,10 @@ Contents:
 5. [While a survey runs](#while-a-survey-runs)
 6. [Where the data goes](#where-the-data-goes)
 7. [Looking at the data](#looking-at-the-data)
-8. [Privacy controls](#privacy-controls)
-9. [Updating Scout firmware](#updating-scout-firmware)
-10. [Troubleshooting](#troubleshooting)
+8. [Nearby Bluetooth (no NS Scout needed)](#nearby-bluetooth-no-ns-scout-needed)
+9. [Privacy controls](#privacy-controls)
+10. [Updating Scout firmware](#updating-scout-firmware)
+11. [Troubleshooting](#troubleshooting)
 
 ## What you need
 
@@ -33,7 +34,7 @@ Contents:
 The app asks for two permissions:
 
 - **Bluetooth**, to talk to your Scout. It is asked the first time you open
-  Scouts.
+  Scouts (or Nearby Bluetooth, whichever comes first).
 - **Location (While Using)**, to place each record on the map. Allow
   **Precise** location; with approximate location the map is not useful. The
   app never asks for "Always": a survey you start keeps location running in
@@ -122,7 +123,7 @@ you to the right place.
 |---|---|---|
 | Wi-Fi APs | Access points and their beacons | On |
 | Wi-Fi Clients | Devices (stations) and their probe requests | On |
-| BLE | Bluetooth Low Energy advertisements | Off |
+| Bluetooth | Bluetooth Low Energy advertisements | Off |
 | Raw frames | Raw 802.11 frames, saved to a pcapng file | Off |
 
 Raw frames are limited by the Scout's Bluetooth link, so the pcapng file is a
@@ -305,6 +306,43 @@ service, the same one the Android app uses, with data from
 
 Tower positions are estimates from crowd-sourced measurements and can be off
 by hundreds of meters.
+
+## Nearby Bluetooth (no NS Scout needed)
+
+**Nearby Bluetooth** lists the Bluetooth LE devices this iPhone's own radio
+can hear, without a Scout. Open it from the Survey tab: under **Still to do**
+when no Scout is connected, or below the survey setup when one is. It is not
+available while a survey records.
+
+It is a separate tool, not a survey:
+
+- The list is live and stays on the iPhone. Nothing it hears is saved, shown
+  on the Map or in Lists, written to files, or sent to MQTT, gRPC or NS
+  Analytics. Closing it clears the list.
+- It only works while its screen is open. iPhones don't let apps look for
+  nearby devices in the background, so it pauses when you leave the app; tap
+  **Look again** when you come back. **Pause** and **Look** stop and resume it.
+- iPhones hide Bluetooth addresses from apps, so a device that changes its
+  address (most phones, watches and earbuds do, every 15 minutes or so) shows up
+  again as a new row.
+- While it looks, the iPhone may ask nearby devices for their names. A Scout
+  only listens.
+
+Tap a device for its signal over the last two minutes and what it advertises:
+company, services, TX power and manufacturer data. **Hide for now** removes it
+from the list until you close Nearby Bluetooth.
+
+What this iPhone can and can't see:
+
+| | Nearby Bluetooth (this iPhone) | Survey with an NS Scout |
+|---|---|---|
+| Device address | No, iOS hides it | Yes |
+| Fixed or randomized address | No | Yes |
+| Same device across surveys and phones | No | Yes, for fixed addresses |
+| Works with the iPhone locked or in a pocket | No | Yes |
+| Wi-Fi | No | Yes |
+| Saved, mapped, exported or uploaded | No | Yes |
+| Signal, company and services | Yes | Yes |
 
 ## Privacy controls
 

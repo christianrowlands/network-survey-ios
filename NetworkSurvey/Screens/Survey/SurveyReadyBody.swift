@@ -58,6 +58,11 @@ struct SurveyReadyBody: View {
                     .font(Theme.Fonts.body)
                     .foregroundStyle(Theme.Colors.amberText)
             }
+            // With no Scout the link sits in Still to do instead.
+            if !(model.boardManager.readyBoards.isEmpty && model.boardsInUse.isEmpty) {
+                NearbyEntryLink(title: "See which Bluetooth devices this iPhone hears on its own")
+                    .padding(.top, Theme.Spacing.s)
+            }
         }
     }
 
@@ -72,6 +77,25 @@ struct SurveyReadyBody: View {
     private var boardsTrailing: String? {
         let ready = model.boardManager.readyBoards.count
         return ready == 0 ? nil : "\(ready) connected"
+    }
+}
+
+/// Opens Nearby Bluetooth, which is apart from the survey (Ready state only).
+private struct NearbyEntryLink: View {
+    @Environment(AppModel.self) private var model
+    let title: String
+
+    var body: some View {
+        Button {
+            model.showingNearby = true
+        } label: {
+            Label(title, systemImage: "iphone")
+                .font(Theme.Fonts.body)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.borderless)
+        .tint(Theme.Colors.ink2)
+        .accessibilityIdentifier("survey.nearby")
     }
 }
 
@@ -160,9 +184,14 @@ private struct StillToDoPanel: View {
                         .padding(.leading, 24 + Theme.Spacing.m)
                         .padding(.bottom, Theme.Spacing.s)
                         .accessibilityIdentifier("survey.scoutGuide")
+                        NearbyEntryLink(title: "Or see which Bluetooth devices this iPhone can hear on its own.")
+                            .padding(.leading, 24 + Theme.Spacing.m)
+                            .padding(.bottom, Theme.Spacing.s)
                     }
                 }
             }
+            // A container, so the rows and links keep their own identifiers.
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier("survey.stillToDo")
             .sheet(isPresented: $showingGuide) { ScoutGuideView() }
         }

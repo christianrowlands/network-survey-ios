@@ -17,7 +17,7 @@ struct LaunchOptions {
     /// boards (end-to-end tests run simulated boards over the Bluetooth transport).
     var simulatedWalk = false
     /// A screen to open at launch: "boards", "board" (first demo board), "debugRecords" (Debug builds),
-    /// "liveActivity" (the Live Activity layouts, for design review).
+    /// "liveActivity" (the Live Activity layouts, for design review), "nearby" (Nearby Bluetooth).
     var openScreen: String?
     /// Shows the first-launch welcome, which UI-testing launches otherwise skip.
     var showWelcome = false

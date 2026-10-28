@@ -16,6 +16,9 @@ struct AboutView: View {
                     Text("Surveys Wi-Fi and Bluetooth with an NS Scout, a small sensor that connects to your iPhone over Bluetooth. The Scout only listens: it never transmits Wi-Fi frames.")
                         .font(Theme.Fonts.body)
                         .foregroundStyle(Theme.Colors.ink2)
+                    Text("Nearby Bluetooth uses this iPhone's own radio instead. It works only while its screen is open, nothing it hears is saved or sent, and your iPhone may ask nearby devices for their names while it looks.")
+                        .font(Theme.Fonts.body)
+                        .foregroundStyle(Theme.Colors.ink2)
                 }
                 Section {
                     Link(destination: Links.website) {

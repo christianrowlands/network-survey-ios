@@ -106,7 +106,7 @@ private struct BLEDetailContent: View {
 }
 
 /// An advertised service UUID, short form and name when known.
-private struct ServiceRow: View {
+struct ServiceRow: View {
     let uuid: String
 
     var body: some View {
