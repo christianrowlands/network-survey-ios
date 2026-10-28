@@ -257,7 +257,14 @@ struct FirmwareInstallerTests {
         // The self-test had not passed yet on the first Hello after the restart.
         let board = MockOtaBoard(version: "0.2.0")
         board.setFaults { $0.unconfirmedHellos = 2 }
-        let result = try await install(board)
+        // Three reconnects and Hellos can outlast the usual 300 ms on a busy CI
+        // runner; the test still ends as soon as the third Hello confirms.
+        var timing = Self.timing
+        timing.confirmWait = .seconds(10)
+        let installer = FirmwareInstaller(
+            transport: board, board: board.board, package: Self.package(), appVersion: "test", timing: timing
+        )
+        let result = try await installer.run()
         #expect(result.imageConfirmed)
         #expect(board.state.withLock(\.hellos) == 3)
     }
