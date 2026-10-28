@@ -15,7 +15,10 @@ final class DataScreens {
     let towers: TowerLayerModel
 
     init(app: AppModel) {
-        data = SurveyData(store: app.store)
+        data = SurveyData(store: app.store) { [weak app] in
+            guard let survey = app?.survey, survey.state != .idle else { return nil }
+            return survey.session
+        }
         settings = SettingsModel(store: app.settings)
         towers = TowerLayerModel(client: app.options.uiTesting
             ? TowerClient(config: TowerServiceConfig(apiKey: "ui-testing", bundleID: "test", appVersion: "test"),

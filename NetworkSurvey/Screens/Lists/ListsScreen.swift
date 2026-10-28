@@ -31,25 +31,32 @@ struct ListsScreen: View {
                 if let sessionID = data.sessionID {
                     EntityList(kind: kind, sessionID: sessionID, filters: filters, isPaused: !navigation.path.isEmpty)
                 } else {
-                    NoSurveyView(message: "Start a survey to see access points, clients, probe requests and Bluetooth devices here.")
+                    if navigation.segment == .ble {
+                        NoSurveyView(message: "Start a survey to see the Bluetooth devices your NS Scouts hear.", offersNearby: true)
+                    } else {
+                        NoSurveyView(message: "Start a survey to see access points, clients, probe requests and Bluetooth devices here.")
+                    }
                 }
             }
             .safeAreaInset(edge: .top, spacing: 0) {
-                VStack(spacing: Theme.Spacing.s) {
-                    Picker("List", selection: $navigation.segment) {
-                        ForEach(Segment.allCases) { Text($0.rawValue).tag($0) }
-                    }
-                    .accessibilityIdentifier("lists.segment")
-                    if navigation.segment == .probes {
-                        Picker("Group probe requests", selection: $navigation.probeGrouping) {
-                            ForEach(ProbeGrouping.allCases) { Text($0.rawValue).tag($0) }
+                VStack(spacing: 0) {
+                    PastSurveyBar()
+                    VStack(spacing: Theme.Spacing.s) {
+                        Picker("List", selection: $navigation.segment) {
+                            ForEach(Segment.allCases) { Text($0.rawValue).tag($0) }
                         }
-                        .accessibilityIdentifier("lists.probeGrouping")
+                        .accessibilityIdentifier("lists.segment")
+                        if navigation.segment == .probes {
+                            Picker("Group probe requests", selection: $navigation.probeGrouping) {
+                                ForEach(ProbeGrouping.allCases) { Text($0.rawValue).tag($0) }
+                            }
+                            .accessibilityIdentifier("lists.probeGrouping")
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, Theme.Spacing.screenGutter)
+                    .padding(.vertical, Theme.Spacing.s)
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, Theme.Spacing.screenGutter)
-                .padding(.vertical, Theme.Spacing.s)
                 .background(Theme.Colors.ground)
             }
             .searchable(text: $filters.search, placement: .navigationBarDrawer(displayMode: .always), prompt: kind.searchPrompt)

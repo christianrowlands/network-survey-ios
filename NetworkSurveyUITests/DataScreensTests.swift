@@ -148,6 +148,35 @@ final class DataScreensTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Zone 1"].waitForExistence(timeout: 5))
     }
 
+    /// Between surveys Lists show nothing until a past survey is picked, and
+    /// a past survey says so.
+    @MainActor
+    func testListsShowPastSurveyOnlyWhenPicked() {
+        let app = launchSurveying()
+        let stop = app.buttons["survey.stop"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 15))
+        app.tabBars.buttons["Lists"].tap()
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 20), "no rows while recording")
+        XCTAssertFalse(app.descendants(matching: .any)["pastSurvey.bar"].exists)
+
+        app.tabBars.buttons["Survey"].tap()
+        stop.tap()
+        app.buttons["survey.confirmStop"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["survey.start"].waitForExistence(timeout: 10))
+
+        app.tabBars.buttons["Lists"].tap()
+        let showLast = app.buttons["noSurvey.showLast"]
+        XCTAssertTrue(showLast.waitForExistence(timeout: 5), "a stopped survey should not stay on Lists")
+        XCTAssertTrue(app.staticTexts["Not recording"].exists)
+        showLast.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["pastSurvey.bar"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 10), "the past survey's rows are missing")
+
+        app.buttons["pastSurvey.close"].tap()
+        XCTAssertTrue(showLast.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.descendants(matching: .any)["pastSurvey.bar"].exists)
+    }
+
     @MainActor
     func testMapShowsMarkers() {
         let app = launchSurveying()

@@ -51,10 +51,10 @@ final class NearbyBluetoothTests: XCTestCase {
         XCTAssertFalse(app.navigationBars["Nearby Bluetooth"].exists)
     }
 
-    /// With a Scout connected the link moves below the survey setup, and it
-    /// is gone while a survey records.
+    /// With a Scout connected the toolbar opens Nearby, and the button is
+    /// gone while a survey records.
     @MainActor
-    func testLinkFollowsTheScoutAndHidesWhileRecording() {
+    func testToolbarButtonHidesWhileRecording() {
         let app = XCUIApplication()
         app.launchArguments = ["-NSUITesting", "YES", "-NSAutoConnectDemo", "YES"]
         app.launch()
@@ -63,15 +63,33 @@ final class NearbyBluetoothTests: XCTestCase {
         XCTAssertTrue(start.waitForExistence(timeout: 10))
         let chip = app.descendants(matching: .any).matching(identifier: "survey.boardChip").firstMatch
         XCTAssertTrue(chip.waitForExistence(timeout: 10))
-        let entry = app.buttons["survey.nearby"]
-        app.swipeUp()
-        XCTAssertTrue(entry.waitForExistence(timeout: 5), "no Nearby Bluetooth link with a Scout connected")
-        XCTAssertEqual(app.buttons.matching(identifier: "survey.nearby").count, 1)
+        let button = app.buttons["survey.nearbyButton"]
+        XCTAssertTrue(button.waitForExistence(timeout: 5), "no Nearby button with a Scout connected")
+        button.tap()
+        XCTAssertTrue(app.navigationBars["Nearby Bluetooth"].waitForExistence(timeout: 5))
+        app.buttons["nearby.done"].tap()
 
         let deadline = Date().addingTimeInterval(10)
         while !start.isEnabled && Date() < deadline { sleep(1) }
         start.tap()
         XCTAssertTrue(app.staticTexts["survey.heartbeat"].waitForExistence(timeout: 10))
-        XCTAssertFalse(entry.exists, "Nearby Bluetooth must not open while a survey records")
+        XCTAssertFalse(button.exists, "Nearby Bluetooth must not open while a survey records")
+    }
+
+    /// Someone looking for Bluetooth in Lists without a survey finds Nearby there.
+    @MainActor
+    func testBluetoothListOffersNearbyBetweenSurveys() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-NSUITesting", "YES"]
+        app.launch()
+
+        app.tabBars.buttons["Lists"].tap()
+        XCTAssertTrue(app.navigationBars["Lists"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["lists.nearby"].exists, "only the Bluetooth list offers Nearby")
+        app.buttons["Bluetooth"].tap()
+        let nearby = app.buttons["lists.nearby"]
+        XCTAssertTrue(nearby.waitForExistence(timeout: 5))
+        nearby.tap()
+        XCTAssertTrue(app.navigationBars["Nearby Bluetooth"].waitForExistence(timeout: 5))
     }
 }

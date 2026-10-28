@@ -39,6 +39,22 @@ struct SurveyView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     BrandTile(size: 30)
                 }
+                // Nearby Bluetooth is apart from the survey, so it can't open while one records.
+                if model.survey.state == .idle {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            model.showingNearby = true
+                        } label: {
+                            HStack(spacing: Theme.Spacing.xs) {
+                                Image(systemName: "iphone")
+                                Text("Nearby")
+                            }
+                        }
+                        .accessibilityLabel("Nearby Bluetooth")
+                        .accessibilityHint("Shows Bluetooth devices this iPhone hears, outside a survey")
+                        .accessibilityIdentifier("survey.nearbyButton")
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink(value: SurveyRoute.boards) {
                         HStack(spacing: Theme.Spacing.xs) {

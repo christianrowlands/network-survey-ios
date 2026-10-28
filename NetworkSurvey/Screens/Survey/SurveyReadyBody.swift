@@ -58,11 +58,6 @@ struct SurveyReadyBody: View {
                     .font(Theme.Fonts.body)
                     .foregroundStyle(Theme.Colors.amberText)
             }
-            // With no Scout the link sits in Still to do instead.
-            if !(model.boardManager.readyBoards.isEmpty && model.boardsInUse.isEmpty) {
-                NearbyEntryLink(title: "See which Bluetooth devices this iPhone hears on its own")
-                    .padding(.top, Theme.Spacing.s)
-            }
         }
     }
 

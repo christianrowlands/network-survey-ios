@@ -7,6 +7,10 @@ struct RootView: View {
     var body: some View {
         if let screens {
             tabs.dataScreens(screens)
+                // A new survey is what Map and Lists should show, not a past one left picked.
+                .onChange(of: model.survey.state) { old, new in
+                    if old == .idle && new != .idle { screens.data.showLive() }
+                }
         } else {
             Color.clear.onAppear { screens = DataScreens(app: model) }
         }

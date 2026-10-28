@@ -16,6 +16,7 @@ struct EntityList: View {
     static let reorderInterval: TimeInterval = 10
 
     @Environment(SurveyData.self) private var data
+    @Environment(AppModel.self) private var model
     @State private var rows = Rows.none
     @State private var pending: Rows?
     @State private var loaded = false
@@ -129,7 +130,16 @@ struct EntityList: View {
                                        description: Text(failure))
             } else if loaded && rows.count == 0 {
                 if filters.search.isEmpty {
-                    ContentUnavailableView(emptyTitle, systemImage: emptySymbol, description: Text(emptyMessage))
+                    ContentUnavailableView {
+                        Label(emptyTitle, systemImage: emptySymbol)
+                    } description: {
+                        Text(emptyMessage)
+                    } actions: {
+                        // A past survey without Bluetooth: the iPhone can still show what is near.
+                        if kind == .ble && !filters.isFiltering(kind) && model.survey.state == .idle {
+                            NearbyButton()
+                        }
+                    }
                 } else {
                     ContentUnavailableView.search(text: filters.search)
                 }

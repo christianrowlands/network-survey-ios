@@ -82,7 +82,10 @@ struct MapScreen: View {
                 }
             }
             .safeAreaInset(edge: .top, spacing: 0) {
-                if editingZones { zoneBanner } else { MapLegend(filters: $filters, points: points, towers: towerLegend) }
+                VStack(spacing: 0) {
+                    PastSurveyBar()
+                    if editingZones { zoneBanner } else { MapLegend(filters: $filters, points: points, towers: towerLegend) }
+                }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if towersOn && !editingZones {

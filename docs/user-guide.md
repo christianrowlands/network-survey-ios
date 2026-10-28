@@ -264,8 +264,8 @@ characters from this install's ID.
 
 ## Looking at the data
 
-- **Map** shows what the current survey (or one you pick from the title menu)
-  has seen, at the place each one was strongest. Nearby markers group into
+- **Map** shows what the survey recording now has seen, at the place each one
+  was strongest. Nearby markers group into
   clusters; tap a cluster to zoom in, or a marker to open its details. The
   options menu filters by type and band, shows your track, switches to
   satellite imagery, and edits privacy zones.
@@ -277,6 +277,11 @@ characters from this install's ID.
 - **Details** show everything known about one access point, client or
   Bluetooth device, a signal chart, and related devices (an access point's
   clients, a client's access points and the networks it probes for).
+- **Between surveys** the Map and Lists show **Not recording** instead of
+  the last survey, because a Scout only hears while a survey records. Tap
+  **Show last survey**, or pick any survey from the title menu, to look back
+  at one. A **Past survey** bar with its date stays at the top until you tap
+  **Close**, and starting a new survey always switches back to it.
 
 ### Cell towers
 
@@ -310,8 +315,8 @@ by hundreds of meters.
 ## Nearby Bluetooth (no NS Scout needed)
 
 **Nearby Bluetooth** lists the Bluetooth LE devices this iPhone's own radio
-can hear, without a Scout. Open it from the Survey tab: under **Still to do**
-when no Scout is connected, or below the survey setup when one is. It is not
+can hear, without a Scout. Open it with **Nearby** at the top of the Survey
+tab, or from **Lists > Bluetooth** when no survey is recording. It is not
 available while a survey records.
 
 It is a separate tool, not a survey:
