@@ -54,7 +54,7 @@ private struct RecordingHero: View {
                         Dot(color: survey.state == .stopping ? Theme.Colors.amber : Theme.Colors.red, size: 10)
                         Text(survey.state == .stopping ? "Stopping" : "Recording")
                             .font(Theme.Fonts.label)
-                            .foregroundStyle(survey.state == .stopping ? Theme.Colors.amberText : Theme.Colors.red)
+                            .foregroundStyle(survey.state == .stopping ? Theme.Colors.amberText : Theme.Colors.heroRedInk)
                     }
                     Text(ElapsedFormat.string(elapsed))
                         .font(Theme.Fonts.timer)
@@ -62,7 +62,7 @@ private struct RecordingHero: View {
                         .accessibilityIdentifier("survey.elapsed")
                     Label(heartbeat(now: context.date), systemImage: "checkmark.circle")
                         .font(Theme.Fonts.body.monospacedDigit())
-                        .foregroundStyle(stalled(now: context.date) ? Theme.Colors.red : Theme.Colors.ink2)
+                        .foregroundStyle(stalled(now: context.date) ? Theme.Colors.heroRedInk : Theme.Colors.ink2)
                         .accessibilityIdentifier("survey.heartbeat")
                 }
             }
@@ -103,7 +103,7 @@ private struct RecordingHero: View {
         .padding(Theme.Spacing.l)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            LinearGradient(colors: [Theme.Colors.redSoft, Theme.Colors.panel], startPoint: .top, endPoint: .bottom),
+            LinearGradient(colors: [Theme.Colors.heroRed, Theme.Colors.panel], startPoint: .top, endPoint: .bottom),
             in: RoundedRectangle(cornerRadius: Theme.Radius.hero, style: .continuous)
         )
         .task(id: copied) {

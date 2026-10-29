@@ -169,7 +169,9 @@ struct ToggleTile: View {
 }
 
 /// The pinned bar at the bottom of a screen that holds its one main action.
+/// On Midnight the system bar material gets a navy tint to match the ground.
 struct ActionBar<Content: View>: View {
+    @Environment(\.palette) private var palette
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -181,6 +183,7 @@ struct ActionBar<Content: View>: View {
         .padding(.bottom, Theme.Spacing.s)
         .frame(maxWidth: Theme.Spacing.contentMaxWidth)
         .frame(maxWidth: .infinity)
+        .background(Theme.Colors.nav.opacity(palette == .midnight ? 0.6 : 0))
         .background(.bar)
     }
 }

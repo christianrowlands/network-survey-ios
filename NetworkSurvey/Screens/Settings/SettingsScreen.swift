@@ -84,6 +84,15 @@ struct SettingsScreen: View {
                         } label: {
                             Label("Units", systemImage: "ruler")
                         }
+                        Picker(selection: settings.binding(Settings.appearance)) {
+                            Text("System").tag(AppearancePreference.system)
+                            Text("Light").tag(AppearancePreference.light)
+                            Text("Dark").tag(AppearancePreference.dark)
+                            Text("Midnight").tag(AppearancePreference.midnight)
+                        } label: {
+                            Label("Appearance", systemImage: "circle.lefthalf.filled")
+                        }
+                        .accessibilityIdentifier("settings.appearance")
                         NavigationLink { DeviceNameView() } label: {
                             SettingsLinkLabel(title: "Device name", symbol: "iphone", detail: deviceNameDetail)
                         }

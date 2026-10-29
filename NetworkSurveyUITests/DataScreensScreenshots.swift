@@ -2,7 +2,8 @@ import XCTest
 
 /// Captures the Map, Lists, details, Settings and Files screens during a demo
 /// survey. Runs only when SCREENSHOT_DIR is set (pass it to xcodebuild as
-/// TEST_RUNNER_SCREENSHOT_DIR); SCREENSHOT_SUFFIX names the appearance.
+/// TEST_RUNNER_SCREENSHOT_DIR); SCREENSHOT_SUFFIX names the appearance, and
+/// "midnight" also picks the Midnight palette in Settings first.
 final class DataScreensScreenshots: XCTestCase {
     private var directory: URL!
     private var suffix = ""
@@ -29,6 +30,12 @@ final class DataScreensScreenshots: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-NSUITesting", "YES", "-NSAutoConnectDemo", "YES", "-NSDemoBoards", "2"]
         app.launch()
+        if suffix == "-midnight" {
+            app.tabBars.buttons["Settings"].tap()
+            app.buttons["settings.appearance"].tap()
+            app.buttons["Midnight"].tap()
+            app.tabBars.buttons["Survey"].tap()
+        }
         let ble = app.buttons["survey.protocol.Bluetooth"]
         if ble.waitForExistence(timeout: 10) { ble.tap() }
         let start = app.buttons["survey.start"]

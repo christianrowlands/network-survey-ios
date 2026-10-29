@@ -37,10 +37,13 @@ struct SettingsTests {
         settings[Settings.mqttPort] = 1883
         settings[Settings.mqttHost] = "broker.example.com"
         settings[Settings.units] = .imperial
+        #expect(settings[Settings.appearance] == .system)
+        settings[Settings.appearance] = .midnight
         #expect(settings[Settings.surveyBLE])
         #expect(settings[Settings.mqttPort] == 1883)
         #expect(settings[Settings.mqttHost] == "broker.example.com")
         #expect(settings[Settings.units] == .imperial)
+        #expect(settings[Settings.appearance] == .midnight)
         settings.reset(Settings.mqttPort)
         #expect(settings[Settings.mqttPort] == 8883)
     }

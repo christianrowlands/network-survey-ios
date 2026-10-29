@@ -185,4 +185,40 @@ final class DataScreensTests: XCTestCase {
         let marker = app.buttons.matching(NSPredicate(format: "label CONTAINS 'strongest' OR label BEGINSWITH 'Group of'")).firstMatch
         XCTAssertTrue(marker.waitForExistence(timeout: 30), "map should show markers for the demo survey")
     }
+
+    @MainActor
+    func testAppearanceSwitchesLive() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-NSUITesting", "YES"]
+        app.launch()
+        app.tabBars.buttons["Settings"].tap()
+        choose("Midnight", in: app)
+        XCTAssertEqual(groundColor(app), 0x060B1A, "Midnight ground")
+        choose("Dark", in: app)
+        XCTAssertEqual(groundColor(app), 0x0E1116, "dark ground")
+        choose("Light", in: app)
+        XCTAssertEqual(groundColor(app), 0xF2F4F7, "light ground")
+    }
+
+    @MainActor
+    private func choose(_ option: String, in app: XCUIApplication) {
+        let picker = app.buttons["settings.appearance"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 5))
+        picker.tap()
+        let item = app.buttons[option]
+        XCTAssertTrue(item.waitForExistence(timeout: 5), "no \(option) option")
+        item.tap()
+        _ = app.buttons[option].waitForNonExistence(timeout: 2)
+    }
+
+    /// The Settings ground left of the list rows, as 0xRRGGBB.
+    @MainActor
+    private func groundColor(_ app: XCUIApplication) -> UInt32 {
+        guard let image = app.screenshot().image.cgImage else { return 0 }
+        var pixel = [UInt8](repeating: 0, count: 4)
+        let context = CGContext(data: &pixel, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                                space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        context?.draw(image, in: CGRect(x: -4, y: -CGFloat(image.height / 2), width: CGFloat(image.width), height: CGFloat(image.height)))
+        return UInt32(pixel[0]) << 16 | UInt32(pixel[1]) << 8 | UInt32(pixel[2])
+    }
 }

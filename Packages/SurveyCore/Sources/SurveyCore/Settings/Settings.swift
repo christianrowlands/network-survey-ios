@@ -57,6 +57,7 @@ public enum Settings {
     // MARK: Location and display
     public static let locationSource = SettingKey<LocationSourcePreference>.enumeration("location_provider", default: .phone)
     public static let units = SettingKey<DisplayUnits>.enumeration("display_units", default: .metric)
+    public static let appearance = SettingKey<AppearancePreference>.enumeration("appearance", default: .system)
 
     // MARK: Map
     public static let mapStyle = SettingKey<MapStylePreference>.enumeration("map_style", default: .standard)
@@ -131,4 +132,13 @@ public enum MapStylePreference: String, Sendable, Codable, CaseIterable {
 public enum DisplayUnits: String, Sendable, Codable, CaseIterable {
     case metric
     case imperial
+}
+
+public enum AppearancePreference: String, Sendable, Codable, CaseIterable {
+    /// Follows the iOS light or dark setting.
+    case system
+    case light
+    case dark
+    /// Dark with navy grounds and panels and a deeper recording red.
+    case midnight
 }
