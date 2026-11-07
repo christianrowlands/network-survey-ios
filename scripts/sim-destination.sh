@@ -10,14 +10,20 @@
 set -euo pipefail
 
 read -r udid version < <(xcrun simctl list devices available -j | python3 -c '
-import json, sys
+import json, re, sys
 devices = json.load(sys.stdin)["devices"]
-# Newest iOS runtime first, e.g. com.apple.CoreSimulator.SimRuntime.iOS-27-0
-ios = [(tuple(int(n) for n in r.split(".iOS-")[1].split("-")), r) for r in devices if ".iOS-" in r]
-for _, runtime in sorted(ios, reverse=True):
+# Newest iOS runtime first, e.g. com.apple.CoreSimulator.SimRuntime.iOS-27-0.
+# Only the numbers are the version: a runtime name can go on after them, as in
+# iOS-27-1-iPhone19.
+ios = []
+for runtime in devices:
+    match = re.search(r"\.iOS-(\d+(?:-\d+)*)", runtime)
+    if match:
+        ios.append((tuple(int(n) for n in match.group(1).split("-")), runtime))
+for version, runtime in sorted(ios, reverse=True):
     for d in devices[runtime]:
         if d["name"].startswith("iPhone") and "Duo" not in d["name"]:
-            print(d["udid"], runtime.split(".iOS-")[1].replace("-", ".")); sys.exit()
+            print(d["udid"], ".".join(str(n) for n in version)); sys.exit()
 ') || true
 if [ -z "$udid" ]; then
     echo "sim-destination: no regular iPhone simulator found; add one in Xcode (Window > Devices and Simulators)" >&2
