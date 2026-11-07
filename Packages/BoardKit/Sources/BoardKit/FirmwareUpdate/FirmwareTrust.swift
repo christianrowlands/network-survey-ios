@@ -32,10 +32,13 @@ public struct FirmwareTrust: Sendable {
     }
 
     /// Release signing keys (base64 of the raw 32 bytes). The firmware
-    /// repository has the same public key in scripts/keys/release-signing-key.pub;
-    /// its private half is the release workflow's signing secret.
+    /// repository has the same public keys in scripts/keys/. The release key's
+    /// private half is the release workflow's signing secret. The backup key is
+    /// unused until the release key is lost or replaced, so installed apps keep
+    /// accepting new firmware after that; its private half is kept offline.
     public static let releaseKeys: [FirmwareSigningKey] = [
         FirmwareSigningKey(name: "Release key", base64: "Ek1bybFsmuhEjknuauGaTa7N2zut111qFfKpziDEBwY=")!,
+        FirmwareSigningKey(name: "Backup key", base64: "9Nf7h0z9KjJzQaIZ1GnO9n2ohErJqFwRYDTSzWu7r/c=")!,
     ]
 
     /// What Release builds trust.

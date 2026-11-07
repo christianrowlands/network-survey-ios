@@ -98,6 +98,10 @@ struct FirmwareVerificationTests {
         }
     }
 
+    @Test func releaseTrustHasTheReleaseAndBackupKeys() {
+        #expect(FirmwareTrust.release.keys.map(\.name) == ["Release key", "Backup key"])
+    }
+
     @Test func releaseTrustDoesNotIncludeTheDevelopmentKey() {
         #expect(!FirmwareTrust.release.keys.contains(FirmwareTrust.developmentKey))
         #expect(FirmwareTrust.release.keys.allSatisfy { !$0.isDevelopment })
