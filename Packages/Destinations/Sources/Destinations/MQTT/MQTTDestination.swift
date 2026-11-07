@@ -18,8 +18,8 @@ public struct MQTTConfig: Sendable, Equatable {
     /// Most messages queued while the broker is slow or unreachable; 0 means
     /// unbounded (still capped at 20,000 until the broker was reached once).
     public var queueLimit: Int
-    /// Experimental: also publish station (client) records.
-    public var streamStationRecords: Bool
+    /// Also publish Wi-Fi client records (off by default).
+    public var streamClientRecords: Bool
     /// Network.framework waits for an unreachable broker instead of failing,
     /// so this bounds each connection attempt.
     public var connectTimeout: Duration
@@ -28,7 +28,7 @@ public struct MQTTConfig: Sendable, Equatable {
     public init(
         host: String, port: Int = 8883, useTLS: Bool = true, username: String? = nil, password: String? = nil,
         clientID: String, topicPrefix: String = "", qos: UInt8 = 1, queueLimit: Int = 20_000,
-        streamStationRecords: Bool = false, connectTimeout: Duration = .seconds(10)
+        streamClientRecords: Bool = false, connectTimeout: Duration = .seconds(10)
     ) {
         self.host = host
         self.port = port
@@ -39,7 +39,7 @@ public struct MQTTConfig: Sendable, Equatable {
         self.topicPrefix = topicPrefix
         self.qos = qos
         self.queueLimit = queueLimit
-        self.streamStationRecords = streamStationRecords
+        self.streamClientRecords = streamClientRecords
         self.connectTimeout = connectTimeout
     }
 
@@ -69,8 +69,8 @@ public enum MQTTTopic {
     public static let wifiProbeRequest = "80211_probe_request_message"
     public static let bluetooth = "bluetooth_message"
     public static let deviceStatus = "device_status_message"
-    /// Experimental, proposed: not in NS Messaging 2.6.0.
-    public static let wifiStation = "80211_station_message"
+    /// New in NS Messaging 2.7.0.
+    public static let wifiClient = "80211_client_message"
 }
 
 /// Publishes NS Messaging JSON to an MQTT broker (MQTT 3.1.1, persistent
@@ -195,7 +195,7 @@ public actor MQTTDestination: Destination {
         case .ble(let ns, _): (MQTTTopic.bluetooth, ns.stamped(deviceName: deviceName).jsonString())
         case .deviceStatus(let ns): (MQTTTopic.deviceStatus, ns.stamped(deviceName: deviceName).jsonString())
         case .client(let ns, _):
-            config.streamStationRecords ? (MQTTTopic.wifiStation, ns.stamped(deviceName: deviceName).jsonString()) : nil
+            config.streamClientRecords ? (MQTTTopic.wifiClient, ns.stamped(deviceName: deviceName).jsonString()) : nil
         case .rawFrame: nil
         }
     }

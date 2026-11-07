@@ -4,7 +4,7 @@ import Foundation
 /// board records.
 public enum NSMessaging {
     /// The NS Messaging API version the models follow.
-    public static let apiVersion = "2.6.0"
+    public static let apiVersion = "2.7.0"
 }
 
 /// A position to stamp on records.

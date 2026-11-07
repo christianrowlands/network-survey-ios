@@ -58,8 +58,8 @@ public struct SurveyRecord: Sendable {
     public enum Kind: Sendable {
         case ap(WifiBeaconRecord, NSBApObservation)
         case probe(WifiProbeRequestRecord, NSBProbeObservation)
-        /// Experimental station record: streamed and uploaded only when enabled.
-        case client(WifiStationRecord, NSBClientObservation)
+        /// Wi-Fi client record: streamed and uploaded only when enabled.
+        case client(WifiClientRecord, NSBClientObservation)
         case ble(BluetoothRecord, NSBBleObservation)
         case deviceStatus(DeviceStatus)
         /// A raw 802.11 frame for pcapng, with its capture time.

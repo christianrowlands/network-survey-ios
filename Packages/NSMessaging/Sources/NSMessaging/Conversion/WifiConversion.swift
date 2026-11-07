@@ -54,10 +54,10 @@ extension WifiProbeRequestRecord {
     }
 }
 
-extension WifiStationRecord {
-    /// Experimental: one client observation (one station MAC per channel dwell).
+extension WifiClientRecord {
+    /// One client observation (one client MAC per channel dwell).
     public init(client: NSBClientObservation, context: RecordContext) {
-        var data = WifiStationRecordData()
+        var data = WifiClientRecordData()
         data.apply(context)
         data.sourceAddress = WifiFields.mac(client.clientMac)
         data.bssid = WifiFields.mac(client.associatedBssid)
@@ -65,9 +65,7 @@ extension WifiStationRecord {
         if client.frequencyMhz != 0 { data.frequencyMhz = Int32(clamping: client.frequencyMhz) }
         data.signalStrength = Float(client.rssiMax)
         if client.hasNoiseFloorDbm { data.snr = Float(client.rssiMax - client.noiseFloorDbm) }
-        data.frameCount = Int32(clamping: client.frameCount)
         data.frameTypes = WifiFields.frameTypes(sourceFlags: client.sourceFlags)
-        data.locallyAdministered = client.locallyAdministered
         self.init(data: data)
     }
 }

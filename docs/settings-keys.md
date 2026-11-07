@@ -9,7 +9,7 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 | Key | Type | Default | Notes |
 |---|---|---|---|
 | `survey_wifi_ap` | Bool | true | Access point (beacon) records |
-| `survey_wifi_client` | Bool | true | Client (station) and probe request records |
+| `survey_wifi_client` | Bool | true | Client and probe request records |
 | `survey_ble` | Bool | false | Bluetooth LE advertisements |
 | `survey_raw_frames` | Bool | false | Raw 802.11 frames for pcapng |
 
@@ -34,7 +34,7 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 | `mqtt_password` | Secret | none | Keychain |
 | `mqtt_topic_prefix` | String | "" | Prepended to every topic |
 | `streaming_queue_limit` | Int | 20000 | Records held while MQTT or gRPC is disconnected; 0 means unbounded (MQTT still holds at most 20,000 until the broker is first reached in a survey); not negative |
-| `mqtt_stream_client_records` | Bool | false | Experimental: station records on the proposed topic |
+| `mqtt_stream_client_records` | Bool | false | Experimental: Wi-Fi client records on `80211_client_message` |
 
 ## gRPC
 

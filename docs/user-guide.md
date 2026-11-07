@@ -122,7 +122,7 @@ you to the right place.
 | Tile | Records | Default |
 |---|---|---|
 | Wi-Fi APs | Access points and their beacons | On |
-| Wi-Fi Clients | Devices (stations) and their probe requests | On |
+| Wi-Fi Clients | Devices and their probe requests | On |
 | Bluetooth | Bluetooth Low Energy advertisements | Off |
 | Raw frames | Raw 802.11 frames, saved to a pcapng file | Off |
 
@@ -205,7 +205,7 @@ run, the same way the Network Survey Android app does.
 - Topics: `80211_beacon_message` (access points), `80211_probe_request_message`
   (probe requests), `bluetooth_message` and `device_status_message`.
 - **Stream client records** (experimental) also sends Wi-Fi client records on
-  `80211_station_message`, a proposed addition to NS Messaging.
+  `80211_client_message`, new in NS Messaging 2.7.0.
 - The queue holds records while the broker is unreachable (20,000 by default,
   0 means no limit) and sends them when the connection comes back. With no
   limit, the queue still holds at most 20,000 records until the broker is first
@@ -222,8 +222,7 @@ Messaging services (for example one built from the NS Messaging library).
 - **Host** and **Port** (2621 by default), and **TLS** (off by default).
 - The queue size set under MQTT also applies to gRPC.
 - Access points, probe requests, Bluetooth and device status each go on their
-  own stream. Client records are not sent over gRPC, because NS Messaging has
-  no gRPC method for them yet.
+  own stream. Client records are not sent over gRPC yet.
 
 ### NS Analytics
 

@@ -127,7 +127,7 @@ enum Samples {
     }
 
     static func clientRecord(_ number: Int32 = 1, board: String = "NS-1A2B") -> SurveyRecord {
-        SurveyRecord(boardID: board, kind: .client(WifiStationRecord(client: client, context: context(number)), client))
+        SurveyRecord(boardID: board, kind: .client(WifiClientRecord(client: client, context: context(number)), client))
     }
 
     static func bleRecord(_ number: Int32 = 1, board: String = "NS-3C4D") -> SurveyRecord {

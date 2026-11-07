@@ -24,9 +24,9 @@ enum Fixtures {
     }
 }
 
-@Test("Targets NS Messaging API 2.6.0")
+@Test("Targets NS Messaging API 2.7.0")
 func apiVersion() {
-    #expect(NSMessaging.apiVersion == "2.6.0")
+    #expect(NSMessaging.apiVersion == "2.7.0")
 }
 
 /// Each fixture line holds a value and what the Java runtime printed for it:

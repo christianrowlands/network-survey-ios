@@ -232,7 +232,7 @@ public actor RecordPipeline {
         let type: MessageType
         switch record.kind {
         case .ap(let ap): (type, payload) = (.wifiBeacon, .accessPoint(ap))
-        case .client(let client): (type, payload) = (.wifiStation, .client(client))
+        case .client(let client): (type, payload) = (.wifiClient, .client(client))
         case .probe(let probe): (type, payload) = (.wifiProbeRequest, .probe(probe))
         case .ble(let ble): (type, payload) = (.bluetooth, .ble(ble))
         case .gps: preconditionFailure("GPS fixes are never stored as records")
@@ -269,7 +269,7 @@ public actor RecordPipeline {
     private func isPlanned(_ type: MessageType) -> Bool {
         switch type {
         case .wifiBeacon: session.plan.wifiAP
-        case .wifiStation, .wifiProbeRequest: session.plan.wifiClient
+        case .wifiClient, .wifiProbeRequest: session.plan.wifiClient
         case .bluetooth: session.plan.ble
         case .deviceStatus: true
         }
@@ -280,7 +280,7 @@ extension NSBRecord.OneOf_Kind {
     var messageType: MessageType? {
         switch self {
         case .ap: .wifiBeacon
-        case .client: .wifiStation
+        case .client: .wifiClient
         case .probe: .wifiProbeRequest
         case .ble: .bluetooth
         case .gps: nil

@@ -115,7 +115,7 @@ if problems:
 
 ns_license = open(os.path.join(root, "proto", "ns-messaging", "LICENSE"), encoding="utf-8").read().strip()
 entries.append({
-    "name": "NS Messaging API protos", "version": "2.6.0", "license": spdx(ns_license), "url": None,
+    "name": "NS Messaging API protos", "version": "2.7.0", "license": spdx(ns_license), "url": None,
     "text": ns_license,
 })
 # The Bluetooth SIG assigned numbers carry no license; record their source

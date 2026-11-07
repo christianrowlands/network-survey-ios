@@ -10,8 +10,8 @@ public struct NSAnalyticsConfig: Sendable, Equatable {
     /// Experimental: NS Analytics does not store probe requests today and
     /// answers them as skipped, which counts as done.
     public var uploadProbeRequests: Bool
-    /// Experimental: station records, also skipped by NS Analytics today.
-    public var uploadStationRecords: Bool
+    /// Experimental: Wi-Fi client records, also skipped by NS Analytics today.
+    public var uploadClientRecords: Bool
     /// Start an upload when the survey stops (it may finish in the background).
     public var uploadOnStop: Bool
     /// Leave out records without a location. NS Analytics stores a missing
@@ -21,7 +21,7 @@ public struct NSAnalyticsConfig: Sendable, Equatable {
 
     public init(
         uploadInterval: Duration? = .seconds(15 * 60), uploadWifi: Bool = true, uploadBluetooth: Bool = true,
-        uploadDeviceStatus: Bool = true, uploadProbeRequests: Bool = false, uploadStationRecords: Bool = false,
+        uploadDeviceStatus: Bool = true, uploadProbeRequests: Bool = false, uploadClientRecords: Bool = false,
         uploadOnStop: Bool = true, requireLocation: Bool = true
     ) {
         self.uploadInterval = uploadInterval
@@ -29,7 +29,7 @@ public struct NSAnalyticsConfig: Sendable, Equatable {
         self.uploadBluetooth = uploadBluetooth
         self.uploadDeviceStatus = uploadDeviceStatus
         self.uploadProbeRequests = uploadProbeRequests
-        self.uploadStationRecords = uploadStationRecords
+        self.uploadClientRecords = uploadClientRecords
         self.uploadOnStop = uploadOnStop
         self.requireLocation = requireLocation
     }
@@ -43,7 +43,7 @@ public enum NSAnalyticsRecordType {
     /// Experimental, not accepted by NS Analytics today.
     public static let wifiProbeRequest = "wifi_probe_request"
     /// Experimental, not accepted by NS Analytics today.
-    public static let wifiStation = "wifi_station"
+    public static let wifiClient = "wifi_client"
 }
 
 /// Queues records for NS Analytics during a survey and uploads them through
@@ -101,7 +101,7 @@ public actor NSAnalyticsDestination: Destination {
             case .probe(let ns, _):
                 config.uploadProbeRequests ? (NSAnalyticsRecordType.wifiProbeRequest, ns.jsonString()) : nil
             case .client(let ns, _):
-                config.uploadStationRecords ? (NSAnalyticsRecordType.wifiStation, ns.jsonString()) : nil
+                config.uploadClientRecords ? (NSAnalyticsRecordType.wifiClient, ns.jsonString()) : nil
             case .rawFrame: nil
             }
         }

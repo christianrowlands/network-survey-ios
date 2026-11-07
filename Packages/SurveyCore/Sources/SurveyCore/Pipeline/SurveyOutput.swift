@@ -41,7 +41,7 @@ public struct SessionContext: Sendable, Equatable {
 /// What the user chose to survey and where it goes, fixed for a session.
 public struct SurveyPlan: Sendable, Equatable, Codable {
     public var wifiAP: Bool
-    /// Client (station) and probe request records.
+    /// Client and probe request records.
     public var wifiClient: Bool
     public var ble: Bool
     public var rawFrames: Bool
@@ -80,8 +80,8 @@ public struct SurveyPlan: Sendable, Equatable, Codable {
 public enum MessageType: String, Sendable, CaseIterable, Codable {
     case wifiBeacon
     case wifiProbeRequest
-    /// Experimental station (client) record.
-    case wifiStation
+    /// Experimental client record.
+    case wifiClient
     case bluetooth
     case deviceStatus
 }
@@ -175,7 +175,10 @@ public struct RecordNumbers: Sendable, Equatable {
     init?(json: String?) {
         guard let json, let byName = try? JSONDecoder().decode([String: Int].self, from: Data(json.utf8)) else { return nil }
         for (name, value) in byName {
-            if let type = MessageType(rawValue: name) { next[type] = value }
+            // wifiStation is what sessions saved before the client record's rename.
+            if let type = MessageType(rawValue: name == "wifiStation" ? MessageType.wifiClient.rawValue : name) {
+                next[type] = value
+            }
         }
     }
 }

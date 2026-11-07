@@ -50,6 +50,13 @@ struct MissionIDTests {
         var numbers = RecordNumbers(startingAfter: [.wifiBeacon: 41, .bluetooth: 2])
         #expect(numbers.take(.wifiBeacon) == 42)
         #expect(numbers.take(.bluetooth) == 3)
-        #expect(numbers.take(.wifiStation) == 1)
+        #expect(numbers.take(.wifiClient) == 1)
+    }
+
+    @Test("A session saved before the client record's rename keeps its client numbers")
+    func resumedNumbersFromTheOldName() throws {
+        var numbers = try #require(RecordNumbers(json: #"{"wifiStation":7,"wifiBeacon":3}"#))
+        #expect(numbers.take(.wifiClient) == 7)
+        #expect(numbers.take(.wifiBeacon) == 3)
     }
 }

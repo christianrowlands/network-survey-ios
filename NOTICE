@@ -3,7 +3,7 @@ Copyright 2026 Caskfive LLC
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 
-This product includes protobuf definitions from the NS Messaging API 2.6.0
+This product includes protobuf definitions from the NS Messaging API 2.7.0
 (proto/ns-messaging, Apache License, Version 2.0, see proto/ns-messaging/LICENSE)
 and Swift code generated from them
 (Packages/Destinations/Sources/Destinations/GRPC/Generated).

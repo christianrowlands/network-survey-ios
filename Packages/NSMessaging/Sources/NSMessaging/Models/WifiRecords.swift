@@ -2,8 +2,8 @@
 public typealias WifiBeaconRecord = NSRecord<WifiBeaconRecordData>
 /// NS Messaging `WifiProbeRequestRecord` (MQTT topic `80211_probe_request_message`).
 public typealias WifiProbeRequestRecord = NSRecord<WifiProbeRequestRecordData>
-/// Experimental station record, not part of NS Messaging 2.6.0.
-public typealias WifiStationRecord = NSRecord<WifiStationRecordData>
+/// NS Messaging `WifiClientRecord` (MQTT topic `80211_client_message`), new in 2.7.0.
+public typealias WifiClientRecord = NSRecord<WifiClientRecordData>
 
 public struct WifiBeaconRecordData: NSCommonData {
     public static let messageType = "WifiBeaconRecord"
@@ -133,13 +133,11 @@ public struct WifiProbeRequestRecordData: NSCommonData {
     }
 }
 
-/// Experimental: one Wi-Fi client (non-AP station) seen during a channel dwell.
-/// NS Messaging 2.6.0 has no such message; this is a proposed addition, a
-/// `WifiStationRecord` on the `80211_station_message` topic, shaped like the
-/// other Wi-Fi records. Send it only where the user turned on the experimental
-/// station option.
-public struct WifiStationRecordData: NSCommonData {
-    public static let messageType = "WifiStationRecord"
+/// One Wi-Fi client (a device that connects to an access point) seen during a
+/// channel dwell. It summarizes every frame the client transmitted in that
+/// window. Sent only where the user turned on client records.
+public struct WifiClientRecordData: NSCommonData {
+    public static let messageType = "WifiClientRecord"
 
     public var deviceSerialNumber = ""
     public var deviceName = ""
@@ -152,19 +150,16 @@ public struct WifiStationRecordData: NSCommonData {
     public var accuracy: Int32 = 0
     public var locationAge: UInt32 = 0
     public var speed: Float = 0
-    /// The station's MAC address.
+    /// The client's MAC address.
     public var sourceAddress = ""
-    /// The BSSID the station is associated with or talking to, if known.
+    /// The BSSID the client is associated with or talking to, if known.
     public var bssid = ""
     public var channel: Int32?
     public var frequencyMhz: Int32?
     public var signalStrength: Float?
     public var snr: Float?
-    /// Frames received from the station during the dwell.
-    public var frameCount: Int32?
-    public var frameTypes: [StationFrameType] = []
-    /// The locally administered bit of the MAC (often a randomized MAC).
-    public var locallyAdministered: Bool?
+    /// Every kind of frame received from the client during the dwell, each once.
+    public var frameTypes: [ClientFrameType] = []
 
     public init() {}
 
@@ -185,9 +180,7 @@ public struct WifiStationRecordData: NSCommonData {
             .int32Value(13, "frequencyMhz", \.frequencyMhz),
             .floatValue(14, "signalStrength", \.signalStrength),
             .floatValue(15, "snr", \.snr),
-            .int32Value(16, "frameCount", \.frameCount),
-            .enumList(17, "frameTypes", \.frameTypes),
-            .boolValue(18, "locallyAdministered", \.locallyAdministered),
+            .enumList(16, "frameTypes", \.frameTypes),
             .uint32(30, "locationAge", \.locationAge),
             .float(55, "speed", \.speed),
         ]

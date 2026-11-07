@@ -61,8 +61,9 @@ public enum BluetoothAddressType: String, NSEnum {
     case unknown = "UNKNOWN", `public` = "PUBLIC", random = "RANDOM", anonymous = "ANONYMOUS"
 }
 
-/// Experimental, not in NS Messaging 2.6.0: the frame types a station sent.
-public enum StationFrameType: String, NSEnum {
+/// NS Messaging 2.7.0 `ClientFrameType`: the kinds of frame a Wi-Fi client sent.
+/// DATA covers Data and QoS Data, NULL_DATA covers Null and QoS Null.
+public enum ClientFrameType: String, NSEnum {
     case unknown = "UNKNOWN", data = "DATA", nullData = "NULL_DATA", probeRequest = "PROBE_REQUEST"
     case associationRequest = "ASSOCIATION_REQUEST", reassociationRequest = "REASSOCIATION_REQUEST"
     case authentication = "AUTHENTICATION", action = "ACTION"

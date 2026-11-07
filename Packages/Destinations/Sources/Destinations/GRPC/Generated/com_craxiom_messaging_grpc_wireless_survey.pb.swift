@@ -118,6 +118,16 @@ nonisolated struct Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse: Sendable {
   init() {}
 }
 
+nonisolated struct Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 nonisolated struct Com_Craxiom_Messaging_Grpc_BluetoothSurveyResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -348,6 +358,25 @@ nonisolated extension Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse: SwiftPro
   }
 
   static func ==(lhs: Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse, rhs: Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".WifiClientSurveyResponse"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    // Load everything into unknown fields
+    while try decoder.nextFieldNumber() != nil {}
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse, rhs: Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse) -> Bool {
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

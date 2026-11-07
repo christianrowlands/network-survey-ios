@@ -51,7 +51,7 @@ struct MQTTSettingsView: View {
                 } header: {
                     Text("Experimental")
                 } footer: {
-                    AppliesNextSurveyFooter(extra: "Client (station) records use a proposed topic that is not part of NS Messaging yet.")
+                    AppliesNextSurveyFooter(extra: "Client records go on the 80211_client_message topic, new in NS Messaging 2.7.0.")
                 }
             }
             .panelRows()

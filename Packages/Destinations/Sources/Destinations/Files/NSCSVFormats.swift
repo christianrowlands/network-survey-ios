@@ -1,10 +1,9 @@
-import BoardProtocol
 import Foundation
 import NSMessaging
 
-/// The NS CSV formats. Wi-Fi (0.4.0) and Bluetooth (0.3.0) have exactly the
-/// columns and value formatting of the Network Survey Android app; the client
-/// and probe formats (0.1.0) are new in the same style (docs/csv-formats.md).
+/// The NS CSV formats, with exactly the columns and value formatting of the
+/// Network Survey Android app (docs/csv-formats.md). Every column is an NS
+/// Messaging field, so a board observation's own values stay out of them.
 enum NSCSVFormat: CaseIterable {
     case wifi, bluetooth, client, probe
 
@@ -44,13 +43,13 @@ enum NSCSVFormat: CaseIterable {
             ]
         case .client:
             Self.common + [
-                "sourceAddress", "bssid", "channel", "frequencyMhz", "signalStrength", "snr", "frameCount",
-                "frameTypes", "locallyAdministered", "boardId", "deviceSerialNumber", "locationAge",
+                "sourceAddress", "bssid", "channel", "frequencyMhz", "signalStrength", "snr", "frameTypes",
+                "deviceSerialNumber", "locationAge",
             ]
         case .probe:
             Self.common + [
                 "sourceAddress", "destinationAddress", "bssid", "ssid", "channel", "frequencyMhz", "signalStrength",
-                "snr", "standard", "probeCount", "locallyAdministered", "boardId", "deviceSerialNumber", "locationAge",
+                "snr", "nodeType", "standard", "deviceSerialNumber", "locationAge",
             ]
         }
     }
@@ -128,7 +127,7 @@ enum NSCSVRow {
         ]
     }
 
-    static func client(_ data: WifiStationRecordData, boardID: String) -> [String] {
+    static func client(_ data: WifiClientRecordData) -> [String] {
         common(data) + [
             data.sourceAddress,
             data.bssid,
@@ -136,16 +135,13 @@ enum NSCSVRow {
             optional(data.frequencyMhz) { String($0) },
             optional(data.signalStrength, float),
             optional(data.snr, float),
-            optional(data.frameCount) { String($0) },
             data.frameTypes.map(\.rawValue).joined(separator: ";"),
-            optional(data.locallyAdministered) { String($0) },
-            boardID,
             data.deviceSerialNumber,
             locationAge(data.locationAge),
         ]
     }
 
-    static func probe(_ data: WifiProbeRequestRecordData, _ probe: NSBProbeObservation, boardID: String) -> [String] {
+    static func probe(_ data: WifiProbeRequestRecordData) -> [String] {
         common(data) + [
             data.sourceAddress,
             data.destinationAddress,
@@ -155,10 +151,8 @@ enum NSCSVRow {
             optional(data.frequencyMhz) { String($0) },
             optional(data.signalStrength, float),
             optional(data.snr, float),
+            data.nodeType.rawValue,
             data.standard.rawValue,
-            String(probe.count),
-            String(probe.locallyAdministered),
-            boardID,
             data.deviceSerialNumber,
             locationAge(data.locationAge),
         ]

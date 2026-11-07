@@ -133,23 +133,26 @@ struct MQTTTests {
         #expect(snapshot.status == .off)
     }
 
-    @Test("Station records go only to the experimental topic, and only when enabled")
-    func stations() async throws {
+    @Test("Client records go only to the client topic, and only when enabled")
+    func clients() async throws {
         let broker = try LocalBroker()
         try await broker.start()
         defer { broker.stop() }
         let subscriber = try await Subscriber(port: broker.port)
         let destination = MQTTDestination(config: MQTTConfig(host: "127.0.0.1", port: broker.port, useTLS: false, clientID: "ns-test-2",
-                                                             streamStationRecords: true))
+                                                             streamClientRecords: true))
         try await destination.start(Samples.session(Samples.tempDirectory(), deviceName: ""))
         await destination.accept([Samples.clientRecord()])
         let received = try await subscriber.waitFor(count: 1)
         await destination.stop()
         await subscriber.close()
-        #expect(received.map(\.topic) == ["80211_station_message"])
+        #expect(received.map(\.topic) == ["80211_client_message"])
         // With no device name the client ID is stamped, as on Android.
         #expect(received.first?.payload.contains(#""deviceName":"ns-test-2""#) == true)
-        #expect(received.first?.payload.contains(#""messageType":"WifiStationRecord""#) == true)
+        #expect(received.first?.payload.contains(#""messageType":"WifiClientRecord""#) == true)
+        #expect(received.first?.payload.contains(#""frameTypes":["DATA","NULL_DATA"]"#) == true)
+        #expect(received.first?.payload.contains("frameCount") == false)
+        #expect(received.first?.payload.contains("locallyAdministered") == false)
     }
 
     @Test("Queues while the broker is down, drops past the limit, then delivers on connect")

@@ -30,8 +30,8 @@ public actor NSCSVDestination: Destination {
             switch record.kind {
             case .ap(let ns, _): write(.wifi, NSCSVRow.wifi(ns.data))
             case .ble(let ns, _): write(.bluetooth, NSCSVRow.bluetooth(ns.data))
-            case .client(let ns, _): write(.client, NSCSVRow.client(ns.data, boardID: record.boardID))
-            case .probe(let ns, let probe): write(.probe, NSCSVRow.probe(ns.data, probe, boardID: record.boardID))
+            case .client(let ns, _): write(.client, NSCSVRow.client(ns.data))
+            case .probe(let ns, _): write(.probe, NSCSVRow.probe(ns.data))
             case .deviceStatus, .rawFrame: break
             }
         }

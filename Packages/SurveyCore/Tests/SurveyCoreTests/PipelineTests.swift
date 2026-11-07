@@ -40,7 +40,7 @@ struct PipelineTests {
         #expect(sink.numbers(.wifiBeacon) == [1, 2, 3, 4])
         #expect(sink.numbers(.bluetooth) == [1])
         #expect(sink.numbers(.wifiProbeRequest) == [1])
-        #expect(sink.numbers(.wifiStation) == [1])
+        #expect(sink.numbers(.wifiClient) == [1])
         #expect(sink.numbers(.deviceStatus) == [1])
         let outputs = sink.outputs
         #expect(outputs.allSatisfy { $0.context.missionId == Fixtures.context().missionId })

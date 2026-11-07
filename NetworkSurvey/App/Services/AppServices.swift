@@ -42,7 +42,7 @@ nonisolated enum DestinationFactory {
                 password: settings.secret(Secrets.mqttPassword),
                 clientID: clientID.isEmpty ? defaultClientID(context) : clientID,
                 topicPrefix: settings[Settings.mqttTopicPrefix], queueLimit: settings[Settings.streamingQueueLimit],
-                streamStationRecords: settings[Settings.mqttStreamClientRecords]
+                streamClientRecords: settings[Settings.mqttStreamClientRecords]
             )))
         }
         if plan.grpc {
@@ -56,7 +56,7 @@ nonisolated enum DestinationFactory {
             let upload = NSAnalyticsDestination(uploader: uploader, config: NSAnalyticsConfig(
                 uploadInterval: minutes > 0 ? .seconds(minutes * 60) : nil,
                 uploadProbeRequests: settings[Settings.nsAnalyticsUploadProbeRecords],
-                uploadStationRecords: settings[Settings.nsAnalyticsUploadClientRecords]
+                uploadClientRecords: settings[Settings.nsAnalyticsUploadClientRecords]
             ))
             destinations.append(RealBoardsOnly(upload, demoBoards: demoBoards))
         }

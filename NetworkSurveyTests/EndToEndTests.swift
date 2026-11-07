@@ -216,7 +216,7 @@ struct EndToEndTests {
         let row = try #require(try await model.store.read { try StoreQueries.sessions($0) }.first { $0.id == sessionID })
         #expect(row.missionId == missionId && row.stoppedAt != nil)
         let stored = try await model.store.read { try StoreQueries.counts($0, sessionID: sessionID) }
-        let records = count(.wifiBeacon) + count(.wifiProbeRequest) + count(.wifiStation) + count(.bluetooth)
+        let records = count(.wifiBeacon) + count(.wifiProbeRequest) + count(.wifiClient) + count(.bluetooth)
         #expect(stored.observations == records)
         #expect(survey.uniqueCounts == stored, "UI unique counts")
         #expect(Set(files.wifi.column("bssid")).count == stored.accessPoints)
@@ -227,7 +227,7 @@ struct EndToEndTests {
 
         // NS CSV: one row per record, the mission ID on each, numbers 1...n.
         let tables: [(MessageType, CSVTable)] = [
-            (.wifiBeacon, files.wifi), (.bluetooth, files.bluetooth), (.wifiStation, files.client), (.wifiProbeRequest, files.probe),
+            (.wifiBeacon, files.wifi), (.bluetooth, files.bluetooth), (.wifiClient, files.client), (.wifiProbeRequest, files.probe),
         ]
         for (type, table) in tables {
             #expect(table.rows.count == count(type), "CSV rows for \(type)")
@@ -235,7 +235,6 @@ struct EndToEndTests {
             #expect(Set(table.column("deviceSerialNumber")) == [serial])
             #expect(table.column("recordNumber").compactMap { Int($0) }.isOneToCount, "CSV numbers for \(type)")
         }
-        #expect(Set(files.client.column("boardId") + files.probe.column("boardId")) == wifiBoards)
         let csvRows = tables.reduce(0) { $0 + $1.1.rows.count }
         #expect(snapshots[DestinationKind.nsCSV.rawValue]?.recordsAccepted == csvRows)
 
@@ -258,7 +257,7 @@ struct EndToEndTests {
             #expect(channel.missionIds == [missionId] && channel.serials == [serial])
             #expect(channel.deviceNames == [Self.deviceName])
         }
-        #expect(counts.mqtt[Self.topicPrefix + MQTTTopic.wifiStation] == nil)
+        #expect(counts.mqtt[Self.topicPrefix + MQTTTopic.wifiClient] == nil)
         #expect(Set(counts.mqtt.keys).isSubset(of: Set(topics.map { Self.topicPrefix + $0.1 })))
         #expect(counts.mqttUnparsed == 0)
         #expect(snapshots[DestinationKind.mqtt.rawValue]?.recordsAccepted == counts.mqtt.values.reduce(0) { $0 + $1.count })
@@ -292,7 +291,7 @@ struct EndToEndTests {
         #expect(counts.nsAnalytics["device_status"]?.count == located(counts.mqtt[Self.topicPrefix + MQTTTopic.deviceStatus]))
         #expect(counts.nsAnalytics["wifi_probe_request"]?.count == locatedProbes)
         #expect(counts.nsAnalyticsSkipped == ["wifi_probe_request": locatedProbes])
-        #expect(counts.nsAnalytics["wifi_station"] == nil)
+        #expect(counts.nsAnalytics["wifi_client"] == nil)
         for (type, channel) in counts.nsAnalytics {
             #expect(channel.missionIds == [missionId] && channel.serials == [serial] && channel.deviceNames == [""], "\(type)")
             #expect(channel.locations.count == channel.count, "\(type) records without location")
@@ -346,11 +345,11 @@ struct EndToEndTests {
         #expect(ended.timeIntervalSince(gap.startedAt) > 4, "gap length")
         #expect(gaps.allSatisfy { $0.endedAt != nil })
         // Records the board buffered during the gap arrived with their own
-        // times, and it kept surveying after it came back.
+        // times, and it kept surveying after it came back. Only this board
+        // surveys Wi-Fi (the other is the BLE sniffer), so these rows are all its.
         let times = ISO8601DateFormatter()
         times.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let boardTimes = (files.probe.rows + files.client.rows)
-            .filter { $0["boardId"] == board.description }
             .compactMap { times.date(from: $0["deviceTime"] ?? "") }
         #expect(boardTimes.contains { $0 > gap.startedAt.addingTimeInterval(1) && $0 < ended.addingTimeInterval(-1) }, "buffered records")
         #expect(boardTimes.contains { $0 > ended })

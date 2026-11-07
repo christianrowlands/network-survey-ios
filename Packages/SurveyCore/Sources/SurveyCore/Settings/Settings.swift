@@ -7,7 +7,7 @@ import Towers
 public enum Settings {
     // MARK: What to survey
     public static let surveyWifiAP = SettingKey<Bool>("survey_wifi_ap", default: true)
-    /// Client (station) and probe request observations.
+    /// Client and probe request observations.
     public static let surveyWifiClient = SettingKey<Bool>("survey_wifi_client", default: true)
     public static let surveyBLE = SettingKey<Bool>("survey_ble", default: false)
     /// Raw 802.11 frames for pcapng.
@@ -29,7 +29,7 @@ public enum Settings {
     public static let mqttTopicPrefix = SettingKey<String>("mqtt_topic_prefix", default: "")
     /// Records held while a stream is disconnected; 0 means unbounded.
     public static let streamingQueueLimit = SettingKey<Int>("streaming_queue_limit", default: 20_000, range: 0...Int.max)
-    /// Experimental: stream station (client) records on the proposed topic.
+    /// Experimental: stream Wi-Fi client records on `80211_client_message`.
     public static let mqttStreamClientRecords = SettingKey<Bool>("mqtt_stream_client_records", default: false)
 
     // MARK: gRPC
@@ -46,7 +46,7 @@ public enum Settings {
     public static let nsAnalyticsUploadIntervalMinutes = SettingKey<Int>("ns_analytics_upload_interval_minutes", default: 15, range: 0...1440)
     /// Experimental: upload probe request records (the backend skips them today).
     public static let nsAnalyticsUploadProbeRecords = SettingKey<Bool>("ns_analytics_upload_probe_records", default: false)
-    /// Experimental: upload station (client) records.
+    /// Experimental: upload client records.
     public static let nsAnalyticsUploadClientRecords = SettingKey<Bool>("ns_analytics_upload_client_records", default: false)
 
     // MARK: Device

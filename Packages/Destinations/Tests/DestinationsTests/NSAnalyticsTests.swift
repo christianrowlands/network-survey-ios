@@ -407,7 +407,7 @@ struct NSAnalyticsTests {
         await plain.stop()
 
         let experimental = NSAnalyticsDestination(uploader: uploader, config: NSAnalyticsConfig(
-            uploadInterval: nil, uploadProbeRequests: true, uploadStationRecords: true, uploadOnStop: true
+            uploadInterval: nil, uploadProbeRequests: true, uploadClientRecords: true, uploadOnStop: true
         ))
         try await experimental.start(Samples.session(Samples.tempDirectory()))
         await experimental.accept([Samples.probeRecord(), Samples.clientRecord()])
@@ -415,7 +415,7 @@ struct NSAnalyticsTests {
         let deadline = ContinuousClock.now + .seconds(5)
         while await uploader.state().pending > 0 && ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(50)) }
         let types = StubServer.sent.flatMap { ($0.json["records"] as? [[String: Any]] ?? []).compactMap { $0["type"] as? String } }
-        #expect(types == ["wifi", "bluetooth", "device_status", "wifi_probe_request", "wifi_station"])
+        #expect(types == ["wifi", "bluetooth", "device_status", "wifi_probe_request", "wifi_client"])
         #expect(await uploader.state().totalUploaded == 5)
     }
 }

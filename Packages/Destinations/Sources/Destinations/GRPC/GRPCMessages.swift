@@ -33,7 +33,8 @@ enum GRPCOutgoing: Sendable {
 
     /// The protobuf message for a record, built from its NS Messaging JSON (the
     /// JSON uses the proto field names, so the protobuf JSON parser maps every
-    /// field). Station records have no gRPC method and are not sent.
+    /// field). Client records are not streamed over gRPC (NS Messaging 2.7.0
+    /// added `StreamWifiClientSurvey`, which the app does not use yet).
     init?(_ record: SurveyRecord, deviceName: String) throws {
         switch record.kind {
         case .ap(let ns, _): self = .wifiBeacon(try Self.decode(ns.stamped(deviceName: deviceName).jsonString()))

@@ -1,7 +1,7 @@
 # NS Messaging protos (copy)
 
 The `.proto` files under `com/craxiom/messaging/` are an unmodified copy of the
-protobuf definitions of the NS Messaging API 2.6.0, licensed under the Apache
+protobuf definitions of the NS Messaging API 2.7.0, licensed under the Apache
 License 2.0 (`LICENSE` in this folder; credited in the repository `NOTICE`). They are the
 gRPC services the app streams to (`WirelessSurvey`, `DeviceStatus`,
 `ConnectionHandshake`) and the messages those services import. The JSON

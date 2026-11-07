@@ -125,8 +125,26 @@ struct ConverterTests {
         try checkGolden(BluetoothRecord(ble: Samples.ble, context: Samples.context(3)).jsonString(), "convert-bluetooth")
     }
 
-    @Test func stationGolden() throws {
-        try checkGolden(WifiStationRecord(client: Samples.client, context: Samples.context(4)).jsonString(), "convert-station")
+    @Test func clientGolden() throws {
+        let json = WifiClientRecord(client: Samples.client, context: Samples.context(4)).jsonString()
+        try checkGolden(json, "convert-client")
+        // The board's frame count and locally administered bit stay out of the record.
+        #expect(!json.contains("frameCount") && !json.contains("locallyAdministered"))
+    }
+
+    @Test("A client that only probed has no bssid")
+    func probeOnlyClientGolden() throws {
+        var client = Samples.client
+        client.associatedBssid = Data()
+        client.sourceFlags = UInt32(NSBClientSource.probeReq.rawValue)
+        try checkGolden(WifiClientRecord(client: client, context: Samples.context(5)).jsonString(),
+                        "convert-client-probe-only")
+    }
+
+    @Test("Probe requests do not carry the locally administered bit")
+    func probeHasNoLocallyAdministered() {
+        let json = WifiProbeRequestRecord(probe: Samples.probe, context: Samples.context(2)).jsonString()
+        #expect(!json.contains("locallyAdministered"))
     }
 
     @Test func deviceStatusGolden() throws {

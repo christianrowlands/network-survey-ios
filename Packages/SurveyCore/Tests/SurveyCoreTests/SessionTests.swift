@@ -128,7 +128,7 @@ struct SessionTests {
         let sink = rig.sink
         #expect(sink.state.withLock { $0.stopped } == 1)
         let outputs = sink.outputs
-        for type in [MessageType.wifiBeacon, .wifiStation, .wifiProbeRequest, .bluetooth, .deviceStatus] {
+        for type in [MessageType.wifiBeacon, .wifiClient, .wifiProbeRequest, .bluetooth, .deviceStatus] {
             let numbers = sink.numbers(type)
             #expect(!numbers.isEmpty, "no \(type) records")
             #expect(numbers == Array(1...max(numbers.count, 1)), "\(type) numbers not contiguous")

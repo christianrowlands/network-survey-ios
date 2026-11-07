@@ -178,7 +178,7 @@ private struct ProtocolCounts: View {
             if session?.wifiClient ?? true {
                 Divider().overlay(Theme.Colors.rule)
                 row("Wi-Fi Clients", symbol: SurveyProtocol.wifiClient.symbol, color: Theme.Colors.wifiClient,
-                    unique: counts.clients, records: delivered(.wifiStation), list: .clients)
+                    unique: counts.clients, records: delivered(.wifiClient), list: .clients)
                 Divider().overlay(Theme.Colors.rule)
                 row("Probe requests", subtitle: "Client and network pairs", symbol: "magnifyingglass",
                     color: Theme.Colors.wifiClient, unique: counts.probes, records: delivered(.wifiProbeRequest), list: .probes)

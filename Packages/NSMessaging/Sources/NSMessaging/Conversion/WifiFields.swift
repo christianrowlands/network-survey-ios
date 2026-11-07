@@ -156,9 +156,9 @@ public enum WifiFields {
         }
     }
 
-    /// Station frame types from ClientObservation.source_flags.
-    public static func frameTypes(sourceFlags: UInt32) -> [StationFrameType] {
-        let bits: [(NSBClientSource, StationFrameType)] = [
+    /// Client frame types from ClientObservation.source_flags.
+    public static func frameTypes(sourceFlags: UInt32) -> [ClientFrameType] {
+        let bits: [(NSBClientSource, ClientFrameType)] = [
             (.data, .data), (.nullData, .nullData), (.probeReq, .probeRequest),
             (.assocReq, .associationRequest), (.reassocReq, .reassociationRequest),
             (.auth, .authentication), (.action, .action),

@@ -80,7 +80,7 @@ extension SurveyOutput {
         switch payload {
         case .accessPoint(let ap): kind = .ap(WifiBeaconRecord(ap: ap, context: context), ap)
         case .probe(let probe): kind = .probe(WifiProbeRequestRecord(probe: probe, context: context), probe)
-        case .client(let client): kind = .client(WifiStationRecord(client: client, context: context), client)
+        case .client(let client): kind = .client(WifiClientRecord(client: client, context: context), client)
         case .ble(let ble): kind = .ble(BluetoothRecord(ble: ble, context: context), ble)
         case .deviceStatus(let info):
             kind = .deviceStatus(DeviceStatus(

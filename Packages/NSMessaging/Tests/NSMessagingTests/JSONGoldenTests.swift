@@ -49,7 +49,7 @@ struct JSONGoldenTests {
         data.encryptionType = .unknown
         data.channel = 0
         #expect(WifiBeaconRecord(data: data).jsonString()
-            == #"{"version":"2.6.0","messageType":"WifiBeaconRecord","data":{"bssid":"02:00:5e:00:53:01","channel":0}}"#)
+            == #"{"version":"2.7.0","messageType":"WifiBeaconRecord","data":{"bssid":"02:00:5e:00:53:01","channel":0}}"#)
         let json = #"{"version":"9.0.0","messageType":"WifiBeaconRecord","data":{"encryptionType":"WPA4","extra":1}}"#
         let decoded = try WifiBeaconRecord(jsonData: Data(json.utf8))
         #expect(decoded.data.encryptionType == .unknown)
@@ -65,7 +65,7 @@ struct JSONGoldenTests {
         }
         check(WifiBeaconRecordData.self)
         check(WifiProbeRequestRecordData.self)
-        check(WifiStationRecordData.self)
+        check(WifiClientRecordData.self)
         check(BluetoothRecordData.self)
         check(DeviceStatusData.self)
     }

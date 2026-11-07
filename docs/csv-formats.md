@@ -8,7 +8,7 @@ created when the first record of its kind arrives, so a session without BLE has 
 |---|---|---|
 | `craxiom-wifi-<time>.csv` | Wi-Fi access points (one row per AP per channel dwell) | NS CSV Wi-Fi 0.4.0 |
 | `craxiom-bluetooth-<time>.csv` | BLE advertisers (one row per address per scan window) | NS CSV Bluetooth 0.3.0 |
-| `craxiom-wifi-client-<time>.csv` | Wi-Fi clients (stations) | NS CSV client 0.1.0 |
+| `craxiom-wifi-client-<time>.csv` | Wi-Fi clients | NS CSV client 0.1.0 |
 | `craxiom-wifi-probe-<time>.csv` | Wi-Fi probe requests | NS CSV probe 0.1.0 |
 | `craxiom-wifi-raw-<time>.pcapng` | Raw 802.11 frames (only with "Raw frames" on) | pcapng, radiotap |
 
@@ -27,7 +27,8 @@ All NS CSV files follow the Network Survey Android app:
   deviceTime,latitude,longitude,...
   ```
 
-- Column names are the NS Messaging API field names.
+- Column names are the NS Messaging API field names, and every column is one of those fields. To spot a
+  randomized MAC, check whether `sourceAddress` has the locally administered bit (`0x02` of the first octet) set.
 - `deviceTime` is RFC 3339 with the phone's offset, millisecond precision, trailing zeros
   dropped (`2026-10-22T14:03:07.12-05:00`).
 - `latitude` and `longitude` have six decimals; `altitude`, `speed` and `accuracy` have up to two
@@ -62,10 +63,7 @@ signal describes the client.
 | `channel`, `frequencyMhz` | Where the frames were received. |
 | `signalStrength` | Strongest frame of the dwell, dBm. |
 | `snr` | `signalStrength` minus the receiver noise floor, dB, if the board reports it. |
-| `frameCount` | Frames received from the client in the dwell. |
 | `frameTypes` | Frame types seen: `DATA`, `NULL_DATA`, `PROBE_REQUEST`, `ASSOCIATION_REQUEST`, `REASSOCIATION_REQUEST`, `AUTHENTICATION`, `ACTION`. |
-| `locallyAdministered` | `true` when the MAC has the locally administered bit set (usually a randomized MAC). |
-| `boardId` | The sensor board that captured the frames. |
 | `deviceSerialNumber`, `locationAge` | As in the Wi-Fi file. |
 
 ### Probe 0.1.0
@@ -79,10 +77,9 @@ One row per client MAC address and requested SSID per channel dwell.
 | `destinationAddress`, `bssid` | Address 1 and address 3 of the last request (broadcast or a specific AP). |
 | `ssid` | The requested network name, empty for a wildcard probe. |
 | `channel`, `frequencyMhz`, `signalStrength`, `snr` | As in the client file. |
+| `nodeType` | Always `NON_AP_STA`: a probe request comes from a client. |
 | `standard` | Newest 802.11 standard the client advertised (`IEEE80211N`, `IEEE80211AC`, ...), `UNKNOWN` for legacy clients. |
-| `probeCount` | Requests received in the dwell. |
-| `locallyAdministered` | As in the client file. |
-| `boardId`, `deviceSerialNumber`, `locationAge` | As in the client file. |
+| `deviceSerialNumber`, `locationAge` | As in the client file. |
 
 ## pcapng
 

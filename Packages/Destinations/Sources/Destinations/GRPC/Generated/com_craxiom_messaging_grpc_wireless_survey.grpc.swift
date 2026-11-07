@@ -145,6 +145,19 @@ internal enum Com_Craxiom_Messaging_Grpc_WirelessSurvey: Sendable {
                 type: .clientStreaming
             )
         }
+        /// Namespace for "StreamWifiClientSurvey" metadata.
+        internal enum StreamWifiClientSurvey: Sendable {
+            /// Request type for "StreamWifiClientSurvey".
+            internal typealias Input = Com_Craxiom_Messaging_WifiClientRecord
+            /// Response type for "StreamWifiClientSurvey".
+            internal typealias Output = Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse
+            /// Descriptor for "StreamWifiClientSurvey".
+            internal static let descriptor = GRPCCore.MethodDescriptor(
+                service: GRPCCore.ServiceDescriptor(fullyQualifiedService: "com.craxiom.messaging.grpc.WirelessSurvey"),
+                method: "StreamWifiClientSurvey",
+                type: .clientStreaming
+            )
+        }
         /// Namespace for "StreamBluetoothSurvey" metadata.
         internal enum StreamBluetoothSurvey: Sendable {
             /// Request type for "StreamBluetoothSurvey".
@@ -234,6 +247,7 @@ internal enum Com_Craxiom_Messaging_Grpc_WirelessSurvey: Sendable {
             StreamWifiBeaconSurvey.descriptor,
             StreamWifiProbeRequestSurvey.descriptor,
             StreamWifiOtaSurvey.descriptor,
+            StreamWifiClientSurvey.descriptor,
             StreamBluetoothSurvey.descriptor,
             StreamGnssSurvey.descriptor,
             StreamEnergyDetections.descriptor,
@@ -391,6 +405,20 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey {
             request: GRPCCore.StreamingServerRequest<Com_Craxiom_Messaging_WifiOtaRecord>,
             context: GRPCCore.ServerContext
         ) async throws -> GRPCCore.StreamingServerResponse<Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse>
+
+        /// Handle the "StreamWifiClientSurvey" method.
+        ///
+        /// - Parameters:
+        ///   - request: A streaming request of `Com_Craxiom_Messaging_WifiClientRecord` messages.
+        ///   - context: Context providing information about the RPC.
+        /// - Throws: Any error which occurred during the processing of the request. Thrown errors
+        ///     of type `RPCError` are mapped to appropriate statuses. All other errors are converted
+        ///     to an internal error.
+        /// - Returns: A streaming response of `Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse` messages.
+        func streamWifiClientSurvey(
+            request: GRPCCore.StreamingServerRequest<Com_Craxiom_Messaging_WifiClientRecord>,
+            context: GRPCCore.ServerContext
+        ) async throws -> GRPCCore.StreamingServerResponse<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>
 
         /// Handle the "StreamBluetoothSurvey" method.
         ///
@@ -611,6 +639,20 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey {
             context: GRPCCore.ServerContext
         ) async throws -> GRPCCore.ServerResponse<Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse>
 
+        /// Handle the "StreamWifiClientSurvey" method.
+        ///
+        /// - Parameters:
+        ///   - request: A streaming request of `Com_Craxiom_Messaging_WifiClientRecord` messages.
+        ///   - context: Context providing information about the RPC.
+        /// - Throws: Any error which occurred during the processing of the request. Thrown errors
+        ///     of type `RPCError` are mapped to appropriate statuses. All other errors are converted
+        ///     to an internal error.
+        /// - Returns: A response containing a single `Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse` message.
+        func streamWifiClientSurvey(
+            request: GRPCCore.StreamingServerRequest<Com_Craxiom_Messaging_WifiClientRecord>,
+            context: GRPCCore.ServerContext
+        ) async throws -> GRPCCore.ServerResponse<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>
+
         /// Handle the "StreamBluetoothSurvey" method.
         ///
         /// - Parameters:
@@ -828,6 +870,20 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey {
             context: GRPCCore.ServerContext
         ) async throws -> Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse
 
+        /// Handle the "StreamWifiClientSurvey" method.
+        ///
+        /// - Parameters:
+        ///   - request: A stream of `Com_Craxiom_Messaging_WifiClientRecord` messages.
+        ///   - context: Context providing information about the RPC.
+        /// - Throws: Any error which occurred during the processing of the request. Thrown errors
+        ///     of type `RPCError` are mapped to appropriate statuses. All other errors are converted
+        ///     to an internal error.
+        /// - Returns: A `Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse` to respond with.
+        func streamWifiClientSurvey(
+            request: GRPCCore.RPCAsyncSequence<Com_Craxiom_Messaging_WifiClientRecord, any Swift.Error>,
+            context: GRPCCore.ServerContext
+        ) async throws -> Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse
+
         /// Handle the "StreamBluetoothSurvey" method.
         ///
         /// - Parameters:
@@ -1018,6 +1074,17 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey.StreamingServiceProtocol {
             }
         )
         router.registerHandler(
+            forMethod: Com_Craxiom_Messaging_Grpc_WirelessSurvey.Method.StreamWifiClientSurvey.descriptor,
+            deserializer: GRPCProtobuf.ProtobufDeserializer<Com_Craxiom_Messaging_WifiClientRecord>(),
+            serializer: GRPCProtobuf.ProtobufSerializer<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>(),
+            handler: { request, context in
+                try await self.streamWifiClientSurvey(
+                    request: request,
+                    context: context
+                )
+            }
+        )
+        router.registerHandler(
             forMethod: Com_Craxiom_Messaging_Grpc_WirelessSurvey.Method.StreamBluetoothSurvey.descriptor,
             deserializer: GRPCProtobuf.ProtobufDeserializer<Com_Craxiom_Messaging_BluetoothRecord>(),
             serializer: GRPCProtobuf.ProtobufSerializer<Com_Craxiom_Messaging_Grpc_BluetoothSurveyResponse>(),
@@ -1182,6 +1249,17 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey.ServiceProtocol {
         context: GRPCCore.ServerContext
     ) async throws -> GRPCCore.StreamingServerResponse<Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse> {
         let response = try await self.streamWifiOtaSurvey(
+            request: request,
+            context: context
+        )
+        return GRPCCore.StreamingServerResponse(single: response)
+    }
+
+    internal func streamWifiClientSurvey(
+        request: GRPCCore.StreamingServerRequest<Com_Craxiom_Messaging_WifiClientRecord>,
+        context: GRPCCore.ServerContext
+    ) async throws -> GRPCCore.StreamingServerResponse<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse> {
+        let response = try await self.streamWifiClientSurvey(
             request: request,
             context: context
         )
@@ -1368,6 +1446,19 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey.SimpleServiceProtocol {
     ) async throws -> GRPCCore.ServerResponse<Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse> {
         return GRPCCore.ServerResponse<Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse>(
             message: try await self.streamWifiOtaSurvey(
+                request: request.messages,
+                context: context
+            ),
+            metadata: [:]
+        )
+    }
+
+    internal func streamWifiClientSurvey(
+        request: GRPCCore.StreamingServerRequest<Com_Craxiom_Messaging_WifiClientRecord>,
+        context: GRPCCore.ServerContext
+    ) async throws -> GRPCCore.ServerResponse<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse> {
+        return GRPCCore.ServerResponse<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>(
+            message: try await self.streamWifiClientSurvey(
                 request: request.messages,
                 context: context
             ),
@@ -1632,6 +1723,25 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey {
             deserializer: some GRPCCore.MessageDeserializer<Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse>,
             options: GRPCCore.CallOptions,
             onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse>) async throws -> Result
+        ) async throws -> Result where Result: Sendable
+
+        /// Call the "StreamWifiClientSurvey" method.
+        ///
+        /// - Parameters:
+        ///   - request: A streaming request producing `Com_Craxiom_Messaging_WifiClientRecord` messages.
+        ///   - serializer: A serializer for `Com_Craxiom_Messaging_WifiClientRecord` messages.
+        ///   - deserializer: A deserializer for `Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse` messages.
+        ///   - options: Options to apply to this RPC.
+        ///   - handleResponse: A closure which handles the response and returns its result to
+        ///       the caller. Returning from the closure will cancel the RPC if it hasn't
+        ///       already finished.
+        /// - Returns: The result of `handleResponse`.
+        func streamWifiClientSurvey<Result>(
+            request: GRPCCore.StreamingClientRequest<Com_Craxiom_Messaging_WifiClientRecord>,
+            serializer: some GRPCCore.MessageSerializer<Com_Craxiom_Messaging_WifiClientRecord>,
+            deserializer: some GRPCCore.MessageDeserializer<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>,
+            options: GRPCCore.CallOptions,
+            onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>) async throws -> Result
         ) async throws -> Result where Result: Sendable
 
         /// Call the "StreamBluetoothSurvey" method.
@@ -2028,6 +2138,36 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey {
             try await self.client.clientStreaming(
                 request: request,
                 descriptor: Com_Craxiom_Messaging_Grpc_WirelessSurvey.Method.StreamWifiOtaSurvey.descriptor,
+                serializer: serializer,
+                deserializer: deserializer,
+                options: options,
+                onResponse: handleResponse
+            )
+        }
+
+        /// Call the "StreamWifiClientSurvey" method.
+        ///
+        /// - Parameters:
+        ///   - request: A streaming request producing `Com_Craxiom_Messaging_WifiClientRecord` messages.
+        ///   - serializer: A serializer for `Com_Craxiom_Messaging_WifiClientRecord` messages.
+        ///   - deserializer: A deserializer for `Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse` messages.
+        ///   - options: Options to apply to this RPC.
+        ///   - handleResponse: A closure which handles the response and returns its result to
+        ///       the caller. Returning from the closure will cancel the RPC if it hasn't
+        ///       already finished.
+        /// - Returns: The result of `handleResponse`.
+        internal func streamWifiClientSurvey<Result>(
+            request: GRPCCore.StreamingClientRequest<Com_Craxiom_Messaging_WifiClientRecord>,
+            serializer: some GRPCCore.MessageSerializer<Com_Craxiom_Messaging_WifiClientRecord>,
+            deserializer: some GRPCCore.MessageDeserializer<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>,
+            options: GRPCCore.CallOptions = .defaults,
+            onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>) async throws -> Result = { response in
+                try response.message
+            }
+        ) async throws -> Result where Result: Sendable {
+            try await self.client.clientStreaming(
+                request: request,
+                descriptor: Com_Craxiom_Messaging_Grpc_WirelessSurvey.Method.StreamWifiClientSurvey.descriptor,
                 serializer: serializer,
                 deserializer: deserializer,
                 options: options,
@@ -2440,6 +2580,31 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey.ClientProtocol {
             request: request,
             serializer: GRPCProtobuf.ProtobufSerializer<Com_Craxiom_Messaging_WifiOtaRecord>(),
             deserializer: GRPCProtobuf.ProtobufDeserializer<Com_Craxiom_Messaging_Grpc_WifiOtaSurveyResponse>(),
+            options: options,
+            onResponse: handleResponse
+        )
+    }
+
+    /// Call the "StreamWifiClientSurvey" method.
+    ///
+    /// - Parameters:
+    ///   - request: A streaming request producing `Com_Craxiom_Messaging_WifiClientRecord` messages.
+    ///   - options: Options to apply to this RPC.
+    ///   - handleResponse: A closure which handles the response and returns its result to
+    ///       the caller. Returning from the closure will cancel the RPC if it hasn't
+    ///       already finished.
+    /// - Returns: The result of `handleResponse`.
+    internal func streamWifiClientSurvey<Result>(
+        request: GRPCCore.StreamingClientRequest<Com_Craxiom_Messaging_WifiClientRecord>,
+        options: GRPCCore.CallOptions = .defaults,
+        onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>) async throws -> Result = { response in
+            try response.message
+        }
+    ) async throws -> Result where Result: Sendable {
+        try await self.streamWifiClientSurvey(
+            request: request,
+            serializer: GRPCProtobuf.ProtobufSerializer<Com_Craxiom_Messaging_WifiClientRecord>(),
+            deserializer: GRPCProtobuf.ProtobufDeserializer<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>(),
             options: options,
             onResponse: handleResponse
         )
@@ -2863,6 +3028,36 @@ extension Com_Craxiom_Messaging_Grpc_WirelessSurvey.ClientProtocol {
             producer: producer
         )
         return try await self.streamWifiOtaSurvey(
+            request: request,
+            options: options,
+            onResponse: handleResponse
+        )
+    }
+
+    /// Call the "StreamWifiClientSurvey" method.
+    ///
+    /// - Parameters:
+    ///   - metadata: Additional metadata to send, defaults to empty.
+    ///   - options: Options to apply to this RPC, defaults to `.defaults`.
+    ///   - producer: A closure producing request messages to send to the server. Returning
+    ///       from the closure closes the request stream.
+    ///   - handleResponse: A closure which handles the response and returns its result to
+    ///       the caller. Returning from the closure will cancel the RPC if it hasn't
+    ///       already finished.
+    /// - Returns: The result of `handleResponse`.
+    internal func streamWifiClientSurvey<Result>(
+        metadata: GRPCCore.Metadata = [:],
+        options: GRPCCore.CallOptions = .defaults,
+        requestProducer producer: @Sendable @escaping (GRPCCore.RPCWriter<Com_Craxiom_Messaging_WifiClientRecord>) async throws -> Void,
+        onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Com_Craxiom_Messaging_Grpc_WifiClientSurveyResponse>) async throws -> Result = { response in
+            try response.message
+        }
+    ) async throws -> Result where Result: Sendable {
+        let request = GRPCCore.StreamingClientRequest<Com_Craxiom_Messaging_WifiClientRecord>(
+            metadata: metadata,
+            producer: producer
+        )
+        return try await self.streamWifiClientSurvey(
             request: request,
             options: options,
             onResponse: handleResponse
