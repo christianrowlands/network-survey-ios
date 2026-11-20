@@ -41,15 +41,19 @@ public struct NSRecord<Payload: NSRecordData>: Sendable, Equatable, Codable {
     }
 }
 
-/// The payload of an NS Messaging message. `fields` lists the JSON fields in
-/// proto field-number order, which is the order the Android app writes them.
-public protocol NSRecordData: Sendable, Equatable, Codable {
-    static var messageType: String { get }
+/// An NS Messaging message body. `fields` lists the JSON fields in proto
+/// field-number order, which is the order the Android app writes them.
+public protocol NSMessageData: Sendable, Equatable, Codable {
     static var fields: [NSField<Self>] { get }
     init()
 }
 
-extension NSRecordData {
+/// The payload of an NS Messaging message.
+public protocol NSRecordData: NSMessageData {
+    static var messageType: String { get }
+}
+
+extension NSMessageData {
     public func write(to writer: inout NSJSONWriter) {
         writer.beginObject()
         for field in Self.fields { field.write(self, &writer) }
@@ -139,6 +143,50 @@ public struct NSField<Root> {
 
     public static func boolValue(_ number: Int, _ name: String, _ path: WritableKeyPath<Root, Bool?>) -> NSField {
         make(number, name, path, isDefault: { $0 == nil }, write: { $1.bool($0!) })
+    }
+
+    /// A proto3 uint64, which JSON carries as a string ("42").
+    public static func uint64(_ number: Int, _ name: String, _ path: WritableKeyPath<Root, UInt64>) -> NSField {
+        let key = NSJSONKey(name)
+        return NSField(
+            number: number, name: name,
+            write: { root, writer in
+                let value = root[keyPath: path]
+                guard value != 0 else { return }
+                writer.key(name)
+                writer.string(String(value))
+            },
+            decode: { root, container in
+                if let text = try? container.decodeIfPresent(String.self, forKey: key), let value = UInt64(text) {
+                    root[keyPath: path] = value
+                } else if let value = try? container.decodeIfPresent(UInt64.self, forKey: key) {
+                    root[keyPath: path] = value
+                }
+            },
+            encode: { root, container in
+                let value = root[keyPath: path]
+                if value != 0 { try container.encode(String(value), forKey: key) }
+            }
+        )
+    }
+
+    /// A `google.protobuf.StringValue`: left out only when nil, so "" is sent.
+    public static func stringValue(_ number: Int, _ name: String, _ path: WritableKeyPath<Root, String?>) -> NSField {
+        make(number, name, path, isDefault: { $0 == nil }, write: { $1.string($0!) })
+    }
+
+    /// A repeated nested message, left out when empty.
+    public static func messageList<Element: NSMessageData>(
+        _ number: Int, _ name: String, _ path: WritableKeyPath<Root, [Element]>
+    ) -> NSField {
+        make(number, name, path, isDefault: { $0.isEmpty }, write: { values, writer in
+            writer.beginArray()
+            for value in values {
+                writer.element()
+                value.write(to: &writer)
+            }
+            writer.endArray()
+        })
     }
 
     public static func enumeration<E: NSEnum>(_ number: Int, _ name: String, _ path: WritableKeyPath<Root, E>) -> NSField {

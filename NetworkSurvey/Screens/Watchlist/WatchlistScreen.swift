@@ -10,6 +10,8 @@ struct WatchlistScreen: View {
     @Environment(\.openURL) private var openURL
     @State private var adding = false
     @State private var confirmingClear = false
+    @State private var pasting = false
+    @State private var openedLink: OpenedLink?
 
     var body: some View {
         let watchlist = app.watchlist
@@ -63,6 +65,14 @@ struct WatchlistScreen: View {
                         }
                     }
                 }
+                Section {
+                    Toggle(isOn: settings.binding(Settings.watchlistStreamMQTT)) {
+                        Label("Stream over MQTT", systemImage: "antenna.radiowaves.left.and.right")
+                    }
+                    .accessibilityIdentifier("watchlist.streamMQTT")
+                } footer: {
+                    Text("While a survey streams to an MQTT broker, sightings and your watched networks, with their names, are sent to it.")
+                }
             }
             .panelRows()
         }
@@ -78,6 +88,16 @@ struct WatchlistScreen: View {
                 }
                 .accessibilityIdentifier("watchlist.history")
                 Menu {
+                    if let link = try? WatchlistLink.makeURL(entries: watchlist.entries) {
+                        ShareLink(item: link, subject: Text("Watchlist"),
+                                  message: Text("Networks to watch with Network Survey")) {
+                            Label("Share watchlist", systemImage: "square.and.arrow.up")
+                        }
+                    } else if watchlist.entries.count > WatchlistLimits.maxEntries {
+                        Text("A share link holds at most \(WatchlistLimits.maxEntries) networks")
+                    }
+                    Button("Import from a link", systemImage: "link") { pasting = true }
+                        .accessibilityIdentifier("watchlist.import")
                     Button("Clear all", systemImage: "trash", role: .destructive) { confirmingClear = true }
                         .disabled(watchlist.summaries.isEmpty)
                 } label: {
@@ -95,6 +115,14 @@ struct WatchlistScreen: View {
         .sheet(isPresented: $adding) {
             NavigationStack { WatchlistEntryEditor(mode: .add(ssid: "", bssid: "", turnOnAlerts: false)) }
                 .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $pasting) { WatchlistPasteImport() }
+        .sheet(item: $openedLink) { WatchlistLinkImport(url: $0.url) }
+        .onChange(of: app.pendingWatchlistLink, initial: true) { _, link in
+            // A link opened from outside the app.
+            guard let link else { return }
+            openedLink = OpenedLink(url: link)
+            app.pendingWatchlistLink = nil
         }
         .confirmationDialog("Clear the watchlist?", isPresented: $confirmingClear, titleVisibility: .visible) {
             Button("Clear all", role: .destructive) { watchlist.clearAll() }
@@ -162,4 +190,10 @@ struct WatchlistIdentity: View {
             }
         }
     }
+}
+
+/// A link to import, for `.sheet(item:)`.
+struct OpenedLink: Identifiable {
+    let id = UUID()
+    let url: URL
 }

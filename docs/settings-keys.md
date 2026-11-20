@@ -93,6 +93,8 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 | Key | Type | Default | Notes |
 |---|---|---|---|
 | `watchlist_enabled` | Bool | false | Watchlist alerts: watch for the networks on the watchlist during a survey, record each sighting and notify. Turned on by adding a network from an access point's details or by importing a list. Same key as Android |
+| `watchlist_stream_enabled` | Bool | true | While a survey streams to MQTT, send `watchlist_match_message` for each sighting and `watchlist_entry_message` with the whole list (on connect and on every change). Same key as Android |
+| `watchlist_mqtt_message_sequence` | Int | 0 | Internal: the last `messageSequence` sent on `watchlist_entry_message`. Starts from the clock in milliseconds, then counts up, so a server keeps the newest list. Same key as Android. Not a user setting |
 
 The watched networks and their sightings are not settings: they live in the survey database (tables `watchlistEntry` and `watchlistHit`), so they stay on this iPhone. Sightings older than 90 days are removed.
 

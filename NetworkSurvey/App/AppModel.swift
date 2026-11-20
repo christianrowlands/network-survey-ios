@@ -74,6 +74,9 @@ final class AppModel {
     /// An NS Analytics registration link opened from outside the app, for the
     /// registration screen to pick up (and set back to nil).
     var pendingRegistrationLink: URL?
+    /// A watchlist share link opened from outside the app, for the Watchlist
+    /// screen to offer for import (and set back to nil).
+    var pendingWatchlistLink: URL?
     /// A survey a previous launch left running, offered for resume or close.
     var interruptedSession: SessionRow?
     var isResuming = false

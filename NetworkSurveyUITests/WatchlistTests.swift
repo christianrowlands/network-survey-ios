@@ -124,6 +124,43 @@ final class WatchlistTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["No watched networks"].waitForExistence(timeout: 5))
     }
 
+    /// A pasted share link (the example from the link format page) is
+    /// previewed, then imported; importing it again finds nothing new.
+    @MainActor
+    func testImportFromPastedLink() {
+        let link = "https://networksurvey.app/app/watchlist?d=eyJ2IjoxLCJuYW1lIjoiQWNtZSBuZXR3b3JrcyIsImVudHJpZXMiOlt7ImxhYmVsIjoiSFEiLCJzc2lkIjoiSFEtR3Vlc3QifSx7ImxhYmVsIjoiTG9iYnkiLCJic3NpZCI6ImE0OjExOjIyOjMzOjQ0OjFjIn1dfQ"
+        let app = XCUIApplication()
+        app.launchArguments = ["-NSUITesting", "YES"]
+        app.launch()
+        app.tabBars.buttons["Settings"].tap()
+        openWatchlist(app)
+
+        for round in 0..<2 {
+            app.buttons["watchlist.more"].tap()
+            app.buttons["watchlist.import"].tap()
+            let text = app.textViews["watchlist.importText"].exists ? app.textViews["watchlist.importText"] : app.textFields["watchlist.importText"]
+            XCTAssertTrue(text.waitForExistence(timeout: 5))
+            text.tap()
+            text.typeText(link)
+            app.buttons["watchlist.importNext"].tap()
+            if round == 0 {
+                XCTAssertTrue(app.staticTexts["Add \u{201C}Acme networks\u{201D}?"].waitForExistence(timeout: 5))
+                XCTAssertTrue(app.staticTexts["From a link: 2 new networks."].exists)
+                attach(app, "watchlist-import-preview")
+                app.buttons["watchlist.importConfirm"].tap()
+            } else {
+                XCTAssertTrue(app.staticTexts["All 2 networks in this link are already on your watchlist."].waitForExistence(timeout: 5))
+                attach(app, "watchlist-import-all-saved")
+                app.buttons["Done"].tap()
+            }
+            XCTAssertTrue(app.navigationBars["Watchlist"].waitForExistence(timeout: 5))
+        }
+        XCTAssertTrue(app.cells.containing(NSPredicate(format: "label CONTAINS 'Lobby' AND label CONTAINS 'a4:11:22:33:44:1c'")).firstMatch.exists)
+        XCTAssertTrue(app.cells.containing(NSPredicate(format: "label CONTAINS 'HQ' AND label CONTAINS 'HQ-Guest'")).firstMatch.exists)
+        XCTAssertEqual(app.switches["watchlist.alerts"].value as? String, "1", "importing turns alerts on")
+        attach(app, "watchlist-imported")
+    }
+
     /// Settings > Watchlist, scrolling down to Tools.
     @MainActor
     private func openWatchlist(_ app: XCUIApplication) {

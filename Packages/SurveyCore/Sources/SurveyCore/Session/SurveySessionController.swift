@@ -266,6 +266,10 @@ public actor SurveySessionController {
             finalCounters = nil
             self.sinks = sinks
             subscribe(pipeline, sessionID: row.id)
+            tasks += await WatchlistStreaming.start(
+                sinks: sinks, store: env.store, settings: env.settings, monitor: env.watchlist, session: context,
+                now: env.now
+            )
             await env.location.start(background: true)
             locationAuthorization = await env.location.authorization()
             if isNew {

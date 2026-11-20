@@ -207,6 +207,11 @@ run, the same way the Network Survey Android app does.
   (probe requests), `bluetooth_message` and `device_status_message`.
 - **Stream client records** (experimental) also sends Wi-Fi client records on
   `80211_client_message`, new in NS Messaging 2.7.0.
+- The [Wi-Fi watchlist](#wi-fi-watchlist) streams too, unless you turn off
+  **Stream over MQTT** on the Watchlist screen: `watchlist_match_message` for
+  each sighting (`WatchlistMatch`) and `watchlist_entry_message` with your
+  whole watchlist (`WatchlistEntryUpdate`), sent when the broker connects and
+  whenever the list changes.
 - The queue holds records while the broker is unreachable (20,000 by default,
   0 means no limit) and sends them when the connection comes back. With no
   limit, the queue still holds at most 20,000 records until the broker is first
@@ -349,9 +354,25 @@ time, signal and location. Open it from **Settings > Watchlist**.
   including networks on your ignore list. Records a Scout sends late, after
   being out of range, never alert. Inside a privacy zone a sighting is saved
   without its location.
+- **Share:** **More > Share watchlist** on the Watchlist screen, or the share
+  button on one network, makes a `https://networksurvey.app/app/watchlist`
+  link with the networks in it (up to 100). It is the same link format the
+  Network Survey Android app opens, documented on the
+  [link format page](https://networksurvey.app/manual/advanced/watchlist-deep-links/).
+- **Import:** open a watchlist link on the iPhone, or tap **More > Import from
+  a link** and paste it (a message with the link in it works too). You see the
+  networks first, with the ones you already watch marked **Already saved**;
+  **Add** adds only the new ones and turns watchlist alerts on. Nothing already
+  on your list is changed. A link with anything out of bounds (a malformed MAC
+  address, a name that is too long, more than 100 networks) is refused whole.
+- **MQTT:** while a survey streams to an MQTT broker, sightings and your
+  watched networks (with their names) are sent to it, as on Android. Turn off
+  **Stream over MQTT** on the Watchlist screen to keep the watchlist on the
+  iPhone. A phone that never had a watched network sends nothing. See
+  [MQTT](#mqtt).
 
-The watchlist and its history stay on this iPhone. Sightings are kept for 90
-days.
+The watchlist and its history stay on this iPhone unless you share them or
+stream them over MQTT. Sightings are kept for 90 days.
 
 ## Nearby Bluetooth (no NS Scout needed)
 

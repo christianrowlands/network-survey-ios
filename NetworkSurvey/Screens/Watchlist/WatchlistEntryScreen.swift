@@ -78,7 +78,12 @@ struct WatchlistEntryScreen: View {
         }
         .themedList()
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if let link = try? WatchlistLink.makeURL(entries: [entry]) {
+                    ShareLink(item: link, subject: Text(entry.label), message: Text("A network to watch with Network Survey")) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                }
                 Button("Edit") { editing = true }
                     .accessibilityIdentifier("watchlist.edit")
             }

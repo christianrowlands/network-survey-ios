@@ -53,6 +53,20 @@ struct WatchlistAppTests {
         await model.stopSurvey()
     }
 
+    @Test("A watchlist share link opens the Watchlist to import it; other links go where they did")
+    func linkRouting() throws {
+        var options = LaunchOptions()
+        options.uiTesting = true
+        let model = AppModel(options: options, sharedStore: try SurveyStore.inMemory())
+        let link = try #require(URL(string: "https://networksurvey.app/app/watchlist?d=eyJ2IjoxfQ"))
+        model.handleOpenURL(link)
+        #expect(model.pendingWatchlistLink == link)
+        #expect(model.selectedTab == .settings && model.settingsRoute == .watchlist)
+        let register = try #require(URL(string: "https://networksurvey.app/app/register?token=x"))
+        model.handleOpenURL(register)
+        #expect(model.pendingRegistrationLink == register && model.pendingWatchlistLink == link)
+    }
+
     @Test("The notification names the network and its signal when known")
     func notificationText() {
         #expect(WatchlistNotifier.body(label: "ExampleNet", rssi: -58) == "ExampleNet is nearby (-58 dBm)")
