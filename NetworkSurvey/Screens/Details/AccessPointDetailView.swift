@@ -44,6 +44,9 @@ private struct AccessPointDetailContent: View {
                 }
                 Section("Identity") {
                     DetailRow(label: "BSSID", value: ap.bssid, mono: true)
+                    if let vendor = OUIRegistry.vendor(for: ap.bssid) {
+                        DetailRow(label: "Manufacturer", value: vendor)
+                    }
                     if ap.randomized {
                         DetailRow(label: "BSSID type", value: "Locally administered (likely a virtual AP)")
                     }

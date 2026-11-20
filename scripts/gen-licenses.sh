@@ -2,8 +2,8 @@
 # Generates NetworkSurvey/Screens/Settings/Resources/third-party-licenses.json
 # (committed): name, version, license and full license and notice text of
 # every Swift package the app resolves, plus the vendored NS Messaging protos
-# and the source note for the bundled Bluetooth SIG assigned numbers, for the
-# Open-source licenses screen.
+# and the source notes for the bundled Bluetooth SIG assigned numbers and IEEE
+# MAC address registries, for the Open-source licenses screen.
 #
 # Usage: scripts/gen-licenses.sh [--check] [--checkouts <dir>]
 #   --check            change nothing; fail if the JSON is stale.
@@ -132,6 +132,14 @@ entries.append({
             "company_identifiers.yaml, assigned_numbers/uuids/member_uuids.yaml and assigned_numbers/uuids/"
             "service_uuids.yaml). Refresh them with scripts/update-bluetooth-numbers.sh.\n\n"
             + sig_notice.strip(),
+})
+# The IEEE registries are public listings with no license; record their source.
+entries.append({
+    "name": "IEEE MAC Address Registries", "version": "MA-L, MA-M and MA-S",
+    "license": "Source", "url": "https://standards.ieee.org/products-programs/regauth/",
+    "text": "Manufacturer names for MAC addresses are the IEEE Registration Authority's public MA-L, MA-M "
+            "and MA-S assignment lists, from https://standards-oui.ieee.org (oui/oui.csv, oui28/mam.csv "
+            "and oui36/oui36.csv). Refresh them with scripts/update-oui.sh.",
 })
 entries.sort(key=lambda e: e["name"].lower())
 # This app's own license and NOTICE, shown first on the screen.

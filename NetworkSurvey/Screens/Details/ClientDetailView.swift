@@ -61,7 +61,7 @@ private struct ClientDetailContent: View {
                                 VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
                                     Text(ap.ssid?.isEmpty == false ? ap.ssid! : "Unknown network")
                                         .foregroundStyle(Theme.Colors.ink)
-                                    Text(ap.bssid).font(Theme.Fonts.mono).foregroundStyle(Theme.Colors.ink2)
+                                    AddressLine(address: ap.bssid, vendor: OUIRegistry.shortVendor(for: ap.bssid))
                                 }
                             }
                         }
@@ -90,6 +90,9 @@ private struct ClientDetailContent: View {
                     Text("Network names from probe requests: the client's saved networks (preferred network list).")
                 }
                 Section("Details") {
+                    if let vendor = OUIRegistry.vendor(for: client.mac) {
+                        DetailRow(label: "Manufacturer", value: vendor)
+                    }
                     if let sources = DataFormat.clientSources(client.sourceFlags) {
                         DetailRow(label: "Seen in", value: sources)
                     }

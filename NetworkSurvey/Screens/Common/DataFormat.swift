@@ -137,6 +137,12 @@ enum DataFormat {
         return first & 0xC0 != 0xC0
     }
 
+    /// The manufacturer registered for a public Bluetooth address. Random
+    /// addresses (static or private) are not in the IEEE registries.
+    static func bleAddressVendor(_ address: String, addressType: Int) -> String? {
+        NSBBleAddressType(rawValue: addressType) == .public ? OUIRegistry.vendor(for: address) : nil
+    }
+
     static func dBm(_ value: Int) -> String {
         "\(value) dBm"
     }

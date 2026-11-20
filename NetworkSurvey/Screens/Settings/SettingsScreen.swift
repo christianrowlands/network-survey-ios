@@ -103,6 +103,12 @@ struct SettingsScreen: View {
                             ? "Records use the phone's location. A Scout GPS fills in when the phone has no recent, accurate fix."
                             : "Records use a Scout GPS when one has a fix, and the phone's location otherwise.")
                     }
+                    Section("Tools") {
+                        NavigationLink { OUILookupView() } label: {
+                            Label("OUI lookup", systemImage: "magnifyingglass")
+                        }
+                        .accessibilityIdentifier("settings.ouiLookup")
+                    }
                     #if DEBUG
                     Section("Developer") {
                         NavigationLink {

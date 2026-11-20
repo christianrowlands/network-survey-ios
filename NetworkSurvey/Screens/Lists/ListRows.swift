@@ -11,9 +11,7 @@ struct AccessPointRowView: View {
                     .font(Theme.Fonts.rowTitle.weight(.medium))
                     .foregroundStyle(ap.ssid?.isEmpty == false ? Theme.Colors.ink : Theme.Colors.ink2)
                     .lineLimit(1)
-                Text(ap.bssid)
-                    .font(Theme.Fonts.mono)
-                    .foregroundStyle(Theme.Colors.ink2)
+                AddressLine(address: ap.bssid, vendor: OUIRegistry.shortVendor(for: ap.bssid))
                 TagRow {
                     TagPill(text: DataFormat.security(ap.security), color: DataFormat.securityColor(ap.security))
                     BandTag(band: ap.band, channel: ap.channel)
@@ -35,9 +33,7 @@ struct ClientRowView: View {
         let client = item.client
         HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.m) {
             VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-                Text(client.mac)
-                    .font(Theme.Fonts.mono)
-                    .foregroundStyle(Theme.Colors.ink)
+                AddressLine(address: client.mac, vendor: OUIRegistry.shortVendor(for: client.mac), color: Theme.Colors.ink)
                 Group {
                     if let bssid = client.associatedBssid {
                         if let ssid = item.associatedSSID, !ssid.isEmpty {
@@ -97,9 +93,7 @@ struct ProbeClientRowView: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.m) {
             VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-                Text(client.mac)
-                    .font(Theme.Fonts.mono)
-                    .foregroundStyle(Theme.Colors.ink)
+                AddressLine(address: client.mac, vendor: OUIRegistry.shortVendor(for: client.mac), color: Theme.Colors.ink)
                 Text(networks)
                     .font(Theme.Fonts.body)
                     .foregroundStyle(Theme.Colors.ink2)
@@ -135,9 +129,7 @@ struct BLERowView: View {
                     .font(Theme.Fonts.rowTitle.weight(.medium))
                     .foregroundStyle(device.name?.isEmpty == false ? Theme.Colors.ink : Theme.Colors.ink2)
                     .lineLimit(1)
-                Text(device.address)
-                    .font(Theme.Fonts.mono)
-                    .foregroundStyle(Theme.Colors.ink2)
+                AddressLine(address: device.address, vendor: DataFormat.bleAddressVendor(device.address, addressType: device.addressType).map(OUIRegistry.shortName))
                 TagRow {
                     if let company = device.companyId {
                         TagPill(text: BLECompanies.name(for: company) ?? BLECompanies.hexID(company), color: Theme.Colors.bluetooth)
@@ -150,6 +142,28 @@ struct BLERowView: View {
         }
         .padding(.vertical, Theme.Spacing.xs)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// A MAC address in monospace with its manufacturer after it, when known.
+struct AddressLine: View {
+    let address: String
+    let vendor: String?
+    var color = Theme.Colors.ink2
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.s) {
+            Text(address)
+                .font(Theme.Fonts.mono)
+                .foregroundStyle(color)
+                .layoutPriority(1)
+            if let vendor {
+                Text(vendor)
+                    .font(Theme.Fonts.caption)
+                    .foregroundStyle(Theme.Colors.ink2)
+                    .lineLimit(1)
+            }
+        }
     }
 }
 

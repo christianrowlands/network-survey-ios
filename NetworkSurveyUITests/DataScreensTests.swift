@@ -186,6 +186,59 @@ final class DataScreensTests: XCTestCase {
         XCTAssertTrue(marker.waitForExistence(timeout: 30), "map should show markers for the demo survey")
     }
 
+    /// Rows and the access point detail name the manufacturer of a globally
+    /// unique address. The demo Scout uses the IANA documentation range.
+    @MainActor
+    func testListsShowManufacturer() {
+        let app = launchSurveying()
+        app.tabBars.buttons["Lists"].tap()
+        let vendor = app.cells.containing(NSPredicate(format: "label CONTAINS 'ICANN, IANA Department'")).firstMatch
+        XCTAssertTrue(vendor.waitForExistence(timeout: 30), "no access point row named its manufacturer")
+        attach(app, "lists-aps")
+        vendor.tap()
+        XCTAssertTrue(app.navigationBars["Access point"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Manufacturer"].waitForExistence(timeout: 5))
+        attach(app, "detail-ap")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["Clients"].tap()
+        sleep(3)
+        attach(app, "lists-clients")
+    }
+
+    /// The OUI lookup in Settings names the manufacturer from the registry
+    /// built into the app, and explains a randomized address.
+    @MainActor
+    func testOUILookupNamesManufacturer() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-NSUITesting", "YES"]
+        app.launch()
+        app.tabBars.buttons["Settings"].tap()
+        let row = app.buttons["settings.ouiLookup"]
+        if !row.waitForExistence(timeout: 2) { app.swipeUp() }
+        XCTAssertTrue(row.waitForExistence(timeout: 5))
+        row.tap()
+        XCTAssertTrue(app.navigationBars["OUI lookup"].waitForExistence(timeout: 5))
+        let field = app.textFields["oui.input"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("00:00:00:12:34:56")
+        XCTAssertTrue(app.staticTexts["XEROX CORPORATION"].waitForExistence(timeout: 5))
+        attach(app, "oui-vendor")
+        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'MA-L'")).firstMatch.exists)
+
+        field.clearAndType("DA:A1:19:00:00:01")
+        XCTAssertTrue(app.staticTexts["Randomized address"].waitForExistence(timeout: 5))
+        attach(app, "oui-randomized")
+    }
+
+    @MainActor
+    private func attach(_ app: XCUIApplication, _ name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
     @MainActor
     func testAppearanceSwitchesLive() {
         let app = XCUIApplication()
@@ -220,5 +273,16 @@ final class DataScreensTests: XCTestCase {
                                 space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         context?.draw(image, in: CGRect(x: -4, y: -CGFloat(image.height / 2), width: CGFloat(image.width), height: CGFloat(image.height)))
         return UInt32(pixel[0]) << 16 | UInt32(pixel[1]) << 8 | UInt32(pixel[2])
+    }
+}
+
+extension XCUIElement {
+    /// Replaces the text field's contents.
+    func clearAndType(_ text: String) {
+        tap()
+        if let current = value as? String, !current.isEmpty {
+            typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count))
+        }
+        typeText(text)
     }
 }

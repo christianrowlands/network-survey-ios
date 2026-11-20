@@ -5,6 +5,10 @@ struct NetworkSurveyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        OUIRegistry.warmUp()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

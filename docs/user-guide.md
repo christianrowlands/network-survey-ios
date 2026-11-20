@@ -276,6 +276,10 @@ characters from this install's ID.
 - **Details** show everything known about one access point, client or
   Bluetooth device, a signal chart, and related devices (an access point's
   clients, a client's access points and the networks it probes for).
+- **Manufacturers** appear next to each address in Lists and on the detail
+  screens, from the IEEE MAC address registries built into the app, so
+  nothing is looked up online. Randomized addresses have no manufacturer.
+  **Settings > OUI lookup** looks up any address or its first 6 hex digits.
 - **Between surveys** the Map and Lists show **Not recording** instead of
   the last survey, because a Scout only hears while a survey records. Tap
   **Show last survey**, or pick any survey from the title menu, to look back
