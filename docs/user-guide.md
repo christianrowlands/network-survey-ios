@@ -285,6 +285,13 @@ characters from this install's ID.
   strongest signal. Tap a network to show its access points, and tap again
   to hide them. Hidden and unnamed networks stay one row per BSSID. **By
   BSSID** lists every access point on its own row. The choice is kept.
+- **Spectrum** (the chart button at the top left of **Lists > APs**) shows
+  how busy each Wi-Fi channel is. Each access point is a curve over the
+  channels it uses, as wide as its channel width and as high as its signal.
+  It shows the access points heard in the last 2 minutes, kept live while a
+  survey records; for a past survey, the last 2 minutes of that survey. Pick
+  2.4 or 5 GHz at the top, and for 5 GHz a channel range. Tap a curve or a
+  row under the chart to open that access point.
 - **Details** show everything known about one access point, client or
   Bluetooth device, a signal chart, and related devices (an access point's
   clients, a client's access points and the networks it probes for).
