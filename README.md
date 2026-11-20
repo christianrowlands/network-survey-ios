@@ -51,6 +51,8 @@ with simulated data.
   lists, and detail pages with signal history
 - **Manufacturer names** for Wi-Fi and Bluetooth addresses from the IEEE
   registries built into the app, and an OUI lookup tool
+- **Wi-Fi watchlist:** a notification when a Scout sees a network you watch,
+  with a history of when and where it was seen
 - **Several boards:** up to four boards at once. The app splits the channels
   between them automatically, or you set each board's role.
 - **Privacy controls:** privacy zones where nothing is recorded, an ignore

@@ -16,6 +16,7 @@ struct AccessPointRowView: View {
                     TagPill(text: DataFormat.security(ap.security), color: DataFormat.securityColor(ap.security))
                     BandTag(band: ap.band, channel: ap.channel)
                     if ap.ssidHidden { TagPill(text: "Hidden", color: Theme.Colors.tagHidden) }
+                    WatchedTag(ssid: ap.ssid, bssid: ap.bssid)
                 }
             }
             Spacer(minLength: Theme.Spacing.s)

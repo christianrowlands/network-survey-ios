@@ -28,6 +28,7 @@ enum SurveyRoute: Hashable {
 /// The Settings screen shows it and sets `AppModel.settingsRoute` back to nil.
 enum SettingsRoute: Hashable {
     case logFiles, mqtt, grpc, nsAnalytics
+    case watchlist, watchlistHistory
 }
 
 /// The composition root: builds the board manager (Bluetooth plus the demo
@@ -56,6 +57,8 @@ final class AppModel {
     let nsAnalyticsClient: NSAnalyticsClient
     let uploader: NSAnalyticsUploader
     let access: AccessModel
+    let watchlistMonitor: WatchlistMonitor
+    let watchlist: WatchlistModel
     let idleTimer = IdleTimerController()
 
     var selectedTab: AppTab = .survey
@@ -161,6 +164,8 @@ final class AppModel {
         nsAnalyticsClient = NSAnalyticsClient(transport: httpTransport)
 
         storageProblem = storageProblems.isEmpty ? nil : storageProblems.joined(separator: " ")
+        let watchlistMonitor = WatchlistMonitor(store: store, settings: settings)
+        self.watchlistMonitor = watchlistMonitor
         let settings = settings
         let uploader = uploader
         let environment = SessionEnvironment(
@@ -176,11 +181,13 @@ final class AppModel {
             },
             isDemoSession: {
                 await MainActor.run { manager.readyBoards.contains(where: demoIDs.contains) }
-            }
+            },
+            watchlist: watchlistMonitor
         )
         controller = SurveySessionController(environment: environment)
         survey = SurveyModel(controller: controller, store: store, boardManager: manager)
         access = AccessModel(locationProvider: phoneLocation)
+        watchlist = WatchlistModel(store: store, settings: settings, monitor: watchlistMonitor, notifier: WatchlistNotifier())
 
         if let uploadTransport {
             uploadTransport.orphanHandler = { taskID, result in
@@ -210,6 +217,10 @@ final class AppModel {
         launched = true
         tasks.append(Task { [weak self] in await self?.watchSettings() })
         tasks.append(Task { [weak self] in await self?.tick() })
+        // Before an interrupted survey resumes, so its sightings are caught.
+        await watchlistMonitor.start()
+        watchlist.notifier.onOpen = { [weak self] in self?.open(.watchlistHistory) }
+        watchlist.notifier.activate()
         for (board, role) in roleStore.load() {
             await boardManager.setRole(role, for: board)
         }

@@ -14,10 +14,11 @@ Contents:
 5. [While a survey runs](#while-a-survey-runs)
 6. [Where the data goes](#where-the-data-goes)
 7. [Looking at the data](#looking-at-the-data)
-8. [Nearby Bluetooth (no NS Scout needed)](#nearby-bluetooth-no-ns-scout-needed)
-9. [Privacy controls](#privacy-controls)
-10. [Updating Scout firmware](#updating-scout-firmware)
-11. [Troubleshooting](#troubleshooting)
+8. [Wi-Fi watchlist](#wi-fi-watchlist)
+9. [Nearby Bluetooth (no NS Scout needed)](#nearby-bluetooth-no-ns-scout-needed)
+10. [Privacy controls](#privacy-controls)
+11. [Updating Scout firmware](#updating-scout-firmware)
+12. [Troubleshooting](#troubleshooting)
 
 ## What you need
 
@@ -314,6 +315,43 @@ service, the same one the Android app uses, with data from
 
 Tower positions are estimates from crowd-sourced measurements and can be off
 by hundreds of meters.
+
+## Wi-Fi watchlist
+
+The watchlist keeps Wi-Fi networks you care about. When a Scout sees one
+during a survey, you get a notification and the sighting is saved with its
+time, signal and location. Open it from **Settings > Watchlist**.
+
+- **Watch a network** by its name (SSID) on any access point, by one access
+  point's MAC address (BSSID), or by both together. With both, it matches only
+  when that access point broadcasts that name. Names and addresses match
+  without regard to case, and a hidden network never matches a name.
+- **Add from an access point:** on its details, tap **Add to watchlist**. The
+  form is filled in from the access point; pick **Network name**, **Access
+  point** or **Both** and tap **Add**. Adding from there also turns
+  **Watchlist alerts** on. Or tap **+** on the Watchlist screen to type one in.
+- **Watched** marks a watched access point in Lists and on its details.
+- **Watchlist alerts** at the top of the Watchlist screen turns watching on
+  and off for the whole list. Each network also has its own **Alerts for this
+  network** switch, to mute it without removing it.
+- **Notifications:** the app asks to send notifications when you add your
+  first network. A network alerts when it appears after being gone for a
+  minute, not on every scan, and the same network alerts at most once every
+  15 minutes. Alerts work with the app in the background while a survey runs.
+  If notifications are off, sightings are still saved, and the Watchlist
+  screen says so.
+- **History** lists each network that was seen, with how many times, when it
+  was last seen and the best signal. Search it, sort it by **Most recent**,
+  **Strongest** or **Most seen**, or clear it. Tap a network (here or on the
+  Watchlist screen) for each sighting, with a map of the ones that have a
+  location.
+- **What is checked:** every access point a Scout hears during a survey,
+  including networks on your ignore list. Records a Scout sends late, after
+  being out of range, never alert. Inside a privacy zone a sighting is saved
+  without its location.
+
+The watchlist and its history stay on this iPhone. Sightings are kept for 90
+days.
 
 ## Nearby Bluetooth (no NS Scout needed)
 

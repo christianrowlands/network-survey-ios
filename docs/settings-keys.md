@@ -88,6 +88,14 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 | `tower_map_operator` | String | "" | One operator as `mcc-mnc` (for example `310-410`), or empty for all |
 | `has_seen_tower_notice` | Bool | false | The note on what the tower layer sends was accepted, so turning towers on again does not ask |
 
+## Watchlist
+
+| Key | Type | Default | Notes |
+|---|---|---|---|
+| `watchlist_enabled` | Bool | false | Watchlist alerts: watch for the networks on the watchlist during a survey, record each sighting and notify. Turned on by adding a network from an access point's details or by importing a list. Same key as Android |
+
+The watched networks and their sightings are not settings: they live in the survey database (tables `watchlistEntry` and `watchlistHit`), so they stay on this iPhone. Sightings older than 90 days are removed.
+
 ## Advanced
 
 | Key | Type | Default | Notes |

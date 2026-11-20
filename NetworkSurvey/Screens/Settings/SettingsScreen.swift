@@ -104,6 +104,10 @@ struct SettingsScreen: View {
                             : "Records use a Scout GPS when one has a fix, and the phone's location otherwise.")
                     }
                     Section("Tools") {
+                        NavigationLink(value: SettingsRoute.watchlist) {
+                            SettingsLinkLabel(title: "Watchlist", symbol: "eye", detail: countText(app.watchlist.summaries.count))
+                        }
+                        .accessibilityIdentifier("settings.watchlist")
                         NavigationLink { OUILookupView() } label: {
                             Label("OUI lookup", systemImage: "magnifyingglass")
                         }
@@ -159,12 +163,14 @@ struct SettingsScreen: View {
                 case .mqtt: MQTTSettingsView()
                 case .grpc: GRPCSettingsView()
                 case .nsAnalytics: NSAnalyticsSettingsView()
+                case .watchlist: WatchlistScreen()
+                case .watchlistHistory: WatchlistHistoryScreen()
                 }
             }
             .onChange(of: app.settingsRoute, initial: true) { _, route in
                 // Another screen asked for a page ("Set up" on a destination).
                 guard let route else { return }
-                path = [route]
+                path = route == .watchlistHistory ? [.watchlist, route] : [route]
                 app.settingsRoute = nil
             }
         }

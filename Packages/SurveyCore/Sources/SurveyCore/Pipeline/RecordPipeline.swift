@@ -22,6 +22,7 @@ public actor RecordPipeline {
     private var privacy: PrivacyFilter
     private let policy: LocationSourcePolicy
     private let battery: any BatteryProvider
+    private let watchlist: WatchlistMonitor?
     private let maxPending: Int
     private let maxInFlight = 4
     private let now: @Sendable () -> Date
@@ -45,7 +46,8 @@ public actor RecordPipeline {
     public init(
         session: SessionContext, store: SurveyStore, sinks: [any SurveyRecordSink], privacy: PrivacyFilter,
         policy: LocationSourcePolicy, battery: any BatteryProvider = UnknownBattery(), maxPending: Int = 200,
-        numbers: RecordNumbers = RecordNumbers(), now: @escaping @Sendable () -> Date = { Date() }
+        numbers: RecordNumbers = RecordNumbers(), watchlist: WatchlistMonitor? = nil,
+        now: @escaping @Sendable () -> Date = { Date() }
     ) {
         self.session = session
         self.store = store
@@ -53,6 +55,7 @@ public actor RecordPipeline {
         self.privacy = privacy
         self.policy = policy
         self.battery = battery
+        self.watchlist = watchlist
         self.maxPending = maxPending
         self.numbers = numbers
         self.now = now
@@ -88,6 +91,14 @@ public actor RecordPipeline {
         counters.received[type, default: 0] += 1
         counters.perBoard[board.description, default: 0] += 1
         let location = location(at: time)
+        if case .ap(let ap) = kind, let watchlist {
+            // Ignored networks are still watched (as on Android); inside a
+            // privacy zone the sighting is kept without its location.
+            let inZone = privacy.isInsideZone(fix: location ?? lastKnownFix(at: time))
+            watchlist.observe(
+                ap, time: time, receivedAt: receivedAt, location: inZone ? nil : location, missionId: session.missionId
+            )
+        }
         guard privacy.allows(kind, fix: location ?? lastKnownFix(at: time)) else {
             pendingFiltered += 1
             counters.filtered += 1

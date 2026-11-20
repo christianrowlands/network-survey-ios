@@ -137,6 +137,7 @@ enum StoreSchema {
                 t.column("source", .text).notNull()
             }
         }
+        WatchlistSchema.register(in: &migrator)
         return migrator
     }
 
