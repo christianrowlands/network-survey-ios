@@ -65,6 +65,16 @@ final class WatchlistModel {
         entry(ssid: ssid, bssid: bssid) != nil
     }
 
+    /// Some entry names this network, for a collapsed SSID group in the
+    /// access point list. Entries that name only a BSSID show on the access
+    /// point's own row once the group is open.
+    func watchesNetwork(ssid: String) -> Bool {
+        guard let wanted = WatchlistMatcher.normalizeSSID(ssid) else { return false }
+        return entries.contains { entry in
+            WatchlistMatcher.normalizeSSID(entry.ssid).map { $0.caseInsensitiveCompare(wanted) == .orderedSame } ?? false
+        }
+    }
+
     // MARK: - Changes
 
     /// Adds a network. `turnOnAlerts` (adding from a detail screen, where the

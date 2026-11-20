@@ -66,6 +66,7 @@ struct AccessPointGroupRowView: View {
                         BandTag(band: band, channel: 0)
                     }
                     if group.hidden { TagPill(text: "Hidden", color: Theme.Colors.tagHidden) }
+                    WatchedTag(ssid: group.ssid, bssid: group.bssid, group: true)
                 }
             }
             Spacer(minLength: Theme.Spacing.s)

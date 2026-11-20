@@ -21,6 +21,10 @@ final class WatchlistTests: XCTestCase {
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
 
         app.tabBars.buttons["Lists"].tap()
+        // One row per access point, so a tap opens its details.
+        let byBSSID = app.buttons["By BSSID"]
+        XCTAssertTrue(byBSSID.waitForExistence(timeout: 5))
+        byBSSID.tap()
         let search = app.searchFields.firstMatch
         XCTAssertTrue(search.waitForExistence(timeout: 5))
         search.tap()
@@ -53,6 +57,11 @@ final class WatchlistTests: XCTestCase {
         let watchedRow = app.cells.containing(NSPredicate(format: "label CONTAINS 'On watchlist'")).firstMatch
         XCTAssertTrue(watchedRow.waitForExistence(timeout: 5), "the list row should be marked as watched")
         attach(app, "watchlist-list-marker")
+        // So is its network's row while grouped by SSID, even collapsed.
+        app.buttons["By SSID"].tap()
+        let watchedGroup = app.cells.containing(NSPredicate(format: "label CONTAINS 'On watchlist'")).firstMatch
+        XCTAssertTrue(watchedGroup.waitForExistence(timeout: 5), "the network's group should be marked as watched")
+        attach(app, "watchlist-group-marker")
 
         // The demo Scout keeps hearing it: a sighting is recorded and notified.
         let banner = springboard.descendants(matching: .any)

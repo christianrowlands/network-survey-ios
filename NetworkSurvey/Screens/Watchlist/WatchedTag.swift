@@ -6,11 +6,18 @@ import SwiftUI
 struct WatchedTag: View {
     let ssid: String?
     let bssid: String
+    /// A whole SSID group: watched when an entry names the network.
+    var group = false
 
     @Environment(AppModel.self) private var app
 
     var body: some View {
-        if app.watchlist.isWatched(ssid: ssid, bssid: bssid) {
+        let watched = if group, let ssid {
+            app.watchlist.watchesNetwork(ssid: ssid)
+        } else {
+            app.watchlist.isWatched(ssid: ssid, bssid: bssid)
+        }
+        if watched {
             TagPill(text: "Watched", color: Theme.Colors.accent)
                 .accessibilityLabel("On watchlist")
                 .accessibilityIdentifier("watchlist.watched")
