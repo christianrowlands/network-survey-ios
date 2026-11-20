@@ -1,6 +1,7 @@
 import BoardProtocol
 import Foundation
 import GRDB
+import NSMessaging
 
 public enum ListSort: String, Sendable, CaseIterable {
     /// Strongest last RSSI first.
@@ -20,18 +21,24 @@ public struct ListQuery: Sendable, Equatable {
     /// Empty means every security type (APs only).
     public var securities: Set<NSBSecurityType>
     public var hideRandomized: Bool
+    /// BLE only: devices that sent a name.
+    public var namedOnly: Bool
+    /// BLE only: AirTags and other Find My trackers (see `FindMyDevice`).
+    public var findMyTrackersOnly: Bool
     /// At most this many rows (a long survey can see tens of thousands).
     public var limit: Int?
 
     public init(
         search: String = "", sort: ListSort = .rssi, bands: Set<NSBBand> = [], securities: Set<NSBSecurityType> = [],
-        hideRandomized: Bool = false, limit: Int? = 5000
+        hideRandomized: Bool = false, namedOnly: Bool = false, findMyTrackersOnly: Bool = false, limit: Int? = 5000
     ) {
         self.search = search
         self.sort = sort
         self.bands = bands
         self.securities = securities
         self.hideRandomized = hideRandomized
+        self.namedOnly = namedOnly
+        self.findMyTrackersOnly = findMyTrackersOnly
         self.limit = limit
     }
 }
@@ -191,6 +198,10 @@ public enum StoreQueries {
             args["q"] = likePattern(query.search)
         }
         if query.hideRandomized { sql += " AND randomized = 0" }
+        if query.namedOnly { sql += " AND TRIM(COALESCE(name, '')) != ''" }
+        if query.findMyTrackersOnly {
+            sql += " AND \(StoreFunctions.findMyDevice.name)(advData) IN (\(FindMyDevice.trackerValues.map(String.init).joined(separator: ",")))"
+        }
         sql += orderBy(query.sort, name: "COALESCE(name, '')", identity: "address") + limit(query.limit)
         return try BLEDeviceRow.fetchAll(db, sql: sql, arguments: StatementArguments(args))
     }

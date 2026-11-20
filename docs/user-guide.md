@@ -272,7 +272,14 @@ characters from this install's ID.
   [Cell towers](#cell-towers).
 - **Lists** has tabs for access points, clients and Bluetooth devices, with
   search, sort (signal, last seen, frame count, name) and filters (band,
-  security, hide randomized addresses).
+  security, hide randomized addresses). The Bluetooth list also has **Named
+  only** and **Find My trackers**.
+- **Find My trackers**: an AirTag gets an **AirTag** tag, and another Find My
+  tracker or accessory a **Find My** tag. The app reads this from the
+  device's Apple Find My advertisement. A device's details show its **Find My
+  type**, also for iPhones, Macs and AirPods. A Find My accessory can't be
+  told apart from a second-generation AirTag without connecting to it, and a
+  survey never connects.
 - **Details** show everything known about one access point, client or
   Bluetooth device, a signal chart, and related devices (an access point's
   clients, a client's access points and the networks it probes for).
@@ -333,8 +340,9 @@ It is a separate tool, not a survey:
   only listens.
 
 Tap a device for its signal over the last two minutes and what it advertises:
-company, services, TX power and manufacturer data. **Hide for now** removes it
-from the list until you close Nearby Bluetooth.
+company, services, TX power, Find My type and manufacturer data. Find My
+trackers get the same **AirTag** or **Find My** tag as in Lists. **Hide for
+now** removes it from the list until you close Nearby Bluetooth.
 
 What this iPhone can and can't see:
 

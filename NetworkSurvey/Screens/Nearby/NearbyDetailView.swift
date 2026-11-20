@@ -43,6 +43,9 @@ struct NearbyDetailView: View {
                     if let company = device.companyID {
                         DetailRow(label: "Company", value: NearbyFormat.company(company))
                     }
+                    if let findMy = device.findMy {
+                        DetailRow(label: "Find My type", value: FindMyFormat.label(findMy))
+                    }
                     ForEach(device.serviceUUIDs, id: \.self) { uuid in
                         ServiceRow(uuid: uuid)
                     }

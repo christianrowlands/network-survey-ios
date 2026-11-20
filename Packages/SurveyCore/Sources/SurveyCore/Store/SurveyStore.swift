@@ -31,8 +31,7 @@ public final class SurveyStore: Sendable {
     /// Opens (or creates) the database file and runs pending migrations.
     public convenience init(url: URL) throws {
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        var config = Configuration()
-        config.foreignKeysEnabled = true
+        var config = StoreFunctions.configuration()
         config.prepareDatabase { db in
             // Must run before WAL mode writes the file header; a no-op on an
             // existing database. Lets deleted sessions give space back.
@@ -41,6 +40,8 @@ public final class SurveyStore: Sendable {
         try self.init(writer: DatabasePool(path: url.path, configuration: config))
     }
 
+    /// `writer` must be opened with `StoreFunctions.configuration()`, which
+    /// adds the SQL functions the queries use.
     public init(writer: any DatabaseWriter) throws {
         self.writer = writer
         try StoreSchema.migrator.migrate(writer)
@@ -48,9 +49,7 @@ public final class SurveyStore: Sendable {
 
     /// An empty in-memory database, for tests and previews.
     public static func inMemory() throws -> SurveyStore {
-        var config = Configuration()
-        config.foreignKeysEnabled = true
-        return try SurveyStore(writer: DatabaseQueue(configuration: config))
+        try SurveyStore(writer: DatabaseQueue(configuration: StoreFunctions.configuration()))
     }
 
     // MARK: - Sessions
