@@ -34,10 +34,12 @@ private struct AccessPointDetailContent: View {
                             TagPill(text: DataFormat.security(ap.security), color: DataFormat.securityColor(ap.security))
                             BandTag(band: ap.band, channel: ap.channel)
                             if ap.ssidHidden { TagPill(text: "Hidden", color: Theme.Colors.tagHidden) }
+                            WatchedTag(ssid: ap.ssid, bssid: ap.bssid)
                         }
                     }
                     .padding(.vertical, Theme.Spacing.xs)
                 }
+                WatchlistDetailSection(ssid: ap.ssid, bssid: ap.bssid)
                 Section("Signal") {
                     RSSIChart(points: detail.rssiHistory)
                         .padding(.vertical, Theme.Spacing.xs)
@@ -104,6 +106,7 @@ private struct AccessPointDetailContent: View {
         }
         .themedList()
         .listStyle(.insetGrouped)
+        .watchlistAddSheet()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 IgnoreMenu(choices: ignoreChoices)

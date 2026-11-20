@@ -65,6 +65,8 @@ public struct SessionEnvironment: Sendable {
     /// True when the survey about to start includes the Demo board; its
     /// missionId is then `MissionID.makeDemo`.
     public var isDemoSession: @Sendable () async -> Bool
+    /// Checks the access points of every session against the watchlist.
+    public var watchlist: WatchlistMonitor?
 
     public init(
         boards: any SurveyBoardSource, location: any LocationProvider, store: SurveyStore, settings: SettingsStore,
@@ -73,7 +75,8 @@ public struct SessionEnvironment: Sendable {
         now: @escaping @Sendable () -> Date = { Date() }, flushInterval: Duration = .seconds(1),
         deviceStatusInterval: Duration? = nil, stopGrace: Duration = .milliseconds(300),
         sinkTimeout: Duration = .seconds(10), minimumFreeBytes: Int64 = 200_000_000,
-        freeSpace: (@Sendable () -> Int64?)? = nil, isDemoSession: @escaping @Sendable () async -> Bool = { false }
+        freeSpace: (@Sendable () -> Int64?)? = nil, isDemoSession: @escaping @Sendable () async -> Bool = { false },
+        watchlist: WatchlistMonitor? = nil
     ) {
         self.boards = boards
         self.location = location
@@ -92,6 +95,7 @@ public struct SessionEnvironment: Sendable {
         self.minimumFreeBytes = minimumFreeBytes
         self.freeSpace = freeSpace ?? { [filesRoot] in Self.availableBytes(at: filesRoot) }
         self.isDemoSession = isDemoSession
+        self.watchlist = watchlist
     }
 
     static func availableBytes(at url: URL) -> Int64? {
@@ -250,7 +254,7 @@ public actor SurveySessionController {
             let pipeline = RecordPipeline(
                 session: context, store: env.store, sinks: sinks, privacy: PrivacyFilter(settings: env.settings),
                 policy: LocationSourcePolicy(preference: env.settings[Settings.locationSource]),
-                battery: env.battery, numbers: numbers, now: env.now
+                battery: env.battery, numbers: numbers, watchlist: env.watchlist, now: env.now
             )
             for sink in sinks {
                 // A destination that cannot start reports it in its status; the
@@ -262,6 +266,10 @@ public actor SurveySessionController {
             finalCounters = nil
             self.sinks = sinks
             subscribe(pipeline, sessionID: row.id)
+            tasks += await WatchlistStreaming.start(
+                sinks: sinks, store: env.store, settings: env.settings, monitor: env.watchlist, session: context,
+                now: env.now
+            )
             await env.location.start(background: true)
             locationAuthorization = await env.location.authorization()
             if isNew {

@@ -142,10 +142,18 @@ public protocol SurveyRecordSink: Sendable {
     func stop() async
     /// What the UI shows, by destination name. A sink may stand for several destinations.
     func snapshots() async -> [String: DestinationSnapshot]
+    /// True when the sink streams watchlist messages (MQTT).
+    var streamsWatchlist: Bool { get async }
+    func acceptWatchlist(_ message: WatchlistMessage) async
+    /// `handler` runs each time the stream (re)connects.
+    func onWatchlistConnected(_ handler: @escaping @Sendable () -> Void) async
 }
 
 extension SurveyRecordSink {
     public func acceptRaw(_ frames: [RawFrameOutput]) async {}
+    public var streamsWatchlist: Bool { false }
+    public func acceptWatchlist(_ message: WatchlistMessage) async {}
+    public func onWatchlistConnected(_ handler: @escaping @Sendable () -> Void) async {}
 }
 
 /// Per-session, per-message-type record numbers starting at 1, as the Network

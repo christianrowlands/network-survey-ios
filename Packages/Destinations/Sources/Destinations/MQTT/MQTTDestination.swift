@@ -71,6 +71,10 @@ public enum MQTTTopic {
     public static let deviceStatus = "device_status_message"
     /// New in NS Messaging 2.7.0.
     public static let wifiClient = "80211_client_message"
+    /// A watched network was seen (`WatchlistMatch`).
+    public static let watchlistMatch = "watchlist_match_message"
+    /// The device's whole watchlist (`WatchlistEntryUpdate`).
+    public static let watchlistEntry = "watchlist_entry_message"
 }
 
 /// Publishes NS Messaging JSON to an MQTT broker (MQTT 3.1.1, persistent
@@ -103,6 +107,7 @@ public actor MQTTDestination: Destination {
     private var published = 0
     private var lastError: String?
     private var lastSuccessAt: Date?
+    private var onConnected: (@Sendable () -> Void)?
 
     public init(config: MQTTConfig, maxBackoff: Duration = .seconds(20), drainTimeout: Duration = .seconds(5)) {
         self.config = config
@@ -142,6 +147,27 @@ public actor MQTTDestination: Destination {
             }
         }
         wake()
+    }
+
+    /// Queues a watchlist message, stamped with the device name like every
+    /// record. Not counted as a survey record.
+    public func acceptWatchlist(_ message: WatchlistMessage) {
+        guard session != nil, !stopping else { return }
+        let (topic, json) = switch message {
+        case .match(let match): (MQTTTopic.watchlistMatch, match.stamped(deviceName: deviceName).jsonString())
+        case .entries(let update): (MQTTTopic.watchlistEntry, update.stamped(deviceName: deviceName).jsonString())
+        }
+        var buffer = ByteBufferAllocator().buffer(capacity: json.utf8.count)
+        buffer.writeString(json)
+        _ = queue.append(Message(topic: config.topicPrefix + topic, payload: buffer), limitOverride: connectedOnce ? nil : Self.holdLimit)
+        wake()
+    }
+
+    /// `handler` runs each time the broker connection is made (and at once if
+    /// it is up already), so the watchlist can be sent on every (re)connect.
+    public func setConnectedHandler(_ handler: (@Sendable () -> Void)?) {
+        onConnected = handler
+        if connected { handler?() }
     }
 
     public func stop() async {
@@ -247,6 +273,7 @@ public actor MQTTDestination: Destination {
         connected = true
         connectedOnce = true
         lastError = nil
+        onConnected?()
     }
 
     private func connectionClosed() {

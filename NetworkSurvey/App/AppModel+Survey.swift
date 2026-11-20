@@ -116,8 +116,14 @@ extension AppModel {
         }
     }
 
-    /// The NS Analytics registration link (QR code or universal link).
+    /// The NS Analytics registration link (QR code or universal link), or a
+    /// watchlist share link.
     func handleOpenURL(_ url: URL) {
+        if WatchlistLink.isWatchlistLink(url) {
+            pendingWatchlistLink = url
+            open(.watchlist)
+            return
+        }
         guard url.host() == "networksurvey.app", url.path().hasPrefix("/app/register") else { return }
         pendingRegistrationLink = url
     }

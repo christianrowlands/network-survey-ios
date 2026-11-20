@@ -84,6 +84,18 @@ public enum Settings {
     /// Send crash and hang reports, in builds configured with a crash reporting DSN.
     public static let crashReports = SettingKey<Bool>("send_crash_reports", default: true)
 
+    // MARK: Watchlist
+    /// Watch for the networks on the watchlist during a survey and alert when
+    /// one is seen. Off until the user adds a network from a detail screen or
+    /// imports a list, or turns it on, as on Android.
+    public static let watchlistEnabled = SettingKey<Bool>("watchlist_enabled", default: false)
+    /// Stream sightings and the watched networks over MQTT while a survey
+    /// streams to a broker. On by default, as on Android.
+    public static let watchlistStreamMQTT = SettingKey<Bool>("watchlist_stream_enabled", default: true)
+    /// The last `messageSequence` sent on `watchlist_entry_message`; 0 until the
+    /// first. Internal, not a user setting.
+    public static let watchlistMessageSequence = SettingKey<Int>("watchlist_mqtt_message_sequence", default: 0, range: 0...Int.max)
+
     // MARK: Advanced
     /// Show the simulated "Demo board" in the board list.
     public static let demoBoardEnabled = SettingKey<Bool>("demo_board_enabled", default: false)
@@ -102,7 +114,8 @@ public enum Settings {
         deviceName.name, deviceStatusIntervalSeconds.name, locationSource.name, units.name, privacyZones.name,
         ignoreList.name, crashReports.name, demoBoardEnabled.name, hasSeenWelcome.name,
         mapStyle.name, showTowers.name, towerSource.name, towerMaxAgeMonths.name, towerTechnologies.name,
-        towerOperator.name, hasSeenTowerNotice.name, wifiGroupBySSID.name,
+        towerOperator.name, hasSeenTowerNotice.name, wifiGroupBySSID.name, watchlistEnabled.name,
+        watchlistStreamMQTT.name, watchlistMessageSequence.name,
     ]
 }
 

@@ -14,10 +14,11 @@ Contents:
 5. [While a survey runs](#while-a-survey-runs)
 6. [Where the data goes](#where-the-data-goes)
 7. [Looking at the data](#looking-at-the-data)
-8. [Nearby Bluetooth (no NS Scout needed)](#nearby-bluetooth-no-ns-scout-needed)
-9. [Privacy controls](#privacy-controls)
-10. [Updating Scout firmware](#updating-scout-firmware)
-11. [Troubleshooting](#troubleshooting)
+8. [Wi-Fi watchlist](#wi-fi-watchlist)
+9. [Nearby Bluetooth (no NS Scout needed)](#nearby-bluetooth-no-ns-scout-needed)
+10. [Privacy controls](#privacy-controls)
+11. [Updating Scout firmware](#updating-scout-firmware)
+12. [Troubleshooting](#troubleshooting)
 
 ## What you need
 
@@ -206,6 +207,11 @@ run, the same way the Network Survey Android app does.
   (probe requests), `bluetooth_message` and `device_status_message`.
 - **Stream client records** (experimental) also sends Wi-Fi client records on
   `80211_client_message`, new in NS Messaging 2.7.0.
+- The [Wi-Fi watchlist](#wi-fi-watchlist) streams too, unless you turn off
+  **Stream over MQTT** on the Watchlist screen: `watchlist_match_message` for
+  each sighting (`WatchlistMatch`) and `watchlist_entry_message` with your
+  whole watchlist (`WatchlistEntryUpdate`), sent when the broker connects and
+  whenever the list changes.
 - The queue holds records while the broker is unreachable (20,000 by default,
   0 means no limit) and sends them when the connection comes back. With no
   limit, the queue still holds at most 20,000 records until the broker is first
@@ -339,6 +345,59 @@ service, the same one the Android app uses, with data from
 
 Tower positions are estimates from crowd-sourced measurements and can be off
 by hundreds of meters.
+
+## Wi-Fi watchlist
+
+The watchlist keeps Wi-Fi networks you care about. When a Scout sees one
+during a survey, you get a notification and the sighting is saved with its
+time, signal and location. Open it from **Settings > Watchlist**.
+
+- **Watch a network** by its name (SSID) on any access point, by one access
+  point's MAC address (BSSID), or by both together. With both, it matches only
+  when that access point broadcasts that name. Names and addresses match
+  without regard to case, and a hidden network never matches a name.
+- **Add from an access point:** on its details, tap **Add to watchlist**. The
+  form is filled in from the access point; pick **Network name**, **Access
+  point** or **Both** and tap **Add**. Adding from there also turns
+  **Watchlist alerts** on. Or tap **+** on the Watchlist screen to type one in.
+- **Watched** marks a watched access point in Lists and on its details.
+- **Watchlist alerts** at the top of the Watchlist screen turns watching on
+  and off for the whole list. Each network also has its own **Alerts for this
+  network** switch, to mute it without removing it.
+- **Notifications:** the app asks to send notifications when you add your
+  first network. A network alerts when it appears after being gone for a
+  minute, not on every scan, and the same network alerts at most once every
+  15 minutes. Alerts work with the app in the background while a survey runs.
+  If notifications are off, sightings are still saved, and the Watchlist
+  screen says so.
+- **History** lists each network that was seen, with how many times, when it
+  was last seen and the best signal. Search it, sort it by **Most recent**,
+  **Strongest** or **Most seen**, or clear it. Tap a network (here or on the
+  Watchlist screen) for each sighting, with a map of the ones that have a
+  location.
+- **What is checked:** every access point a Scout hears during a survey,
+  including networks on your ignore list. Records a Scout sends late, after
+  being out of range, never alert. Inside a privacy zone a sighting is saved
+  without its location.
+- **Share:** **More > Share watchlist** on the Watchlist screen, or the share
+  button on one network, makes a `https://networksurvey.app/app/watchlist`
+  link with the networks in it (up to 100). It is the same link format the
+  Network Survey Android app opens, documented on the
+  [link format page](https://networksurvey.app/manual/advanced/watchlist-deep-links/).
+- **Import:** open a watchlist link on the iPhone, or tap **More > Import from
+  a link** and paste it (a message with the link in it works too). You see the
+  networks first, with the ones you already watch marked **Already saved**;
+  **Add** adds only the new ones and turns watchlist alerts on. Nothing already
+  on your list is changed. A link with anything out of bounds (a malformed MAC
+  address, a name that is too long, more than 100 networks) is refused whole.
+- **MQTT:** while a survey streams to an MQTT broker, sightings and your
+  watched networks (with their names) are sent to it, as on Android. Turn off
+  **Stream over MQTT** on the Watchlist screen to keep the watchlist on the
+  iPhone. A phone that never had a watched network sends nothing. See
+  [MQTT](#mqtt).
+
+The watchlist and its history stay on this iPhone unless you share them or
+stream them over MQTT. Sightings are kept for 90 days.
 
 ## Nearby Bluetooth (no NS Scout needed)
 

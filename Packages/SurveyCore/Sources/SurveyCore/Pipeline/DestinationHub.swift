@@ -52,6 +52,16 @@ public final class DestinationHub: SurveyRecordSink {
         for destination in destinations { await destination.stop() }
     }
 
+    public var streamsWatchlist: Bool { destinations.contains { $0 is MQTTDestination } }
+
+    public func acceptWatchlist(_ message: WatchlistMessage) async {
+        for case let mqtt as MQTTDestination in destinations { await mqtt.acceptWatchlist(message) }
+    }
+
+    public func onWatchlistConnected(_ handler: @escaping @Sendable () -> Void) async {
+        for case let mqtt as MQTTDestination in destinations { await mqtt.setConnectedHandler(handler) }
+    }
+
     public func snapshots() async -> [String: DestinationSnapshot] {
         var result: [String: DestinationSnapshot] = [:]
         for destination in destinations { result[destination.kind.rawValue] = await destination.snapshot() }

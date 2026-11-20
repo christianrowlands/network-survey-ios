@@ -22,6 +22,22 @@ public struct NSJSONWriter {
         needsComma.removeLast()
     }
 
+    public mutating func beginArray() {
+        output.append("[")
+        needsComma.append(false)
+    }
+
+    public mutating func endArray() {
+        output.append("]")
+        needsComma.removeLast()
+    }
+
+    /// Before each array element; the first gets no comma.
+    public mutating func element() {
+        if needsComma[needsComma.count - 1] { output.append(",") }
+        needsComma[needsComma.count - 1] = true
+    }
+
     public mutating func key(_ name: String) {
         if needsComma[needsComma.count - 1] { output.append(",") }
         needsComma[needsComma.count - 1] = true
