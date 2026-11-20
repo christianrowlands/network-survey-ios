@@ -134,6 +134,7 @@ struct BLERowView: View {
                     if let company = device.companyId {
                         TagPill(text: BLECompanies.name(for: company) ?? BLECompanies.hexID(company), color: Theme.Colors.bluetooth)
                     }
+                    FindMyTag(device: device.findMy)
                     if DataFormat.isPrivateBLEAddress(device.address, addressType: device.addressType) { RandomizedBadge() }
                 }
             }

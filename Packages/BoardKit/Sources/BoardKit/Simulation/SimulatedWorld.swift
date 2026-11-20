@@ -73,6 +73,8 @@ public struct SimulatedWorld: Sendable {
         clients = Self.makeClients(count: clientCount, aps: accessPoints, macs: &macs, rng: &clientRNG)
         var bleRNG = SeededGenerator(seed: seed).derived(3)
         bleDevices = Self.makeBLEDevices(count: bleCount, macs: &macs, rng: &bleRNG)
+        var findMyRNG = SeededGenerator(seed: seed).derived(4)
+        bleDevices += Self.makeFindMyDevices(rng: &findMyRNG)
     }
 
     /// Where the surveyor (and so every board) is at `timeMs` after the start:
@@ -193,7 +195,9 @@ public struct SimulatedWorld: Sendable {
             let address = addressType == .public ? macs.universal() : macs.bleRandom(rng: &rng)
             let name = kind.name.isEmpty ? "" : "\(kind.name)-\(index + 1)"
             let txPower: Int8? = rng.chance(0.4) ? Int8.random(in: -12...4, using: &rng) : nil
-            let payload = rng.bytes(Int.random(in: 2...8, using: &rng))
+            var payload = rng.bytes(Int.random(in: 2...8, using: &rng))
+            // Only the Find My devices below are Find My trackers.
+            if kind.company == 0x004C && payload[0] == 0x12 { payload[0] = 0x10 }
             return BLEDevice(
                 address: address, addressType: addressType, advType: kind.advType, name: name,
                 companyID: kind.company, serviceUUIDs: kind.services, txPower: txPower,
@@ -203,6 +207,27 @@ public struct SimulatedWorld: Sendable {
                 ),
                 position: Point(x: .random(in: 0...width, using: &rng), y: .random(in: 0...height, using: &rng)),
                 shadowing: rng.noise(sigma: 4)
+            )
+        }
+    }
+}
+
+extension SimulatedWorld {
+    /// Two Find My trackers on the surveyor's loop, so the demo shows the
+    /// Find My tag and filter: an AirTag away from its owner (Apple's full
+    /// 31-byte form, a made-up key) and a Find My accessory near its owner.
+    /// Neither sends a name. Random static addresses.
+    static func makeFindMyDevices(rng: inout SeededGenerator) -> [BLEDevice] {
+        let airTag: [UInt8] = [0x1E, 0xFF, 0x4C, 0x00, 0x12, 0x19, 0x10] + rng.bytes(22) + [0x01, rng.bytes(1)[0]]
+        let accessory: [UInt8] = [0x07, 0xFF, 0x4C, 0x00, 0x12, 0x02, 0x24, rng.bytes(1)[0]]
+        return [(airTag, UInt64(0)), (accessory, UInt64(40_000))].map { advData, timeMs in
+            var address = rng.bytes(6)
+            address[0] |= 0xC0
+            let spot = surveyorPosition(atMs: timeMs)
+            return BLEDevice(
+                address: address, addressType: .random, advType: .advInd, name: "", companyID: 0x004C,
+                serviceUUIDs: [], txPower: nil, advData: advData, position: Point(x: spot.x - 3, y: spot.y + 2),
+                shadowing: 0
             )
         }
     }

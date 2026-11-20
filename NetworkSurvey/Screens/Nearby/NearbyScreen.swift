@@ -236,8 +236,11 @@ struct NearbyRowView: View {
                     .font(Theme.Fonts.rowTitle.weight(.medium))
                     .foregroundStyle(device.name == nil ? Theme.Colors.ink2 : Theme.Colors.ink)
                     .lineLimit(1)
-                if let tag = NearbyFormat.tag(device) {
-                    TagPill(text: tag, color: Theme.Colors.ink2)
+                TagRow {
+                    if let tag = NearbyFormat.tag(device) {
+                        TagPill(text: tag, color: Theme.Colors.ink2)
+                    }
+                    FindMyTag(device: device.findMy)
                 }
             }
             Spacer(minLength: Theme.Spacing.s)

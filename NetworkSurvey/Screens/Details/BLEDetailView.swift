@@ -41,6 +41,7 @@ private struct BLEDetailContent: View {
                             if let company = device.companyId {
                                 TagPill(text: BLECompanies.name(for: company) ?? BLECompanies.hexID(company), color: Theme.Colors.bluetooth)
                             }
+                            FindMyTag(device: device.findMy)
                             if DataFormat.isPrivateBLEAddress(device.address, addressType: device.addressType) { RandomizedBadge() }
                         }
                     }
@@ -58,6 +59,9 @@ private struct BLEDetailContent: View {
                     }
                     if let company = device.companyId {
                         DetailRow(label: "Company", value: companyText(company))
+                    }
+                    if let findMy = device.findMy {
+                        DetailRow(label: "Find My type", value: FindMyFormat.label(findMy))
                     }
                     DetailRow(label: "Advertising", value: DataFormat.bleAdvType(device.advType))
                     if let txPower = device.txPower { DetailRow(label: "TX power", value: DataFormat.dBm(txPower)) }

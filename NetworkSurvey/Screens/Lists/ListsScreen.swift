@@ -133,6 +133,9 @@ struct ListFilters: Equatable {
     var bands: Set<NSBBand> = []
     var securities: Set<NSBSecurityType> = []
     var hideRandomized = false
+    /// BLE only.
+    var namedOnly = false
+    var findMyTrackersOnly = false
 
     /// Rows shown at most; a search narrows the rest.
     static let rowLimit = 1000
@@ -144,13 +147,15 @@ struct ListFilters: Equatable {
         ListQuery(
             search: search.trimmingCharacters(in: .whitespaces), sort: sort, bands: kind == .ble ? [] : bands,
             securities: kind == .aps ? securities : [], hideRandomized: kind != .aps && hideRandomized,
+            namedOnly: kind == .ble && namedOnly, findMyTrackersOnly: kind == .ble && findMyTrackersOnly,
             limit: Self.rowLimit
         )
     }
 
     func isFiltering(_ kind: ListKind) -> Bool {
         let query = query(for: kind)
-        return !query.bands.isEmpty || !query.securities.isEmpty || query.hideRandomized
+        return !query.bands.isEmpty || !query.securities.isEmpty || query.hideRandomized || query.namedOnly
+            || query.findMyTrackersOnly
     }
 }
 
@@ -192,6 +197,10 @@ private struct FilterMenu: View {
             if kind != .aps {
                 Toggle("Hide randomized addresses", isOn: $filters.hideRandomized)
             }
+            if kind == .ble {
+                Toggle("Named only", isOn: $filters.namedOnly)
+                Toggle("Find My trackers", isOn: $filters.findMyTrackersOnly)
+            }
             if kind != .ble {
                 Section("Band") {
                     ForEach(DataFormat.filterBands, id: \.self) { band in
@@ -211,6 +220,8 @@ private struct FilterMenu: View {
                     filters.bands = []
                     filters.securities = []
                     filters.hideRandomized = false
+                    filters.namedOnly = false
+                    filters.findMyTrackersOnly = false
                 }
             }
         } label: {

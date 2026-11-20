@@ -96,6 +96,9 @@ public final class SimulatedNearbyScanner: NearbyScanner, Sendable {
                     connectable: true, baseRSSI: -82, presence: 0.3),
             Profile(id: id(), name: nil, manufacturerData: Data([0x4C, 0x00, 0x12, 0x02, 0x00, 0x03]),
                     connectable: false, baseRSSI: -86, presence: 0.3),
+            // An AirTag away from its owner (Find My, status 0x10), with a made-up key.
+            Profile(id: id(), name: nil, manufacturerData: Data([0x4C, 0x00, 0x12, 0x19, 0x10] + (0..<22).map { UInt8($0 * 11) } + [0x01, 0x5A]),
+                    connectable: true, baseRSSI: -74, presence: 0.7),
         ]
     }
 }

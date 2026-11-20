@@ -72,6 +72,8 @@ extension Theme {
         static let tagOpen = Color(light: 0xA53D24, dark: 0xE88A6C)
         static let tagHidden = Color(light: 0x4F6672, dark: 0x9AADB7)
         static let tagRandomized = Color(light: 0x7B2F8E, dark: 0xCE93D8)
+        // A Find My tracker: Android's tracker tag color.
+        static let tagTracker = Color(light: 0x7B2F8E, dark: 0xCE93D8)
 
         // One per Scout on the signal chart, in this fixed order. Checked for
         // color vision deficiency against the panel in both appearances.
