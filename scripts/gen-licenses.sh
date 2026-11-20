@@ -139,7 +139,9 @@ entries.append({
     "license": "Source", "url": "https://standards.ieee.org/products-programs/regauth/",
     "text": "Manufacturer names for MAC addresses are the IEEE Registration Authority's public MA-L, MA-M "
             "and MA-S assignment lists, from https://standards-oui.ieee.org (oui/oui.csv, oui28/mam.csv "
-            "and oui36/oui36.csv). Refresh them with scripts/update-oui.sh.",
+            "and oui36/oui36.csv). The lists are published by the IEEE for anyone to look up who an address "
+            "prefix is registered to. They are built into the app so lookups work offline and never leave the "
+            "iPhone. Refresh them with scripts/update-oui.sh.",
 })
 entries.sort(key=lambda e: e["name"].lower())
 # This app's own license and NOTICE, shown first on the screen.
