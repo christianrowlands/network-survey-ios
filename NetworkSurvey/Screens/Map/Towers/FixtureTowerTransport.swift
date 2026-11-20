@@ -19,6 +19,7 @@ nonisolated struct FixtureTowerTransport: TowerTransport {
             (URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []).map { ($0.name, $0.value ?? "") }
         ) { $1 }
         let body: Data
+        if url.path.hasSuffix("plmn/search") { return (try plmnSearch(query), Self.ok(url)) }
         switch url.lastPathComponent {
         case "area": body = try area(query)
         case "batch": body = try names()
@@ -26,7 +27,37 @@ nonisolated struct FixtureTowerTransport: TowerTransport {
         case "search": body = try JSONEncoder().encode(Batch(cells: [Self.tower(row: 9935, column: -26248)], truncated: false))
         default: body = try JSONEncoder().encode(Batch(cells: [], truncated: false))
         }
-        return (body, HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+        return (body, Self.ok(url))
+    }
+
+    private static func ok(_ url: URL) -> HTTPURLResponse {
+        HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+    }
+
+    /// Made-up operators for the PLMN lookup. A search for "offline" fails
+    /// as if there were no connection.
+    static let plmnRecords: [[String: String]] = [
+        ["mcc": "001", "mnc": "01", "brand": "ExampleNet", "operator": "Example Network Ltd", "country": "Test network",
+         "region": "Test", "tadig": "XXXEX", "bands": "LTE 1800 / LTE 2600 / 5G 3500", "status": "Operational"],
+        ["mcc": "001", "mnc": "010", "brand": "ExampleNet IoT", "operator": "Example Network Ltd", "country": "Test network",
+         "region": "Test", "bands": "LTE 800", "status": "Not operational"],
+        ["mcc": "001", "mnc": "02", "brand": "Sample Mobile", "operator": "Sample Mobile", "country": "Test network",
+         "region": "Test", "tadig": "XXXSM", "bands": "UMTS 2100 / LTE 700", "status": "Operational"],
+        ["mcc": "001", "mnc": "03", "brand": "Test Wireless", "operator": "Test Wireless Co", "country": "Test network",
+         "region": "Test", "bands": "5G 700 / 5G 3500", "status": "Operational"],
+        ["mcc": "999", "mnc": "99", "operator": "Example Private Network", "country": "Internal use", "status": "Reserved"],
+    ]
+
+    private func plmnSearch(_ query: [String: String]) throws -> Data {
+        let text = query["q"]?.lowercased()
+        if text == "offline" { throw URLError(.notConnectedToInternet) }
+        let found = Self.plmnRecords.filter { record in
+            if let text, !record.values.contains(where: { $0.lowercased().contains(text) }) { return false }
+            if let mcc = query["mcc"], !(record["mcc"] ?? "").hasPrefix(mcc) { return false }
+            if let mnc = query["mnc"], !(record["mnc"] ?? "").hasPrefix(mnc) { return false }
+            return true
+        }.map { $0.merging(["plmn": ($0["mcc"] ?? "") + ($0["mnc"] ?? "")]) { old, _ in old } }
+        return try JSONSerialization.data(withJSONObject: ["count": found.count, "truncated": false, "results": found] as [String: Any])
     }
 
     private func area(_ query: [String: String]) throws -> Data {

@@ -121,7 +121,7 @@ public struct TowerClient: Sendable {
 
     // MARK: - Requests
 
-    private func get(_ path: String, _ query: [URLQueryItem]) async throws(TowerServiceError) -> Data? {
+    func get(_ path: String, _ query: [URLQueryItem]) async throws(TowerServiceError) -> Data? {
         try await send(request(path, query, method: "GET", body: nil))
     }
 
@@ -154,7 +154,7 @@ public struct TowerClient: Sendable {
         }
     }
 
-    private func decode<T: Decodable>(_ type: T.Type, _ data: Data?) throws(TowerServiceError) -> T? {
+    func decode<T: Decodable>(_ type: T.Type, _ data: Data?) throws(TowerServiceError) -> T? {
         guard let data, !data.isEmpty else { return nil }
         do {
             return try JSONDecoder().decode(type, from: data)

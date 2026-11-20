@@ -316,6 +316,12 @@ service, the same one the Android app uses, with data from
   have been seen.
 - **Find a tower** in the options menu looks up a tower by MCC, MNC, LAC or
   TAC and cell ID.
+- **Settings > PLMN lookup** finds mobile network operators by MCC (310),
+  MCC-MNC (310-260), country or operator name, with their brand, company,
+  country, status, bands and TADIG code. **Look up operator** on a tower's
+  details opens it for that tower's MCC-MNC. Each search is sent to the
+  tower service, so it needs a connection. Builds from source without a
+  tower service key cannot look up operators.
 
 Tower positions are estimates from crowd-sourced measurements and can be off
 by hundreds of meters.

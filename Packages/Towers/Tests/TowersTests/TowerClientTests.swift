@@ -3,7 +3,7 @@ import Testing
 @testable import Towers
 
 /// Answers every request with one canned response and keeps what was sent.
-private final class StubTransport: TowerTransport, @unchecked Sendable {
+final class StubTransport: TowerTransport, @unchecked Sendable {
     private let lock = NSLock()
     private var log: [URLRequest] = []
     let status: Int

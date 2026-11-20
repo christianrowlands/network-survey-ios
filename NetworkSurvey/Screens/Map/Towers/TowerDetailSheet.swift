@@ -126,6 +126,10 @@ struct TowerDetailView: View {
                     Label(copied ? "Copied" : "Copy cell identity", systemImage: copied ? "checkmark" : "doc.on.doc")
                 }
                 ShareLink(item: shareText) { Label("Share", systemImage: "square.and.arrow.up") }
+                NavigationLink { PlmnLookupView(initialText: tower.plmn.description) } label: {
+                    Label("Look up operator", systemImage: "antenna.radiowaves.left.and.right")
+                }
+                .accessibilityIdentifier("tower.lookupOperator")
             }
         }
         .navigationTitle("Tower")

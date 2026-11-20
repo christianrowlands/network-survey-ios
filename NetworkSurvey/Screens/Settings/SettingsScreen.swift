@@ -108,6 +108,10 @@ struct SettingsScreen: View {
                             Label("OUI lookup", systemImage: "magnifyingglass")
                         }
                         .accessibilityIdentifier("settings.ouiLookup")
+                        NavigationLink { PlmnLookupView() } label: {
+                            Label("PLMN lookup", systemImage: "antenna.radiowaves.left.and.right")
+                        }
+                        .accessibilityIdentifier("settings.plmnLookup")
                     }
                     #if DEBUG
                     Section("Developer") {
