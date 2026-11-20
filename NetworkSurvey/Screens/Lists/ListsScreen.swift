@@ -68,12 +68,22 @@ struct ListsScreen: View {
                 ToolbarItem(placement: .principal) {
                     SessionTitle(title: "Lists")
                 }
+                if navigation.segment == .aps {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Spectrum", systemImage: "chart.xyaxis.line") { navigation.path.append(SpectrumRoute()) }
+                            .accessibilityHint("Shows how busy each Wi-Fi channel is")
+                            .accessibilityIdentifier("lists.spectrum")
+                    }
+                }
             }
             .screenBackground()
             .navigationTitle("Lists")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: DetailRoute.self) { route in
                 DetailScreen(route: route)
+            }
+            .navigationDestination(for: SpectrumRoute.self) { _ in
+                SpectrumScreen()
             }
         }
     }
