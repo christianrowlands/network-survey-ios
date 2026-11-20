@@ -21,6 +21,7 @@ struct ListsScreen: View {
 
     @Environment(SurveyData.self) private var data
     @Environment(ListsNavigation.self) private var navigation
+    @Environment(SettingsModel.self) private var settings
     @State private var filters = ListFilters()
 
     var body: some View {
@@ -29,7 +30,8 @@ struct ListsScreen: View {
         NavigationStack(path: $navigation.path) {
             Group {
                 if let sessionID = data.sessionID {
-                    EntityList(kind: kind, sessionID: sessionID, filters: filters, isPaused: !navigation.path.isEmpty)
+                    EntityList(kind: kind, sessionID: sessionID, filters: filters, isPaused: !navigation.path.isEmpty,
+                               groupsBySSID: settings[Settings.wifiGroupBySSID])
                 } else {
                     if navigation.segment == .ble {
                         NoSurveyView(message: "Start a survey to see the Bluetooth devices your NS Scouts hear.", offersNearby: true)
@@ -51,6 +53,13 @@ struct ListsScreen: View {
                                 ForEach(ProbeGrouping.allCases) { Text($0.rawValue).tag($0) }
                             }
                             .accessibilityIdentifier("lists.probeGrouping")
+                        }
+                        if navigation.segment == .aps {
+                            Picker("Group access points", selection: settings.binding(Settings.wifiGroupBySSID)) {
+                                Text("By SSID").tag(true)
+                                Text("By BSSID").tag(false)
+                            }
+                            .accessibilityIdentifier("lists.apGrouping")
                         }
                     }
                     .pickerStyle(.segmented)

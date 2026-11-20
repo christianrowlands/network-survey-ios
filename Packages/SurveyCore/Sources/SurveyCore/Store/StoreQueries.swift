@@ -153,7 +153,18 @@ public enum StoreQueries {
     }
 
     public static func accessPoints(_ db: Database, sessionID: String, query: ListQuery = ListQuery()) throws -> [AccessPointRow] {
-        var sql = "SELECT * FROM accessPoint WHERE sessionId = :s"
+        let (filter, args) = accessPointFilter(sessionID: sessionID, query: query)
+        let sql = "SELECT * FROM accessPoint" + filter
+            + orderBy(query.sort, name: "COALESCE(ssid, '')", identity: "bssid") + limit(query.limit)
+        return try AccessPointRow.fetchAll(db, sql: sql, arguments: StatementArguments(args))
+    }
+
+    /// The WHERE clause for the access points `query` keeps, shared by the
+    /// flat and the grouped list.
+    static func accessPointFilter(
+        sessionID: String, query: ListQuery
+    ) -> (sql: String, arguments: [String: (any DatabaseValueConvertible)?]) {
+        var sql = " WHERE sessionId = :s"
         var args: [String: (any DatabaseValueConvertible)?] = ["s": sessionID]
         if !query.search.isEmpty {
             sql += " AND (ssid LIKE :q ESCAPE '\\' OR bssid LIKE :q ESCAPE '\\')"
@@ -162,8 +173,7 @@ public enum StoreQueries {
         sql += inFilter("band", query.bands.map { $0.rawValue })
         sql += inFilter("security", query.securities.map { $0.rawValue })
         if query.hideRandomized { sql += " AND randomized = 0" }
-        sql += orderBy(query.sort, name: "COALESCE(ssid, '')", identity: "bssid") + limit(query.limit)
-        return try AccessPointRow.fetchAll(db, sql: sql, arguments: StatementArguments(args))
+        return (sql, args)
     }
 
     public static func clients(_ db: Database, sessionID: String, query: ListQuery = ListQuery()) throws -> [ClientListItem] {

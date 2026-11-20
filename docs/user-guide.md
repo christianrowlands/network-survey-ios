@@ -273,6 +273,11 @@ characters from this install's ID.
 - **Lists** has tabs for access points, clients and Bluetooth devices, with
   search, sort (signal, last seen, frame count, name) and filters (band,
   security, hide randomized addresses).
+- **By SSID** (the default) groups access points by network name: one row
+  per network with its number of access points, security, bands and
+  strongest signal. Tap a network to show its access points, and tap again
+  to hide them. Hidden and unnamed networks stay one row per BSSID. **By
+  BSSID** lists every access point on its own row. The choice is kept.
 - **Details** show everything known about one access point, client or
   Bluetooth device, a signal chart, and related devices (an access point's
   clients, a client's access points and the networks it probes for).

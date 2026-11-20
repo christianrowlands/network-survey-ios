@@ -73,6 +73,11 @@ public enum Settings {
     /// The note on what turning towers on sends was shown and accepted.
     public static let hasSeenTowerNotice = SettingKey<Bool>("has_seen_tower_notice", default: false)
 
+    // MARK: Lists
+    /// The access point list shows one row per network name, opened to its
+    /// access points, instead of one row per BSSID. Same key as Android.
+    public static let wifiGroupBySSID = SettingKey<Bool>("wifi_group_by_ssid", default: true)
+
     // MARK: Privacy
     public static let privacyZones = SettingKey<[PrivacyZone]>.json("privacy_zones", default: [])
     public static let ignoreList = SettingKey<[IgnoreEntry]>.json("ignore_list", default: [])
@@ -97,7 +102,7 @@ public enum Settings {
         deviceName.name, deviceStatusIntervalSeconds.name, locationSource.name, units.name, privacyZones.name,
         ignoreList.name, crashReports.name, demoBoardEnabled.name, hasSeenWelcome.name,
         mapStyle.name, showTowers.name, towerSource.name, towerMaxAgeMonths.name, towerTechnologies.name,
-        towerOperator.name, hasSeenTowerNotice.name,
+        towerOperator.name, hasSeenTowerNotice.name, wifiGroupBySSID.name,
     ]
 }
 

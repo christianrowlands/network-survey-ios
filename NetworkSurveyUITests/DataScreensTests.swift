@@ -21,6 +21,7 @@ final class DataScreensTests: XCTestCase {
         let app = launchSurveying()
         app.tabBars.buttons["Lists"].tap()
         XCTAssertTrue(app.navigationBars["Lists"].waitForExistence(timeout: 5))
+        app.buttons["By BSSID"].tap()
 
         let search = app.searchFields.firstMatch
         XCTAssertTrue(search.waitForExistence(timeout: 5))
@@ -192,6 +193,7 @@ final class DataScreensTests: XCTestCase {
     func testListsShowManufacturer() {
         let app = launchSurveying()
         app.tabBars.buttons["Lists"].tap()
+        app.buttons["By BSSID"].tap()
         let vendor = app.cells.containing(NSPredicate(format: "label CONTAINS 'ICANN, IANA Department'")).firstMatch
         XCTAssertTrue(vendor.waitForExistence(timeout: 30), "no access point row named its manufacturer")
         attach(app, "lists-aps")

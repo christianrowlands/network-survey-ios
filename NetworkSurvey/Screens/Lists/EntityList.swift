@@ -12,6 +12,8 @@ struct EntityList: View {
     let sessionID: String
     let filters: ListFilters
     let isPaused: Bool
+    /// APs as a row per SSID (`Settings.wifiGroupBySSID`).
+    var groupsBySSID = false
 
     static let reorderInterval: TimeInterval = 10
 
@@ -24,17 +26,27 @@ struct EntityList: View {
     @State private var scrolling = false
     @State private var lastReorder = Date.distantPast
     @State private var shown: Shown?
+    @State private var expandedGroups: Set<String> = []
 
     /// The list identity; a change replaces the rows instead of merging.
     private struct Shown: Equatable {
         var kind: ListKind
         var sessionID: String
         var filters: ListFilters
+        var grouped = false
+        /// Opening a group re-reads the list but keeps its order.
+        var expanded: Set<String> = []
+    }
+
+    private var shownKey: Shown {
+        let grouped = kind == .aps && groupsBySSID
+        return Shown(kind: kind, sessionID: sessionID, filters: filters, grouped: grouped, expanded: grouped ? expandedGroups : [])
     }
 
     enum Rows: Equatable {
         case none
         case aps([AccessPointRow])
+        case apGroups([AccessPointGroup])
         case clients([ClientListItem])
         case probeNetworks([ProbeNetworkRow])
         case probeClients([ProbeClientRow])
@@ -44,6 +56,7 @@ struct EntityList: View {
             switch self {
             case .none: 0
             case .aps(let rows): rows.count
+            case .apGroups(let groups): groups.count
             case .clients(let rows): rows.count
             case .probeNetworks(let rows): rows.count
             case .probeClients(let rows): rows.count
@@ -56,6 +69,7 @@ struct EntityList: View {
         func merged(with new: Rows) -> Rows {
             switch (self, new) {
             case (.aps(let old), .aps(let fresh)): .aps(StableOrder.merge(old, fresh, id: \.bssid))
+            case (.apGroups(let old), .apGroups(let fresh)): .apGroups(GroupedOrder.merge(old, fresh))
             case (.clients(let old), .clients(let fresh)): .clients(StableOrder.merge(old, fresh, id: \.client.mac))
             case (.probeNetworks(let old), .probeNetworks(let fresh)): .probeNetworks(StableOrder.merge(old, fresh, id: \.ssid))
             case (.probeClients(let old), .probeClients(let fresh)): .probeClients(StableOrder.merge(old, fresh, id: \.mac))
@@ -77,6 +91,8 @@ struct EntityList: View {
                     }
                     .listRowBackground(Theme.Colors.ground)
                 }
+            case .apGroups(let groups):
+                AccessPointGroupRows(groups: groups, sessionID: sessionID, expanded: $expandedGroups)
             case .clients(let clients):
                 ForEach(clients, id: \.client.mac) { item in
                     NavigationLink(value: DetailRoute.client(sessionID: sessionID, mac: item.client.mac)) {
@@ -145,14 +161,14 @@ struct EntityList: View {
                 }
             }
         }
-        .task(id: Shown(kind: kind, sessionID: sessionID, filters: filters)) {
+        .task(id: shownKey) {
             await observe()
         }
     }
 
     private func observe() async {
-        let key = Shown(kind: kind, sessionID: sessionID, filters: filters)
-        if shown?.kind != key.kind || shown?.sessionID != key.sessionID {
+        let key = shownKey
+        if shown?.kind != key.kind || shown?.sessionID != key.sessionID || shown?.grouped != key.grouped {
             // Another list: do not show the previous one's rows meanwhile.
             rows = .none
             loaded = false
@@ -164,6 +180,13 @@ struct EntityList: View {
         let query = filters.query(for: kind)
         do {
             switch kind {
+            case .aps where key.grouped:
+                let expanded = key.expanded
+                for try await value in store.observe({
+                    try StoreQueries.accessPointGroups($0, sessionID: id, query: query, expanded: expanded)
+                }) {
+                    receive(.apGroups(value), key: key)
+                }
             case .aps:
                 for try await value in store.observe({ try StoreQueries.accessPoints($0, sessionID: id, query: query) }) {
                     receive(.aps(value), key: key)
@@ -193,9 +216,12 @@ struct EntityList: View {
 
     private func receive(_ value: Rows, key: Shown) {
         if shown != key {
-            // New search, sort or filter: show its order right away.
+            // New search, sort or filter: show its order right away. An
+            // opened or closed group keeps the order.
+            var sameOrder = shown
+            sameOrder?.expanded = key.expanded
             shown = key
-            rows = value
+            rows = sameOrder == key ? rows.merged(with: value) : value
             loaded = true
             lastReorder = .now
             return
@@ -220,6 +246,10 @@ struct EntityList: View {
         let count = rows.count
         if count >= ListFilters.rowLimit {
             return "Showing the first \(DataFormat.count(count)). Search or filter to narrow the list."
+        }
+        if case .apGroups(let groups) = rows {
+            let aps = groups.reduce(0) { $0 + $1.accessPointCount }
+            return "\(DataFormat.count(count, "network")), \(DataFormat.count(aps, "access point"))"
         }
         let noun = switch kind {
         case .aps: count == 1 ? "access point" : "access points"

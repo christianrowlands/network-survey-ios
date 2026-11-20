@@ -88,6 +88,12 @@ Plain settings live in `UserDefaults` (`SettingsStore`, `Settings` in SurveyCore
 | `tower_map_operator` | String | "" | One operator as `mcc-mnc` (for example `310-410`), or empty for all |
 | `has_seen_tower_notice` | Bool | false | The note on what the tower layer sends was accepted, so turning towers on again does not ask |
 
+## Lists
+
+| Key | Type | Default | Notes |
+|---|---|---|---|
+| `wifi_group_by_ssid` | Bool | true | The access point list groups access points by network name (SSID). Hidden and unnamed networks stay one row per BSSID. Same key as Android |
+
 ## Advanced
 
 | Key | Type | Default | Notes |
