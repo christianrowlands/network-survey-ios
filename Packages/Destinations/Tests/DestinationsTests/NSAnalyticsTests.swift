@@ -109,6 +109,10 @@ struct NSAnalyticsTests {
         let link = try NSAnalyticsLink(url: URL(string:
             "https://networksurvey.app/app/register?token=abc&workspace_id=ws-1&api_url=https%3A%2F%2Fingest.example.net&workspace_name=Field%20Team")!)
         #expect(link == NSAnalyticsLink(token: "abc", workspaceID: "ws-1", apiURL: Self.api, workspaceName: "Field Team"))
+        // NS Analytics writes spaces as "+" (URLSearchParams); an encoded plus stays a plus.
+        let formEncoded = try NSAnalyticsLink(url: URL(string:
+            "https://networksurvey.app/app/register?token=a%2Bb&workspace_id=ws-1&api_url=https%3A%2F%2Fingest.example.net&workspace_name=Apple+Review+%2B+Co")!)
+        #expect(formEncoded == NSAnalyticsLink(token: "a+b", workspaceID: "ws-1", apiURL: Self.api, workspaceName: "Apple Review + Co"))
         func problem(_ text: String) -> NSAnalyticsLink.Problem? {
             do { _ = try NSAnalyticsLink(url: URL(string: text)!); return nil } catch { return error }
         }

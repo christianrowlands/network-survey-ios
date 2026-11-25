@@ -23,11 +23,15 @@ public struct NSAnalyticsLink: Sendable, Equatable {
 
     public init(url: URL) throws(Problem) {
         guard url.host?.lowercased() == "networksurvey.app", url.path.hasPrefix("/app/register"),
-              let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems else {
+              let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedQueryItems else {
             throw .notARegistrationLink
         }
+        // Form decoding, like Android's getQueryParameter: NS Analytics builds
+        // the link with URLSearchParams, which writes a space as "+".
         func value(_ name: String) -> String? {
-            items.first { $0.name == name }?.value?.trimmingCharacters(in: .whitespaces).nilIfEmpty
+            items.first { $0.name == name }?.value?
+                .replacingOccurrences(of: "+", with: " ").removingPercentEncoding?
+                .trimmingCharacters(in: .whitespaces).nilIfEmpty
         }
         let name = value("workspace_name")
         if let name, name.count > 100 { throw .nameTooLong }
