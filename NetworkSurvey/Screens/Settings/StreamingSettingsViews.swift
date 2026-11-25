@@ -101,37 +101,3 @@ struct GRPCSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 }
-
-/// NS CSV and pcapng.
-struct FileSettingsView: View {
-    @Environment(SettingsModel.self) private var settings
-
-    var body: some View {
-        Form {
-            Group {
-                Section {
-                    Toggle("Save files on this iPhone", isOn: settings.binding(Settings.destinationLogFiles))
-                        .accessibilityIdentifier("files.enabled")
-                } footer: {
-                    Text("Network Survey CSV files: Wi-Fi, Bluetooth, clients and probe requests, one file of each per survey.")
-                }
-                Section {
-                    Toggle("Packet capture (pcapng)", isOn: settings.binding(Settings.surveyRawFrames))
-                        .disabled(!settings[Settings.destinationLogFiles])
-                        .accessibilityIdentifier("files.pcap")
-                } footer: {
-                    Text("Also saves every Wi-Fi frame the Scouts hear, in a file you can open in Wireshark. Files grow quickly. This is the same switch as Raw frames on the Survey tab.")
-                }
-                Section {
-                    EmptyView()
-                } footer: {
-                    AppliesNextSurveyFooter(extra: "Files are in the Files tab and in the Files app under On My iPhone > Network Survey.")
-                }
-            }
-            .panelRows()
-        }
-        .themedList()
-        .navigationTitle("Files")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}

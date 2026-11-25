@@ -55,7 +55,7 @@ private struct BLEDetailContent: View {
                     DetailRow(label: "Address", value: device.address, mono: true)
                     DetailRow(label: "Address type", value: addressTypeText(device))
                     if let vendor = DataFormat.bleAddressVendor(device.address, addressType: device.addressType) {
-                        DetailRow(label: "Address registered to", value: vendor)
+                        ManufacturerLink(address: device.address, vendor: vendor, label: "Address registered to")
                     }
                     if let company = device.companyId {
                         DetailRow(label: "Company", value: companyText(company))

@@ -22,6 +22,7 @@ extension AppModel {
         if readyReal && !options.simulatedWalk && access.location == .notDetermined {
             await access.perform(.allow)
         }
+        finishedSurvey = nil
         await survey.start()
         // The survey model hears about the new state a moment later; ask the controller.
         let snapshot = await controller.snapshot
@@ -36,7 +37,11 @@ extension AppModel {
     func stopSurvey() async {
         isStoppingSurvey = true
         defer { isStoppingSurvey = false }
+        let session = survey.session
+        let fileKinds = Set(SurveyDestination.logFiles.kinds.map(\.rawValue))
+        let savedFiles = survey.destinations.contains { fileKinds.contains($0.name) }
         await survey.stop()
+        if savedFiles { finishedSurvey = session }
         // After Stop, so the Live Activity ends with the totals of the final flush.
         liveActivity.end(final: activityState())
         updateIdleTimer()
@@ -121,7 +126,7 @@ extension AppModel {
     func handleOpenURL(_ url: URL) {
         if WatchlistLink.isWatchlistLink(url) {
             pendingWatchlistLink = url
-            open(.watchlist)
+            open(ToolsRoute.watchlist)
             return
         }
         guard url.host() == "networksurvey.app", url.path().hasPrefix("/app/register") else { return }

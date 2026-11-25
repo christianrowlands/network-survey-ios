@@ -7,6 +7,9 @@ import UIKit
 /// the boards, live counts per protocol, and where the data is going.
 struct SurveyRecordingBody: View {
     @Environment(AppModel.self) private var model
+    /// Watched networks seen in this survey. Observed here, not in the row,
+    /// since the row is absent (and so never runs a task) until one is seen.
+    @State private var watchedSeen = 0
     let onSelectBoard: (BoardID) -> Void
 
     var body: some View {
@@ -16,6 +19,9 @@ struct SurveyRecordingBody: View {
             BoardStrip(onSelect: onSelectBoard)
             SectionHeader(title: "Records", trailing: "unique this survey")
             ProtocolCounts()
+            if watchedSeen > 0 {
+                WatchlistSeenRow(seen: watchedSeen)
+            }
             SectionHeader(title: "Where it's going")
             Panel {
                 let destinations = activeDestinations
@@ -29,6 +35,15 @@ struct SurveyRecordingBody: View {
                     LiveDestinationRow(destination: destination)
                 }
             }
+        }
+        .task(id: model.survey.missionId) {
+            watchedSeen = 0
+            guard let missionID = model.survey.missionId else { return }
+            do {
+                for try await count in model.store.observe({ try WatchlistQueries.networksSeen($0, missionID: missionID) }) {
+                    watchedSeen = count
+                }
+            } catch {}
         }
     }
 
@@ -160,7 +175,7 @@ private struct RecordingHero: View {
 }
 
 /// Live counts for each protocol in the session. A count with a list opens
-/// it in the Lists tab.
+/// it in the Signals tab.
 private struct ProtocolCounts: View {
     @Environment(AppModel.self) private var model
     @Environment(SurveyData.self) private var data
@@ -202,12 +217,12 @@ private struct ProtocolCounts: View {
         model.survey.counters.delivered[type] ?? 0
     }
 
-    /// Lists show the session the Lists tab picked; from here, follow the
+    /// Signals shows the session its title menu picked; from here, follow the
     /// running survey.
     private func open(_ list: ListsScreen.Segment) {
         data.pickedSessionID = nil
         lists.show(list)
-        model.selectedTab = .lists
+        model.selectedTab = .signals
     }
 
     @ViewBuilder private func row(
@@ -313,5 +328,38 @@ private struct LiveDestinationRow: View {
         .frame(minHeight: Theme.Spacing.touchTarget)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("survey.liveDestination.\(destination.title)")
+    }
+}
+
+/// "2 watched networks seen" while recording, opening the sightings. Shown
+/// once a watched network was seen in this survey.
+private struct WatchlistSeenRow: View {
+    @Environment(AppModel.self) private var model
+    let seen: Int
+
+    var body: some View {
+        Button {
+            model.showWatchlistSightings()
+        } label: {
+            HStack(spacing: Theme.Spacing.m) {
+                Image(systemName: "eye.fill")
+                    .foregroundStyle(Theme.Colors.accent)
+                    .accessibilityHidden(true)
+                Text("\(seen) watched \(seen == 1 ? "network" : "networks") seen")
+                    .font(Theme.Fonts.body.weight(.semibold))
+                    .foregroundStyle(Theme.Colors.ink)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(Theme.Fonts.caption.weight(.semibold))
+                    .foregroundStyle(Theme.Colors.ink3)
+                    .accessibilityHidden(true)
+            }
+            .padding(Theme.Spacing.l)
+            .background(Theme.Colors.accentSoft, in: RoundedRectangle(cornerRadius: Theme.Radius.panel, style: .continuous))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Shows the watchlist sightings")
+        .accessibilityIdentifier("survey.watchlistSeen")
     }
 }

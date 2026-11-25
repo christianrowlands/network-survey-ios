@@ -127,7 +127,8 @@ struct BoardsView: View {
             }
         } header: {
             HStack(spacing: Theme.Spacing.s) {
-                Text("Nearby")
+                // "Nearby" is Nearby Bluetooth's word (this iPhone's own radio).
+                Text(yourBoards.isEmpty ? "Scouts in range" : "Other Scouts")
                 Spacer()
                 if scanning {
                     ProgressView().controlSize(.small)
@@ -317,7 +318,7 @@ private struct NearbyBoardRow: View {
     /// Signal strength in words.
     private var distance: String {
         if board.rssi >= -60 { return "Very close" }
-        return board.rssi >= -75 ? "Nearby" : "Weak signal"
+        return board.rssi >= -75 ? "In range" : "Weak signal"
     }
 
     /// 0 at -95 dBm or weaker, 1 at -45 dBm or stronger.

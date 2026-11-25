@@ -50,10 +50,17 @@ nonisolated struct OUIMatch: Equatable, Sendable {
 /// stay on the phone.
 nonisolated enum OUIRegistry {
     /// The manufacturer of a globally unique address, or nil when the
-    /// address is randomized, multicast, private or not registered.
+    /// address is randomized, multicast, private, not registered, or in the
+    /// documentation range.
     static func vendor(for mac: String) -> String? {
-        lookup(mac)?.vendor
+        if let digits = hexDigits(mac), digits.hasPrefix(documentationPrefix) { return nil }
+        return lookup(mac)?.vendor
     }
+
+    /// 00:00:5E:00:53:xx, which RFC 7042 sets aside for documentation (the
+    /// demo Scout uses it). No device has one, so naming IANA's block as its
+    /// maker would only mislead. The lookup tool still shows the block.
+    private static let documentationPrefix = "00005E0053"
 
     /// `vendor(for:)` in its short form, for list rows.
     static func shortVendor(for mac: String) -> String? {

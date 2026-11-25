@@ -30,7 +30,7 @@ nonisolated enum SpectrumPresentation {
         placement.ssid ?? "Hidden"
     }
 
-    /// The name in the list under the chart, as the Lists show it.
+    /// The name in the list under the chart, as Signals shows it.
     static func name(_ placement: WifiSpectrum.Placement) -> String {
         placement.ssid ?? "Hidden network"
     }

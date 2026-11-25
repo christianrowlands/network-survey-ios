@@ -9,8 +9,10 @@ struct SpectrumRoute: Hashable {}
 /// minutes of the shown survey, one chart per band, kept live while the
 /// survey records.
 struct SpectrumScreen: View {
+    /// Pushes an access point's details on the stack that shows the spectrum
+    /// (Signals or Tools).
+    let openDetail: (DetailRoute) -> Void
     @Environment(SurveyData.self) private var data
-    @Environment(ListsNavigation.self) private var navigation
     @State private var sectionID = WifiSpectrum.sections[0].id
     @State private var aps: [AccessPointRow] = []
     @State private var loaded = false
@@ -94,7 +96,7 @@ struct SpectrumScreen: View {
             List {
                 Section {
                     SpectrumChart(section: section, placements: placements) { placement in
-                        navigation.path.append(DetailRoute.accessPoint(sessionID: sessionID, bssid: placement.bssid))
+                        openDetail(DetailRoute.accessPoint(sessionID: sessionID, bssid: placement.bssid))
                     }
                     .padding(.vertical, Theme.Spacing.s)
                 } header: {

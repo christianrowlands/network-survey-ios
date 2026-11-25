@@ -53,6 +53,7 @@ private struct ProbeNetworkDetailContent: View {
                     }
                 }
                 if !network.isWildcard {
+                    WatchlistDetailSection(ssid: network.ssid, bssid: nil)
                     accessPoints
                 }
                 clients
@@ -68,6 +69,7 @@ private struct ProbeNetworkDetailContent: View {
         }
         .themedList()
         .listStyle(.insetGrouped)
+        .watchlistAddSheet()
     }
 
     private var accessPoints: some View {

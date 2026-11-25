@@ -2,10 +2,12 @@ import SurveyCore
 import SwiftUI
 
 /// The navigation title with the shown survey as a subtitle; tapping it
-/// picks a past survey. Used as the principal toolbar item on Map and Lists.
+/// picks a past survey or opens the shown survey's files. Used as the
+/// principal toolbar item on Signals and the Map.
 struct SessionTitle: View {
     let title: String
     @Environment(SurveyData.self) private var data
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         @Bindable var data = data
@@ -17,6 +19,12 @@ struct SessionTitle: View {
                         Text(DataFormat.dateTime(session.startedAt)).tag(Optional(session.id))
                     }
                 }
+            }
+            if let session = data.session {
+                Button("Files for this survey", systemImage: "folder") {
+                    model.filesRequest = FilesRequest(missionID: session.missionId)
+                }
+                .accessibilityIdentifier("session.files")
             }
         } label: {
             VStack(spacing: 0) {
@@ -35,7 +43,7 @@ struct SessionTitle: View {
         }
         .disabled(data.sessions.isEmpty)
         .accessibilityLabel("\(title), \(subtitle)")
-        .accessibilityHint("Chooses which survey to show")
+        .accessibilityHint("Chooses which survey to show, or opens its files")
         .accessibilityIdentifier("session.title")
     }
 
@@ -46,7 +54,7 @@ struct SessionTitle: View {
 }
 
 /// Says the screen shows a finished survey, not what is around now, with a
-/// way back. Shown at the top of Map and Lists.
+/// way back. Shown at the top of Signals and the Map.
 struct PastSurveyBar: View {
     @Environment(SurveyData.self) private var data
 

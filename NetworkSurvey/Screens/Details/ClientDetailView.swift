@@ -91,7 +91,7 @@ private struct ClientDetailContent: View {
                 }
                 Section("Details") {
                     if let vendor = OUIRegistry.vendor(for: client.mac) {
-                        DetailRow(label: "Manufacturer", value: vendor)
+                        ManufacturerLink(address: client.mac, vendor: vendor)
                     }
                     if let sources = DataFormat.clientSources(client.sourceFlags) {
                         DetailRow(label: "Seen in", value: sources)

@@ -65,6 +65,16 @@ final class WatchlistModel {
         entry(ssid: ssid, bssid: bssid) != nil
     }
 
+    /// The entry that watches this network name on any access point (no
+    /// BSSID), for a probed network's details.
+    func entry(network ssid: String) -> WatchlistEntry? {
+        guard let wanted = WatchlistMatcher.normalizeSSID(ssid) else { return nil }
+        return entries.first { entry in
+            entry.bssid == nil
+                && WatchlistMatcher.normalizeSSID(entry.ssid).map { $0.caseInsensitiveCompare(wanted) == .orderedSame } == true
+        }
+    }
+
     /// Some entry names this network, for a collapsed SSID group in the
     /// access point list. Entries that name only a BSSID show on the access
     /// point's own row once the group is open.

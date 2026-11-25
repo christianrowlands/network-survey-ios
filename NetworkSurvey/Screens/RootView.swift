@@ -8,7 +8,7 @@ struct RootView: View {
         if let screens {
             tabs.appAppearance()
                 .dataScreens(screens)
-                // A new survey is what Map and Lists should show, not a past one left picked.
+                // A new survey is what Map and Signals should show, not a past one left picked.
                 .onChange(of: model.survey.state) { old, new in
                     if old == .idle && new != .idle { screens.data.showLive() }
                 }
@@ -23,14 +23,14 @@ struct RootView: View {
             Tab("Survey", systemImage: "dot.radiowaves.left.and.right", value: .survey) {
                 SurveyView()
             }
+            Tab("Signals", systemImage: "list.bullet", value: .signals) {
+                ListsScreen()
+            }
             Tab("Map", systemImage: "map", value: .map) {
                 MapScreen()
             }
-            Tab("Lists", systemImage: "list.bullet", value: .lists) {
-                ListsScreen()
-            }
-            Tab("Files", systemImage: "folder", value: .files) {
-                FilesScreen()
+            Tab("Tools", systemImage: "wrench.and.screwdriver", value: .tools) {
+                ToolsScreen()
             }
             Tab("Settings", systemImage: "gearshape", value: .settings) {
                 SettingsScreen()
@@ -39,6 +39,28 @@ struct RootView: View {
         .onChange(of: model.selectedTab) { model.updateIdleTimer() }
         .fullScreenCover(isPresented: $model.showingWelcome) { WelcomeView() }
         .fullScreenCover(isPresented: $model.showingNearby) { NearbyScreen() }
+        .sheet(isPresented: $model.showingWatchlistHistory) {
+            NavigationStack {
+                WatchlistHistoryScreen()
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { model.showingWatchlistHistory = false }
+                                .accessibilityIdentifier("watchlistHistory.done")
+                        }
+                    }
+            }
+        }
+        .sheet(item: $model.filesRequest) { request in
+            NavigationStack {
+                FilesPage(focusMissionID: request.missionID)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { model.filesRequest = nil }
+                                .accessibilityIdentifier("files.done")
+                        }
+                    }
+            }
+        }
     }
 }
 

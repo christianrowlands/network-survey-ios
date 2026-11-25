@@ -1,6 +1,6 @@
 import XCTest
 
-/// Captures the Map, Lists, details, Settings and Files screens during a demo
+/// Captures Signals, the Map, details, Tools, Settings and Files during a demo
 /// survey. Runs only when SCREENSHOT_DIR is set (pass it to xcodebuild as
 /// TEST_RUNNER_SCREENSHOT_DIR); SCREENSHOT_SUFFIX names the appearance, and
 /// "midnight" also picks the Midnight palette in Settings first.
@@ -48,7 +48,7 @@ final class DataScreensScreenshots: XCTestCase {
         sleep(40)
 
         let tabs = app.tabBars.firstMatch
-        tabs.buttons["Lists"].tap()
+        tabs.buttons["Signals"].tap()
         _ = app.cells.firstMatch.waitForExistence(timeout: 10)
         save(app, "lists-aps")
         app.cells.firstMatch.tap()
@@ -89,15 +89,19 @@ final class DataScreensScreenshots: XCTestCase {
         save(app, "map-zones")
         if app.buttons["map.zonesDone"].exists { app.buttons["map.zonesDone"].tap() }
 
-        tabs.buttons["Files"].tap()
-        _ = app.staticTexts["Wi-Fi CSV"].waitForExistence(timeout: 10)
-        save(app, "files")
+        tabs.buttons["Tools"].tap()
+        _ = app.navigationBars["Tools"].waitForExistence(timeout: 5)
+        save(app, "tools")
 
         tabs.buttons["Settings"].tap()
         save(app, "settings")
+        app.buttons["settings.files"].tap()
+        _ = app.staticTexts["Wi-Fi CSV"].waitForExistence(timeout: 10)
+        save(app, "files")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
         for (identifier, name) in [
             ("settings.mqtt", "settings-mqtt"), ("settings.grpc", "settings-grpc"),
-            ("settings.nsAnalytics", "settings-nsanalytics"), ("settings.files", "settings-files"),
+            ("settings.nsAnalytics", "settings-nsanalytics"),
             ("settings.zones", "settings-zones"), ("settings.ignoreList", "settings-ignore"),
         ] {
             app.buttons[identifier].tap()

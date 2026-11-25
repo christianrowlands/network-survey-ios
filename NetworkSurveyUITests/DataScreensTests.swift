@@ -19,8 +19,8 @@ final class DataScreensTests: XCTestCase {
     @MainActor
     func testListsSearchDetailAndIgnore() {
         let app = launchSurveying()
-        app.tabBars.buttons["Lists"].tap()
-        XCTAssertTrue(app.navigationBars["Lists"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["Signals"].tap()
+        XCTAssertTrue(app.navigationBars["Signals"].waitForExistence(timeout: 5))
         app.buttons["By BSSID"].tap()
 
         let search = app.searchFields.firstMatch
@@ -56,7 +56,7 @@ final class DataScreensTests: XCTestCase {
         let probes = app.buttons["survey.count.Probe requests"]
         XCTAssertTrue(probes.waitForExistence(timeout: 15))
         probes.tap()
-        XCTAssertTrue(app.navigationBars["Lists"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Signals"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Probes"].isSelected)
 
         let byNetwork = NSPredicate(format: "label CONTAINS ' client' AND NOT (label BEGINSWITH 'Any network')")
@@ -79,7 +79,7 @@ final class DataScreensTests: XCTestCase {
         let aps = app.buttons["survey.count.Wi-Fi APs"]
         XCTAssertTrue(aps.waitForExistence(timeout: 5))
         aps.tap()
-        XCTAssertTrue(app.navigationBars["Lists"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Signals"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["APs"].isSelected)
         XCTAssertFalse(app.segmentedControls["lists.probeGrouping"].exists)
     }
@@ -116,14 +116,71 @@ final class DataScreensTests: XCTestCase {
         XCTAssertEqual(app.textFields["mqtt.username"].value as? String, "surveyor")
     }
 
+    /// Files opens from the survey title menu on Signals, as a sheet, with
+    /// the running survey's files and the file options above them.
     @MainActor
     func testFilesShowSessionAfterDemoSurvey() {
         let app = launchSurveying()
-        app.tabBars.buttons["Files"].tap()
+        app.tabBars.buttons["Signals"].tap()
+        let title = app.buttons["session.title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 5))
+        title.tap()
+        let files = app.buttons["session.files"]
+        XCTAssertTrue(files.waitForExistence(timeout: 5))
+        files.tap()
         XCTAssertTrue(app.navigationBars["Files"].waitForExistence(timeout: 5))
+        // It shows just this survey, with the file options above it.
+        XCTAssertTrue(app.staticTexts["Recording"].waitForExistence(timeout: 10))
+        let enabled = app.switches["files.enabled"]
+        for _ in 0..<3 where !enabled.exists { app.collectionViews["files.list"].swipeDown() }
+        XCTAssertTrue(enabled.waitForExistence(timeout: 5), "file options sit above the folders")
         let wifiCSV = app.staticTexts["Wi-Fi CSV"]
         XCTAssertTrue(wifiCSV.waitForExistence(timeout: 20), "the running survey's Wi-Fi CSV should be listed")
         XCTAssertTrue(app.staticTexts["Recording"].exists)
+        app.buttons["files.done"].tap()
+        XCTAssertTrue(app.navigationBars["Signals"].waitForExistence(timeout: 5))
+    }
+
+    /// A probed network can go on the watchlist. (The Manufacturer link is
+    /// not testable with the demo: its addresses are in the documentation
+    /// range, which has no maker.)
+    @MainActor
+    func testProbedNetworkCanGoOnWatchlist() {
+        let app = launchSurveying()
+        app.tabBars.buttons["Signals"].tap()
+        XCTAssertTrue(app.buttons["Probes"].waitForExistence(timeout: 5))
+        app.buttons["Probes"].tap()
+        // A row's own label, not a cell's: a cell "contains" any descendant
+        // that lacks the words, so it would match the wildcard row too.
+        let probed = app.buttons.matching(NSPredicate(
+            format: "label CONTAINS ' client' AND label CONTAINS ' request' AND NOT label CONTAINS[c] 'wildcard'"
+        )).firstMatch
+        XCTAssertTrue(probed.waitForExistence(timeout: 20), "no probed network")
+        probed.tap()
+        XCTAssertTrue(app.navigationBars["Probed network"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["watchlist.addFromDetail"].waitForExistence(timeout: 5))
+        attach(app, "probed-network-watchlist")
+    }
+
+    /// After Stop, Survey offers the survey's files to share and see.
+    @MainActor
+    func testShareFilesAfterStop() {
+        let app = launchSurveying()
+        app.tabBars.buttons["Survey"].tap()
+        let stop = app.buttons["survey.stop"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 10))
+        sleep(3)
+        stop.tap()
+        app.buttons["survey.confirmStop"].firstMatch.tap()
+        let share = app.buttons["survey.shareFiles"]
+        XCTAssertTrue(share.waitForExistence(timeout: 15), "Share files should appear once the survey stops")
+        attach(app, "survey-finished")
+        app.buttons["survey.seeFiles"].tap()
+        XCTAssertTrue(app.navigationBars["Files"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Wi-Fi CSV"].waitForExistence(timeout: 10))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["survey.closeFinished"].tap()
+        XCTAssertFalse(share.waitForExistence(timeout: 2))
     }
 
     /// The zone added on the map is the setting the survey pipeline reads
@@ -133,10 +190,18 @@ final class DataScreensTests: XCTestCase {
         let app = launchSurveying()
         app.tabBars.buttons["Map"].tap()
         XCTAssertTrue(app.buttons["map.filter"].waitForExistence(timeout: 5))
-        app.buttons["map.filter"].tap()
-        app.buttons["map.zones"].tap()
+        // The menu can open late; retry until the zone editing banner shows.
+        let zonesDone = app.buttons["map.zonesDone"]
+        for _ in 0..<3 where !zonesDone.exists {
+            app.buttons["map.filter"].tap()
+            let zones = app.buttons["map.zones"]
+            if zones.waitForExistence(timeout: 3) { zones.tap() }
+            _ = zonesDone.waitForExistence(timeout: 3)
+        }
+        XCTAssertTrue(zonesDone.exists, "zone editing should start")
         let map = app.otherElements["map.map"].exists ? app.otherElements["map.map"] : app.maps.firstMatch
-        map.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 1.0)
+        // Off center: the demo track and its markers sit in the middle.
+        map.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.7)).press(forDuration: 1.0)
         XCTAssertTrue(app.navigationBars["New privacy zone"].waitForExistence(timeout: 5))
         app.buttons["zone.add"].tap()
         app.buttons["map.zonesDone"].tap()
@@ -156,7 +221,7 @@ final class DataScreensTests: XCTestCase {
         let app = launchSurveying()
         let stop = app.buttons["survey.stop"]
         XCTAssertTrue(stop.waitForExistence(timeout: 15))
-        app.tabBars.buttons["Lists"].tap()
+        app.tabBars.buttons["Signals"].tap()
         XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 20), "no rows while recording")
         XCTAssertFalse(app.descendants(matching: .any)["pastSurvey.bar"].exists)
 
@@ -165,7 +230,7 @@ final class DataScreensTests: XCTestCase {
         app.buttons["survey.confirmStop"].firstMatch.tap()
         XCTAssertTrue(app.buttons["survey.start"].waitForExistence(timeout: 10))
 
-        app.tabBars.buttons["Lists"].tap()
+        app.tabBars.buttons["Signals"].tap()
         let showLast = app.buttons["noSurvey.showLast"]
         XCTAssertTrue(showLast.waitForExistence(timeout: 5), "a stopped survey should not stay on Lists")
         XCTAssertTrue(app.staticTexts["Not recording"].exists)
@@ -187,35 +252,32 @@ final class DataScreensTests: XCTestCase {
         XCTAssertTrue(marker.waitForExistence(timeout: 30), "map should show markers for the demo survey")
     }
 
-    /// Rows and the access point detail name the manufacturer of a globally
-    /// unique address. The demo Scout uses the IANA documentation range.
+    /// The demo's access points use the documentation range, so neither
+    /// rows nor details name a maker for them (not IANA, which owns the block).
     @MainActor
-    func testListsShowManufacturer() {
+    func testDocumentationAddressesHaveNoManufacturer() {
         let app = launchSurveying()
-        app.tabBars.buttons["Lists"].tap()
+        app.tabBars.buttons["Signals"].tap()
         app.buttons["By BSSID"].tap()
-        let vendor = app.cells.containing(NSPredicate(format: "label CONTAINS 'ICANN, IANA Department'")).firstMatch
-        XCTAssertTrue(vendor.waitForExistence(timeout: 30), "no access point row named its manufacturer")
+        let row = app.cells.containing(NSPredicate(format: "label CONTAINS '00:00:5E:00:53'")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 30))
+        XCTAssertFalse(app.cells.containing(NSPredicate(format: "label CONTAINS 'IANA'")).firstMatch.exists,
+                       "a documentation address has no maker")
         attach(app, "lists-aps")
-        vendor.tap()
+        row.tap()
         XCTAssertTrue(app.navigationBars["Access point"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Manufacturer"].waitForExistence(timeout: 5))
-        attach(app, "detail-ap")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["Clients"].tap()
-        sleep(3)
-        attach(app, "lists-clients")
+        XCTAssertFalse(app.buttons["detail.manufacturer"].exists)
     }
 
-    /// The OUI lookup in Settings names the manufacturer from the registry
+    /// The OUI lookup in Tools names the manufacturer from the registry
     /// built into the app, and explains a randomized address.
     @MainActor
     func testOUILookupNamesManufacturer() {
         let app = XCUIApplication()
         app.launchArguments = ["-NSUITesting", "YES"]
         app.launch()
-        app.tabBars.buttons["Settings"].tap()
-        let row = app.buttons["settings.ouiLookup"]
+        app.tabBars.buttons["Tools"].tap()
+        let row = app.buttons["tools.ouiLookup"]
         if !row.waitForExistence(timeout: 2) { app.swipeUp() }
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         row.tap()
@@ -258,6 +320,7 @@ final class DataScreensTests: XCTestCase {
     @MainActor
     private func choose(_ option: String, in app: XCUIApplication) {
         let picker = app.buttons["settings.appearance"]
+        for _ in 0..<3 where !(picker.exists && picker.isHittable) { app.swipeUp() }
         XCTAssertTrue(picker.waitForExistence(timeout: 5))
         picker.tap()
         let item = app.buttons[option]

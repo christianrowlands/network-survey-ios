@@ -39,22 +39,6 @@ struct SurveyView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     BrandTile(size: 30)
                 }
-                // Nearby Bluetooth is apart from the survey, so it can't open while one records.
-                if model.survey.state == .idle {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            model.showingNearby = true
-                        } label: {
-                            HStack(spacing: Theme.Spacing.xs) {
-                                Image(systemName: "iphone")
-                                Text("Nearby")
-                            }
-                        }
-                        .accessibilityLabel("Nearby Bluetooth")
-                        .accessibilityHint("Shows Bluetooth devices this iPhone hears, outside a survey")
-                        .accessibilityIdentifier("survey.nearbyButton")
-                    }
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink(value: SurveyRoute.boards) {
                         HStack(spacing: Theme.Spacing.xs) {
@@ -70,6 +54,7 @@ struct SurveyView: View {
                 case .boards: BoardsView()
                 case .board(let board): BoardDetailView(board: board)
                 case .firmwareUpdate(let board): FirmwareUpdateScreen(boardID: board)
+                case .files: FilesPage(focusMissionID: model.finishedSurvey?.missionId)
                 #if DEBUG
                 case .debugRecords: DebugRecordsView()
                 #endif
@@ -130,6 +115,10 @@ struct SurveyView: View {
                 EmptyView()
             }
             .padding(.top, Theme.Spacing.s)
+        }
+        if let finished = model.finishedSurvey, !isRecording {
+            FinishedSurveyPanel(session: finished)
+                .padding(.top, Theme.Spacing.s)
         }
         if let notice = model.notice {
             NoticePanel(symbol: "info.circle", title: "Note", message: notice, tone: .info) {

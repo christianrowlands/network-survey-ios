@@ -2,8 +2,8 @@ import SurveyCore
 import SwiftUI
 
 /// The watched networks: the alerts switch, one row per network with how
-/// often it was seen, and adding, history and clearing. Opened from Settings >
-/// Tools and from an access point's details.
+/// often it was seen, and adding, history and clearing. Opened from Tools and
+/// from an access point's details.
 struct WatchlistScreen: View {
     @Environment(AppModel.self) private var app
     @Environment(SettingsModel.self) private var settings

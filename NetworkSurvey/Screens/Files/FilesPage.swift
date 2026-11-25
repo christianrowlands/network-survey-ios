@@ -2,65 +2,99 @@ import QuickLook
 import SurveyCore
 import SwiftUI
 
-/// Each survey's files, with share, preview, delete and a jump to the Files app.
-struct FilesScreen: View {
+/// The Files page: whether surveys save files, then each survey's files with
+/// share, preview, delete and a jump to the Files app. Opened from the Files
+/// row on Survey, the survey title menu and after Stop (both showing just that
+/// survey, with a way to show them all) and Settings.
+struct FilesPage: View {
+    /// Shows only this survey's folder until Show all is tapped.
+    var focusMissionID: String?
     @Environment(AppModel.self) private var app
     @Environment(SurveyData.self) private var data
+    @Environment(SettingsModel.self) private var settings
     @Environment(\.openURL) private var openURL
     @State private var folders: [SurveyFolder] = []
     @State private var loaded = false
+    @State private var showAll = false
     @State private var preview: URL?
     @State private var deleteError: String?
 
+    /// The focused survey alone, or every folder when there is no focus, it
+    /// has no files, or Show all was tapped.
+    private var shownFolders: [SurveyFolder] {
+        guard let focusMissionID, !showAll else { return folders }
+        let focused = folders.filter { $0.session?.missionId == focusMissionID }
+        return focused.isEmpty ? folders : focused
+    }
+
     var body: some View {
-        NavigationStack {
-            List {
-                Group {
-                    ForEach(folders) { folder in
-                        FolderSection(folder: folder, preview: $preview) {
-                            delete(folder)
-                        }
+        List {
+            Group {
+                options
+                ForEach(shownFolders) { folder in
+                    FolderSection(folder: folder, preview: $preview) {
+                        delete(folder)
                     }
                 }
-                .panelRows()
-            }
-            .themedList()
-            .listStyle(.insetGrouped)
-            .overlay {
+                if shownFolders.count < folders.count {
+                    Section {
+                        Button("Show every survey's files") { showAll = true }
+                            .accessibilityIdentifier("files.showAll")
+                    }
+                }
                 if loaded && folders.isEmpty {
-                    ContentUnavailableView(
-                        "No survey files yet",
-                        systemImage: "folder",
-                        description: Text("Each survey's files are kept here and in the Files app under On My iPhone > Network Survey.")
-                    )
-                }
-            }
-            .accessibilityIdentifier("files.list")
-            .navigationTitle("Files")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        openInFilesApp()
-                    } label: {
-                        Label("Open in Files", systemImage: "folder.badge.gearshape")
+                    Section {
+                        ContentUnavailableView(
+                            "No survey files yet",
+                            systemImage: "folder",
+                            description: Text("Each survey's files are kept here and in the Files app under On My iPhone > Network Survey.")
+                        )
                     }
-                    .accessibilityIdentifier("files.openInFiles")
                 }
             }
-            .refreshable { await reload() }
-            .quickLookPreview($preview)
-            .alert("Could not delete", isPresented: Binding(get: { deleteError != nil }, set: { if !$0 { deleteError = nil } })) {
-                Button("OK") {}
-            } message: {
-                Text(deleteError ?? "")
-            }
-            .task(id: data.sessions.map(\.id)) {
-                // Sizes grow while a survey records, so refresh every few seconds while visible.
-                while !Task.isCancelled {
-                    await reload()
-                    try? await Task.sleep(for: .seconds(3))
+            .panelRows()
+        }
+        .themedList()
+        .listStyle(.insetGrouped)
+        .accessibilityIdentifier("files.list")
+        .navigationTitle("Files")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    openInFilesApp()
+                } label: {
+                    Label("Open in Files", systemImage: "folder.badge.gearshape")
                 }
+                .accessibilityIdentifier("files.openInFiles")
             }
+        }
+        .refreshable { await reload() }
+        .quickLookPreview($preview)
+        .alert("Could not delete", isPresented: Binding(get: { deleteError != nil }, set: { if !$0 { deleteError = nil } })) {
+            Button("OK") {}
+        } message: {
+            Text(deleteError ?? "")
+        }
+        .task(id: data.sessions.map(\.id)) {
+            // Sizes grow while a survey records, so refresh every few seconds while visible.
+            while !Task.isCancelled {
+                await reload()
+                try? await Task.sleep(for: .seconds(3))
+            }
+        }
+    }
+
+    /// NS CSV and pcapng, for the next survey.
+    @ViewBuilder private var options: some View {
+        Section {
+            Toggle("Save files on this iPhone", isOn: settings.binding(Settings.destinationLogFiles))
+                .accessibilityIdentifier("files.enabled")
+            Toggle("Packet capture (pcapng)", isOn: settings.binding(Settings.surveyRawFrames))
+                .disabled(!settings[Settings.destinationLogFiles])
+                .accessibilityIdentifier("files.pcap")
+        } footer: {
+            AppliesNextSurveyFooter(extra: "Network Survey CSV files: Wi-Fi, Bluetooth, clients and probe requests, one file of each per survey. Packet capture also saves every Wi-Fi frame the Scouts hear, for Wireshark; it is the same switch as Raw frames on Survey, and files grow quickly.")
         }
     }
 
@@ -86,6 +120,8 @@ struct FilesScreen: View {
                 try await Task.detached { try SurveyFiles.delete(folder) }.value
                 if let session = folder.session {
                     try await store.deleteSession(session.id)
+                    // Survey stops offering to share files that are gone.
+                    if app.finishedSurvey?.id == session.id { app.finishedSurvey = nil }
                 }
             } catch {
                 deleteError = error.localizedDescription
@@ -191,7 +227,7 @@ private struct FolderSection: View {
                 .confirmationDialog("Delete this survey?", isPresented: $confirmingDelete, titleVisibility: .visible) {
                     Button("Delete files and survey data", role: .destructive, action: onDelete)
                 } message: {
-                    Text("Deletes \(folder.files.count) files (\(DataFormat.bytes(folder.totalBytes))) and removes the survey from the Map and Lists. This cannot be undone.")
+                    Text("Deletes \(folder.files.count) files (\(DataFormat.bytes(folder.totalBytes))) and removes the survey from Signals and the Map. This cannot be undone.")
                 }
             }
         }

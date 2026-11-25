@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Tokens and list styling for the Map, Lists, details, Settings and Files.
+/// Tokens and list styling for the Map, Signals, details, Tools, Settings and Files.
 extension Theme.Colors {
     /// Wi-Fi clients: a lighter tint of the Wi-Fi color.
     nonisolated static let wifiClient = Color(light: 0x7FD3DF, dark: 0xA6E9F2)

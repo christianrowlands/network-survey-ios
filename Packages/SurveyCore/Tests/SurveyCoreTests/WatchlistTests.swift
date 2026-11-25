@@ -238,10 +238,27 @@ struct WatchlistStoreTests {
         #expect(try await store.insertWatchlistHit(hit(entryID: 999, at: 0)) == nil)
     }
 
-    func hit(entryID: Int64, at offset: TimeInterval, rssi: Int? = -60, located: Bool = false) -> WatchlistHit {
+    @Test("Networks seen counts each watched network once per survey")
+    func networksSeen() async throws {
+        let store = try SurveyStore.inMemory()
+        guard case .saved(let a) = try await store.addWatchlistEntry(label: "A", ssid: "ExampleNet", bssid: nil),
+              case .saved(let b) = try await store.addWatchlistEntry(label: "B", ssid: "HomeNet", bssid: nil),
+              let idA = a.id, let idB = b.id
+        else { Issue.record("not added"); return }
+        try await store.insertWatchlistHit(hit(entryID: idA, at: 0))
+        try await store.insertWatchlistHit(hit(entryID: idA, at: 10))
+        try await store.insertWatchlistHit(hit(entryID: idB, at: 20, mission: "M2"))
+        #expect(try await store.read { try WatchlistQueries.networksSeen($0, missionID: "M1") } == 1)
+        #expect(try await store.read { try WatchlistQueries.networksSeen($0, missionID: "M2") } == 1)
+        #expect(try await store.read { try WatchlistQueries.networksSeen($0, missionID: "M3") } == 0)
+    }
+
+    func hit(
+        entryID: Int64, at offset: TimeInterval, rssi: Int? = -60, located: Bool = false, mission: String = "M1"
+    ) -> WatchlistHit {
         WatchlistHit(
             entryId: entryID, label: "X", matchedField: .ssid, ssid: "ExampleNet", bssid: "02:00:5e:00:00:01", rssi: rssi,
-            latitude: located ? 38.89 : nil, longitude: located ? -77.03 : nil, timestamp: t0 + offset, missionId: "M1"
+            latitude: located ? 38.89 : nil, longitude: located ? -77.03 : nil, timestamp: t0 + offset, missionId: mission
         )
     }
 }

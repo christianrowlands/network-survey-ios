@@ -13,7 +13,7 @@ final class ListsGroupingTests: XCTestCase {
         app.launchArguments = ["-NSUITesting", "YES", "-NSAutoStartSurvey", "YES"]
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
-        app.tabBars.buttons["Lists"].tap()
+        app.tabBars.buttons["Signals"].tap()
 
         // Grouped is the default.
         let grouping = app.segmentedControls["lists.apGrouping"]

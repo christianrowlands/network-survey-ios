@@ -111,7 +111,18 @@ private struct DestinationRow: View {
                 EmptyView()
             } else if configured {
                 HStack(spacing: Theme.Spacing.s) {
-                    if destination != .logFiles {
+                    if destination == .logFiles {
+                        // The Files page: options and every survey's files, on this tab.
+                        Button {
+                            model.surveyPath.append(.files)
+                        } label: {
+                            Image(systemName: "folder")
+                                .frame(width: Theme.Spacing.touchTarget, height: Theme.Spacing.touchTarget)
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel("Survey files")
+                        .accessibilityIdentifier("survey.files")
+                    } else {
                         Button {
                             model.open(destination.route)
                         } label: {

@@ -22,8 +22,8 @@ final class FindMyTests: XCTestCase {
         waitForExpectations(timeout: 30)
         start.tap()
         XCTAssertTrue(app.buttons["survey.stop"].waitForExistence(timeout: 15))
-        app.tabBars.buttons["Lists"].tap()
-        XCTAssertTrue(app.navigationBars["Lists"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["Signals"].tap()
+        XCTAssertTrue(app.navigationBars["Signals"].waitForExistence(timeout: 5))
         app.buttons["Bluetooth"].tap()
 
         let airTag = app.cells.containing(NSPredicate(format: "label CONTAINS 'AirTag tracker'")).firstMatch

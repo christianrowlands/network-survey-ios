@@ -3,8 +3,13 @@ import SwiftUI
 /// Type a MAC address, or its first 6 hex digits, and see who it is
 /// registered to. Uses the registries built into the app, so it works offline.
 struct OUILookupView: View {
-    @State private var text = ""
+    @State private var text: String
     @FocusState private var focused: Bool
+
+    /// `address` fills in the field (a detail screen's MAC address).
+    init(address: String = "") {
+        _text = State(initialValue: address.uppercased())
+    }
 
     var body: some View {
         let digits = OUIRegistry.hexDigits(text)
@@ -103,5 +108,23 @@ private struct OUIResultView: View {
         case .notFound:
             "This prefix is not in the registries built into this version of the app."
         }
+    }
+}
+
+/// A detail screen's Manufacturer row, opening OUI lookup for the address
+/// to show the registry entry.
+struct ManufacturerLink: View {
+    let address: String
+    let vendor: String
+    var label = "Manufacturer"
+
+    var body: some View {
+        NavigationLink {
+            OUILookupView(address: address)
+        } label: {
+            DetailRow(label: label, value: vendor)
+        }
+        .accessibilityHint("Looks up the manufacturer")
+        .accessibilityIdentifier("detail.manufacturer")
     }
 }

@@ -81,6 +81,12 @@ public enum WatchlistQueries {
         }
     }
 
+    /// How many watched networks were seen in one survey.
+    public static func networksSeen(_ db: Database, missionID: String) throws -> Int {
+        try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT entryId) FROM watchlistHit WHERE missionId = ?",
+                         arguments: [missionID]) ?? 0
+    }
+
     /// Sightings newest first; every entry's when `entryID` is nil.
     public static func hits(_ db: Database, entryID: Int64? = nil) throws -> [WatchlistHit] {
         var request = WatchlistHit.order(sql: "timestamp DESC, id DESC")

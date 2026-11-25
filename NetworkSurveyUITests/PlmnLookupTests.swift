@@ -12,8 +12,8 @@ final class PlmnLookupTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-NSUITesting", "YES"]
         app.launch()
-        app.tabBars.buttons["Settings"].tap()
-        let row = app.buttons["settings.plmnLookup"]
+        app.tabBars.buttons["Tools"].tap()
+        let row = app.buttons["tools.plmnLookup"]
         if !row.waitForExistence(timeout: 2) { app.swipeUp() }
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         row.tap()

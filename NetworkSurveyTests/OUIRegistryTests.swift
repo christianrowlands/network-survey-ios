@@ -86,4 +86,13 @@ struct OUIRegistryTests {
         #expect(OUIRegistry.table.count > 50_000)
         #expect(OUIRegistry.vendor(for: "00:00:00:00:00:01") == "XEROX CORPORATION")
     }
+
+    /// RFC 7042's documentation range has no maker; the rest of IANA's block
+    /// (VRRP's virtual routers, for one) does, and the lookup tool still
+    /// shows the block for a documentation address.
+    @Test func theDocumentationRangeHasNoManufacturer() {
+        #expect(OUIRegistry.vendor(for: "00:00:5E:00:53:13") == nil)
+        #expect(OUIRegistry.vendor(for: "00:00:5E:00:01:01") == "ICANN, IANA Department")
+        #expect(OUIRegistry.lookup("00:00:5E:00:53:13")?.vendor == "ICANN, IANA Department")
+    }
 }

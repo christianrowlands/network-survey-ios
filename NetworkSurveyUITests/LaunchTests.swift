@@ -12,11 +12,15 @@ final class LaunchTests: XCTestCase {
         app.launch()
         let tabBar = app.tabBars.firstMatch
         XCTAssertTrue(tabBar.waitForExistence(timeout: 10))
-        for name in ["Survey", "Map", "Lists", "Files", "Settings"] {
+        for name in ["Survey", "Signals", "Map", "Tools", "Settings"] {
             XCTAssertTrue(tabBar.buttons[name].exists, "missing tab \(name)")
         }
         tabBar.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+        tabBar.buttons["Tools"].tap()
+        XCTAssertTrue(app.navigationBars["Tools"].waitForExistence(timeout: 5))
+        app.buttons["tools.spectrum"].tap()
+        XCTAssertTrue(app.navigationBars["Wi-Fi spectrum"].waitForExistence(timeout: 5))
         tabBar.buttons["Survey"].tap()
         XCTAssertTrue(app.navigationBars["Network Survey"].waitForExistence(timeout: 5))
     }

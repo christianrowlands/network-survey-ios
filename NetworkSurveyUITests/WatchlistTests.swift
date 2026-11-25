@@ -20,7 +20,7 @@ final class WatchlistTests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
 
-        app.tabBars.buttons["Lists"].tap()
+        app.tabBars.buttons["Signals"].tap()
         // One row per access point, so a tap opens its details.
         let byBSSID = app.buttons["By BSSID"]
         XCTAssertTrue(byBSSID.waitForExistence(timeout: 5))
@@ -70,7 +70,6 @@ final class WatchlistTests: XCTestCase {
             attach(springboard, "watchlist-notification")
             banner.tap()
         } else {
-            app.tabBars.buttons["Settings"].tap()
             openWatchlist(app)
             app.buttons["watchlist.history"].tap()
         }
@@ -90,6 +89,20 @@ final class WatchlistTests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Watchlist"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.cells.containing(NSPredicate(format: "label CONTAINS 'Seen once'")).firstMatch.waitForExistence(timeout: 5))
         attach(app, "watchlist-screen")
+
+        // The recording Survey screen counts it and opens the sightings.
+        let historyDone = app.buttons["watchlistHistory.done"]
+        if historyDone.exists { historyDone.tap() }
+        app.tabBars.buttons["Survey"].tap()
+        let seen = app.buttons["survey.watchlistSeen"]
+        XCTAssertTrue(seen.waitForExistence(timeout: 10), "Survey should count the watched network")
+        XCTAssertTrue(seen.label.contains("watched network"), "label: \(seen.label)")
+        // Clear of the Stop survey bar that floats over the bottom.
+        app.swipeUp()
+        attach(app, "watchlist-survey-seen")
+        seen.tap()
+        XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 5))
+        historyDone.tap()
     }
 
     /// Adding by hand from the Watchlist screen, editing and removing.
@@ -98,7 +111,6 @@ final class WatchlistTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-NSUITesting", "YES"]
         app.launch()
-        app.tabBars.buttons["Settings"].tap()
         openWatchlist(app)
         attach(app, "watchlist-empty")
 
@@ -141,7 +153,6 @@ final class WatchlistTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-NSUITesting", "YES"]
         app.launch()
-        app.tabBars.buttons["Settings"].tap()
         openWatchlist(app)
 
         for round in 0..<2 {
@@ -170,12 +181,15 @@ final class WatchlistTests: XCTestCase {
         attach(app, "watchlist-imported")
     }
 
-    /// Settings > Watchlist, scrolling down to Tools.
+    /// Tools > Watchlist.
     @MainActor
     private func openWatchlist(_ app: XCUIApplication) {
-        let row = app.buttons["settings.watchlist"]
-        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
-        for _ in 0..<5 where !(row.exists && row.isHittable) { app.swipeUp() }
+        // A search left open on Signals puts the keyboard over the tab bar.
+        let closeSearch = app.navigationBars.buttons["Close"]
+        if app.keyboards.count > 0 && closeSearch.exists { closeSearch.tap() }
+        app.tabBars.buttons["Tools"].tap()
+        let row = app.buttons["tools.watchlist"]
+        XCTAssertTrue(app.navigationBars["Tools"].waitForExistence(timeout: 5))
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         row.tap()
         XCTAssertTrue(app.navigationBars["Watchlist"].waitForExistence(timeout: 5))

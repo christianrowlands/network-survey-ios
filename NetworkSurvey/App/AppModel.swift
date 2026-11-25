@@ -7,8 +7,10 @@ import Observation
 import OSLog
 import SurveyCore
 
+/// The tab bar. Survey, Signals and Map come first, in the order Network
+/// Survey uses on Android; Tools holds what works without a survey.
 enum AppTab: Hashable {
-    case survey, map, lists, files, settings
+    case survey, signals, map, tools, settings
 }
 
 /// Screens pushed on the Survey tab's navigation stack.
@@ -16,6 +18,8 @@ enum SurveyRoute: Hashable {
     case boards
     case board(BoardID)
     case firmwareUpdate(BoardID)
+    /// The survey files and their options (the Files row).
+    case files
     #if DEBUG
     /// Live records from the demo board (Debug builds only).
     case debugRecords
@@ -28,7 +32,19 @@ enum SurveyRoute: Hashable {
 /// The Settings screen shows it and sets `AppModel.settingsRoute` back to nil.
 enum SettingsRoute: Hashable {
     case logFiles, mqtt, grpc, nsAnalytics
-    case watchlist, watchlistHistory
+}
+
+/// A Tools page another screen asks to open (a watchlist link). The Tools
+/// screen shows it and sets `AppModel.toolsRoute` back to nil.
+enum ToolsRoute: Hashable {
+    case watchlist, spectrum, ouiLookup, plmnLookup
+}
+
+/// The Files page opened as a sheet from the survey title menu, showing one
+/// survey's files.
+struct FilesRequest: Identifiable {
+    let id = UUID()
+    var missionID: String?
 }
 
 /// The composition root: builds the board manager (Bluetooth plus the demo
@@ -64,6 +80,14 @@ final class AppModel {
     var selectedTab: AppTab = .survey
     var surveyPath: [SurveyRoute] = []
     var settingsRoute: SettingsRoute?
+    var toolsRoute: ToolsRoute?
+    /// Watchlist sightings, opened over the current tab from a notification.
+    var showingWatchlistHistory = false
+    /// The Files page as a sheet (survey title menu).
+    var filesRequest: FilesRequest?
+    /// The survey just stopped with files saved, for Share files on Survey
+    /// (until the next survey starts or the user closes it).
+    var finishedSurvey: SessionRow?
     /// A short message for the user (a failed start, an upload result).
     var notice: String?
     var demoBoardEnabled: Bool
@@ -222,7 +246,8 @@ final class AppModel {
         tasks.append(Task { [weak self] in await self?.tick() })
         // Before an interrupted survey resumes, so its sightings are caught.
         await watchlistMonitor.start()
-        watchlist.notifier.onOpen = { [weak self] in self?.open(.watchlistHistory) }
+        // A sighting opens over the current tab, so a mapping survey stays on the Map.
+        watchlist.notifier.onOpen = { [weak self] in self?.showWatchlistSightings() }
         watchlist.notifier.activate()
         for (board, role) in roleStore.load() {
             await boardManager.setRole(role, for: board)
@@ -259,6 +284,16 @@ final class AppModel {
     func open(_ route: SettingsRoute) {
         settingsRoute = route
         selectedTab = .settings
+    }
+
+    func open(_ route: ToolsRoute) {
+        toolsRoute = route
+        selectedTab = .tools
+    }
+
+    /// The watchlist sightings as a sheet over whatever tab is showing.
+    func showWatchlistSightings() {
+        showingWatchlistHistory = true
     }
 
     func openBoards() {
@@ -342,6 +377,7 @@ final class AppModel {
         #endif
         case "liveActivity": surveyPath = [.liveActivityPreview]
         case "nearby": showingNearby = !showingWelcome && survey.state == .idle
+        case "files": surveyPath = [.files]
         default: break
         }
     }

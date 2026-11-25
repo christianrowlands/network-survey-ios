@@ -34,7 +34,7 @@ struct SettingsScreen: View {
                     } header: {
                         Text("Where the data goes")
                     } footer: {
-                        Text("Most people save Files and share with NS Analytics. MQTT and gRPC stream live to a server your team runs.")
+                        Text("Most people save files and share with NS Analytics. Files also lists each survey's files to share. MQTT and gRPC stream live to a server your team runs.")
                     }
                     Section {
                         NavigationLink { PrivacyZonesView() } label: {
@@ -103,20 +103,6 @@ struct SettingsScreen: View {
                             ? "Records use the phone's location. A Scout GPS fills in when the phone has no recent, accurate fix."
                             : "Records use a Scout GPS when one has a fix, and the phone's location otherwise.")
                     }
-                    Section("Tools") {
-                        NavigationLink(value: SettingsRoute.watchlist) {
-                            SettingsLinkLabel(title: "Watchlist", symbol: "eye", detail: countText(app.watchlist.summaries.count))
-                        }
-                        .accessibilityIdentifier("settings.watchlist")
-                        NavigationLink { OUILookupView() } label: {
-                            Label("OUI lookup", systemImage: "magnifyingglass")
-                        }
-                        .accessibilityIdentifier("settings.ouiLookup")
-                        NavigationLink { PlmnLookupView() } label: {
-                            Label("PLMN lookup", systemImage: "antenna.radiowaves.left.and.right")
-                        }
-                        .accessibilityIdentifier("settings.plmnLookup")
-                    }
                     #if DEBUG
                     Section("Developer") {
                         NavigationLink {
@@ -163,18 +149,16 @@ struct SettingsScreen: View {
             .sheet(isPresented: $showingScoutGuide) { ScoutGuideView() }
             .navigationDestination(for: SettingsRoute.self) { route in
                 switch route {
-                case .logFiles: FileSettingsView()
+                case .logFiles: FilesPage()
                 case .mqtt: MQTTSettingsView()
                 case .grpc: GRPCSettingsView()
                 case .nsAnalytics: NSAnalyticsSettingsView()
-                case .watchlist: WatchlistScreen()
-                case .watchlistHistory: WatchlistHistoryScreen()
                 }
             }
             .onChange(of: app.settingsRoute, initial: true) { _, route in
                 // Another screen asked for a page ("Set up" on a destination).
                 guard let route else { return }
-                path = route == .watchlistHistory ? [.watchlist, route] : [route]
+                path = [route]
                 app.settingsRoute = nil
             }
         }

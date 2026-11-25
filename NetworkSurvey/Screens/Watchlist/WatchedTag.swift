@@ -48,17 +48,18 @@ extension View {
     }
 }
 
-/// The watchlist part of an access point's details: on the watchlist (open
-/// it), or add it, prefilled.
+/// The watchlist part of an access point's or a probed network's details:
+/// on the watchlist (open it), or add it, prefilled. With no BSSID it watches
+/// the network name on any access point.
 struct WatchlistDetailSection: View {
     let ssid: String?
-    let bssid: String
+    let bssid: String?
 
     @Environment(AppModel.self) private var app
     @Environment(SettingsModel.self) private var settings
 
     var body: some View {
-        let entry = app.watchlist.entry(ssid: ssid, bssid: bssid)
+        let entry = if let bssid { app.watchlist.entry(ssid: ssid, bssid: bssid) } else { ssid.flatMap(app.watchlist.entry(network:)) }
         Section {
             if let entry {
                 NavigationLink {
@@ -70,7 +71,7 @@ struct WatchlistDetailSection: View {
                 .accessibilityIdentifier("watchlist.onWatchlist")
             } else {
                 Button {
-                    app.watchlist.draft = WatchlistModel.Draft(ssid: ssid ?? "", bssid: bssid.lowercased())
+                    app.watchlist.draft = WatchlistModel.Draft(ssid: ssid ?? "", bssid: bssid?.lowercased() ?? "")
                 } label: {
                     Label("Add to watchlist", systemImage: "eye")
                 }
@@ -80,11 +81,13 @@ struct WatchlistDetailSection: View {
             Text("Watchlist")
         } footer: {
             if entry == nil {
-                Text("Get a notification when a Scout sees this network during a survey. Adding it turns watchlist alerts on.")
+                Text(bssid == nil
+                    ? "Get a notification when a Scout sees an access point with this name during a survey. Adding it turns watchlist alerts on."
+                    : "Get a notification when a Scout sees this network during a survey. Adding it turns watchlist alerts on.")
             } else if settings[Settings.watchlistEnabled] {
                 Text("You get a notification when a Scout sees it during a survey.")
             } else {
-                Text("Watchlist alerts are off. Turn them on in Settings > Watchlist.")
+                Text("Watchlist alerts are off. Turn them on in Tools > Watchlist.")
             }
         }
     }

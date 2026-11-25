@@ -2,7 +2,7 @@ import BoardProtocol
 import SurveyCore
 import SwiftUI
 
-/// Everything seen in a survey, as searchable, sortable lists.
+/// The Signals tab: everything seen in a survey, as searchable, sortable lists.
 struct ListsScreen: View {
     enum Segment: String, CaseIterable, Identifiable {
         case aps = "APs"
@@ -75,7 +75,7 @@ struct ListsScreen: View {
                     FilterMenu(filters: $filters, kind: kind)
                 }
                 ToolbarItem(placement: .principal) {
-                    SessionTitle(title: "Lists")
+                    SessionTitle(title: "Signals")
                 }
                 if navigation.segment == .aps {
                     ToolbarItem(placement: .topBarLeading) {
@@ -86,13 +86,13 @@ struct ListsScreen: View {
                 }
             }
             .screenBackground()
-            .navigationTitle("Lists")
+            .navigationTitle("Signals")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: DetailRoute.self) { route in
                 DetailScreen(route: route)
             }
             .navigationDestination(for: SpectrumRoute.self) { _ in
-                SpectrumScreen()
+                SpectrumScreen { navigation.path.append($0) }
             }
         }
     }
@@ -112,7 +112,7 @@ enum ListKind: Hashable {
     }
 }
 
-/// Which list the Lists tab shows and its navigation, so other tabs can
+/// Which list the Signals tab shows and its navigation, so other tabs can
 /// open a list.
 @Observable
 final class ListsNavigation {

@@ -41,6 +41,17 @@ The app asks for two permissions:
   app never asks for "Always": a survey you start keeps location running in
   the background until you stop it.
 
+The app has five tabs:
+
+- **Survey** starts and stops a survey and shows it live. **Scouts** at the
+  top right pairs and manages your Scouts.
+- **Signals** lists the access points, clients, probe requests and Bluetooth
+  devices a survey saw.
+- **Map** shows them where they were heard, plus nearby cell towers.
+- **Tools** holds Nearby Bluetooth, the Wi-Fi watchlist, the Wi-Fi spectrum
+  and the OUI and PLMN lookups.
+- **Settings** is where the data goes, privacy, this phone and help.
+
 ## Installing the Scout software
 
 A new board needs the Scout software once. On a computer with Chrome or Edge,
@@ -57,7 +68,7 @@ updates install from the app over Bluetooth. Where to buy a board:
    ESP32-C5), it is ready to pair.
 2. In the app, open **Survey** and tap **Scouts** (or **Find Scouts** in the
    Still to do list).
-3. Hold the Scout next to your iPhone. It appears under **Nearby** as
+3. Hold the Scout next to your iPhone. It appears under **Scouts in range** as
    `NS-XXXX`, where `XXXX` is its short ID (also shown by the web installer).
 4. Tap the Scout. When iOS asks, tap **Pair**. The Scout moves to **Your
    Scouts** and its LED turns solid blue (solid yellow on the XIAO).
@@ -76,8 +87,8 @@ battery, GPS, what it is doing now, and its role. From there you can
 **Connect** or **Disconnect** it, update its firmware, or **Remove Scout**.
 
 **Removing a Scout** stops the app from connecting to it. Both the Scout and
-the iPhone keep their pairing, so it shows under **Nearby** as **Used with this
-iPhone before** and you can add it back with one tap, without pairing again.
+the iPhone keep their pairing, so it shows under **Other Scouts** as **Used with
+this iPhone before** and you can add it back with one tap, without pairing again.
 
 **Erase pairings on the Scout** (under Advanced, while connected) makes the
 Scout forget every phone. You only need it before giving a Scout away for good:
@@ -180,17 +191,22 @@ All data stays on your iPhone unless you set up a stream or an upload.
 
 ### Files
 
-**Settings > Files.** **Save files on this iPhone** is on by default. Each
-survey gets its own folder of files:
+**Files** opens from the folder button on the Files row of the Survey tab,
+from **Files for this survey** in the title menu of Signals and the Map, from
+**See files** after you stop a survey, and from **Settings > Files**. Opened
+for one survey, it shows just that survey's files; tap **Show every survey's
+files** for the rest. **Save files on this iPhone**, at the top, is on by
+default. Each survey gets its own folder of files:
 
 - Network Survey CSV files for Wi-Fi access points, Bluetooth, clients and
   probe requests (the Wi-Fi and Bluetooth files use the same format as the
   Network Survey Android app).
 - A pcapng file of raw frames, when **Raw frames** is on.
 
-The **Files** tab lists the surveys with their files. Tap a file to preview
-it, share one file or a whole survey, or delete a survey (which also removes
-its map and list data). **Open in Files** opens the folder in the iOS Files
+Below the options, Files lists the surveys with their files. Tap a file to
+preview it, share one file or a whole survey, or delete a survey (which also
+removes its map and list data). After you tap **Stop**, the Survey tab shows
+**Survey saved** with **Share files** for the survey that just ended. **Open in Files** opens the folder in the iOS Files
 app, under **On My iPhone > Network Survey > Surveys**.
 
 The columns of every file are described in [csv-formats.md](csv-formats.md).
@@ -276,7 +292,8 @@ characters from this install's ID.
   satellite imagery, and edits privacy zones.
 - **Towers** on the Map shows cell towers near you, also without a survey. See
   [Cell towers](#cell-towers).
-- **Lists** has tabs for access points, clients and Bluetooth devices, with
+- **Signals** has tabs for access points, clients, probe requests and
+  Bluetooth devices, with
   search, sort (signal, last seen, frame count, name) and filters (band,
   security, hide randomized addresses). The Bluetooth list also has **Named
   only** and **Find My trackers**.
@@ -291,7 +308,8 @@ characters from this install's ID.
   strongest signal. Tap a network to show its access points, and tap again
   to hide them. Hidden and unnamed networks stay one row per BSSID. **By
   BSSID** lists every access point on its own row. The choice is kept.
-- **Spectrum** (the chart button at the top left of **Lists > APs**) shows
+- **Spectrum** (**Tools > Wi-Fi spectrum**, or the chart button at the top
+  left of **Signals > APs**) shows
   how busy each Wi-Fi channel is. Each access point is a curve over the
   channels it uses, as wide as its channel width and as high as its signal.
   It shows the access points heard in the last 2 minutes, kept live while a
@@ -301,11 +319,14 @@ characters from this install's ID.
 - **Details** show everything known about one access point, client or
   Bluetooth device, a signal chart, and related devices (an access point's
   clients, a client's access points and the networks it probes for).
-- **Manufacturers** appear next to each address in Lists and on the detail
+- **Manufacturers** appear next to each address in Signals and on the detail
   screens, from the IEEE MAC address registries built into the app, so
-  nothing is looked up online. Randomized addresses have no manufacturer.
-  **Settings > OUI lookup** looks up any address or its first 6 hex digits.
-- **Between surveys** the Map and Lists show **Not recording** instead of
+  nothing is looked up online. Randomized addresses, and the documentation
+  addresses the Demo Scout uses, have no manufacturer. Tap **Manufacturer**
+  (**Address registered to** for Bluetooth) on a detail screen to see the
+  registry entry, or use
+  **Tools > OUI lookup** for any address or its first 6 hex digits.
+- **Between surveys** Signals and the Map show **Not recording** instead of
   the last survey, because a Scout only hears while a survey records. Tap
   **Show last survey**, or pick any survey from the title menu, to look back
   at one. A **Past survey** bar with its date stays at the top until you tap
@@ -336,7 +357,7 @@ service, the same one the Android app uses, with data from
   have been seen.
 - **Find a tower** in the options menu looks up a tower by MCC, MNC, LAC or
   TAC and cell ID.
-- **Settings > PLMN lookup** finds mobile network operators by MCC (310),
+- **Tools > PLMN lookup** finds mobile network operators by MCC (310),
   MCC-MNC (310-260), country or operator name, with their brand, company,
   country, status, bands and TADIG code. **Look up operator** on a tower's
   details opens it for that tower's MCC-MNC. Each search is sent to the
@@ -350,7 +371,9 @@ by hundreds of meters.
 
 The watchlist keeps Wi-Fi networks you care about. When a Scout sees one
 during a survey, you get a notification and the sighting is saved with its
-time, signal and location. Open it from **Settings > Watchlist**.
+time, signal and location. Open it from **Tools > Watchlist**. Tapping a
+notification shows the sightings over whatever tab you are on, and while a
+survey records the Survey tab shows how many watched networks it has seen.
 
 - **Watch a network** by its name (SSID) on any access point, by one access
   point's MAC address (BSSID), or by both together. With both, it matches only
@@ -359,8 +382,10 @@ time, signal and location. Open it from **Settings > Watchlist**.
 - **Add from an access point:** on its details, tap **Add to watchlist**. The
   form is filled in from the access point; pick **Network name**, **Access
   point** or **Both** and tap **Add**. Adding from there also turns
-  **Watchlist alerts** on. Or tap **+** on the Watchlist screen to type one in.
-- **Watched** marks a watched access point in Lists and on its details.
+  **Watchlist alerts** on. A probed network's details have **Add to
+  watchlist** too, for its name. Or tap **+** on the Watchlist screen to type
+  one in.
+- **Watched** marks a watched access point in Signals and on its details.
 - **Watchlist alerts** at the top of the Watchlist screen turns watching on
   and off for the whole list. Each network also has its own **Alerts for this
   network** switch, to mute it without removing it.
@@ -402,14 +427,15 @@ stream them over MQTT. Sightings are kept for 90 days.
 ## Nearby Bluetooth (no NS Scout needed)
 
 **Nearby Bluetooth** lists the Bluetooth LE devices this iPhone's own radio
-can hear, without a Scout. Open it with **Nearby** at the top of the Survey
-tab, or from **Lists > Bluetooth** when no survey is recording. It is not
-available while a survey records.
+can hear, without a Scout. Open it from **Tools > Nearby Bluetooth**, from the
+link under Still to do on the Survey tab when no Scout is connected, or from
+**Signals > Bluetooth** when no survey is recording. It is not available while
+a survey records.
 
 It is a separate tool, not a survey:
 
 - The list is live and stays on the iPhone. Nothing it hears is saved, shown
-  on the Map or in Lists, written to files, or sent to MQTT, gRPC or NS
+  on the Map or in Signals, written to files, or sent to MQTT, gRPC or NS
   Analytics. Closing it clears the list.
 - It only works while its screen is open. iPhones don't let apps look for
   nearby devices in the background, so it pauses when you leave the app; tap
@@ -422,7 +448,7 @@ It is a separate tool, not a survey:
 
 Tap a device for its signal over the last two minutes and what it advertises:
 company, services, TX power, Find My type and manufacturer data. Find My
-trackers get the same **AirTag** or **Find My** tag as in Lists. **Hide for
+trackers get the same **AirTag** or **Find My** tag as in Signals. **Hide for
 now** removes it from the list until you close Nearby Bluetooth.
 
 What this iPhone can and can't see:
@@ -473,7 +499,7 @@ for example your own access points or phone.
 Most phones use a random, changing MAC address when they look for networks,
 and many Bluetooth devices do the same. The app marks these with a
 **Randomized** badge in the lists, and **Hide randomized addresses** in the
-Lists filter hides them.
+Signals filter hides them.
 
 - For **clients**, randomized means a locally administered address.
 - For **Bluetooth**, the badge is shown only for private random addresses,
@@ -525,7 +551,7 @@ asks you to confirm.
 
 ## Troubleshooting
 
-**The Scout does not show under Nearby.**
+**The Scout does not show under Scouts in range.**
 - Check that it is powered and its LED blinks: cyan fast when it is ready to
   pair, or a short blue blink every 2 seconds when it is waiting for the phone
   it is paired with. Hold it within a few meters of the iPhone.
@@ -579,4 +605,4 @@ its upload limit (uploads resume at the time shown). Records stay queued on
 the phone either way.
 
 **The survey stopped by itself.** The iPhone ran low on storage. Free up space,
-share and delete old surveys from the Files tab, and start again.
+share and delete old surveys from **Settings > Files**, and start again.

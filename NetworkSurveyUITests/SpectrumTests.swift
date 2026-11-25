@@ -21,7 +21,7 @@ final class SpectrumTests: XCTestCase {
         app.launchArguments = ["-NSUITesting", "YES", "-NSAutoStartSurvey", "YES"]
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
-        app.tabBars.buttons["Lists"].tap()
+        app.tabBars.buttons["Signals"].tap()
         XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 30), "no access point appeared")
 
         app.buttons["lists.spectrum"].tap()

@@ -2,7 +2,7 @@ import Foundation
 import Observation
 import SurveyCore
 
-/// Which session the Map and Lists show: the one the user picked, else the
+/// Which session the Map and Signals show: the one the user picked, else the
 /// survey recording now. Between surveys they show nothing, so nobody mistakes
 /// an old survey for what is around them now.
 @Observable

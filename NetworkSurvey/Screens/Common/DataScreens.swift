@@ -3,7 +3,7 @@ import SurveyCore
 import SwiftUI
 import Towers
 
-/// The shared state of the Map, Lists, Files and Settings tabs, built once
+/// The shared state of the Signals, Map, Tools and Settings tabs, built once
 /// from the app model.
 @MainActor
 final class DataScreens {

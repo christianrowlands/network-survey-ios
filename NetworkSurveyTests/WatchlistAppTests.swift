@@ -50,7 +50,11 @@ struct WatchlistAppTests {
             return hits.contains { $0.missionId == model.survey.missionId }
         }, "the demo Scout keeps hearing the network, so a sighting is recorded")
         #expect(await waitUntil { model.watchlist.summaries.first?.sightings == 1 })
+        let missionID = model.survey.missionId
+        #expect(model.finishedSurvey == nil)
         await model.stopSurvey()
+        // Files are on by default, so Survey offers them to share.
+        #expect(model.finishedSurvey?.missionId == missionID)
     }
 
     @Test("A watchlist share link opens the Watchlist to import it; other links go where they did")
@@ -61,10 +65,20 @@ struct WatchlistAppTests {
         let link = try #require(URL(string: "https://networksurvey.app/app/watchlist?d=eyJ2IjoxfQ"))
         model.handleOpenURL(link)
         #expect(model.pendingWatchlistLink == link)
-        #expect(model.selectedTab == .settings && model.settingsRoute == .watchlist)
+        #expect(model.selectedTab == .tools && model.toolsRoute == .watchlist)
         let register = try #require(URL(string: "https://networksurvey.app/app/register?token=x"))
         model.handleOpenURL(register)
         #expect(model.pendingRegistrationLink == register && model.pendingWatchlistLink == link)
+    }
+
+    @Test("A sighting notification opens over the current tab")
+    func sightingOpensOverCurrentTab() {
+        var options = LaunchOptions()
+        options.uiTesting = true
+        let model = AppModel(options: options)
+        model.selectedTab = .map
+        model.showWatchlistSightings()
+        #expect(model.selectedTab == .map && model.showingWatchlistHistory)
     }
 
     @Test("The notification names the network and its signal when known")

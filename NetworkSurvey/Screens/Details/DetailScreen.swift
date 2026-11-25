@@ -1,7 +1,7 @@
 import SurveyCore
 import SwiftUI
 
-/// A detail screen to push from the Lists or the Map.
+/// A detail screen to push from Signals, the Map or Tools.
 enum DetailRoute: Hashable {
     case accessPoint(sessionID: String, bssid: String)
     case client(sessionID: String, mac: String)
