@@ -137,11 +137,16 @@ struct SessionTests {
         #expect(Set(outputs.compactMap(\.context.boardID)) == Set(rig.ids.map(\.description)))
         let located = outputs.filter { $0.context.location?.source == .phone }.count
         #expect(Double(located) > Double(outputs.count) * 0.8)
-        let status = try #require(outputs.first { $0.type == .deviceStatus })
-        if case .deviceStatus(let info) = status.payload {
-            #expect(info.batteryLevelPercent == 80)
-            #expect(info.connectedBoards == 2)
+        let statuses = outputs.compactMap { output -> DeviceStatusInfo? in
+            if case .deviceStatus(let info) = output.payload { return info }
+            return nil
         }
+        #expect(!statuses.isEmpty)
+        #expect(statuses.allSatisfy { $0.batteryLevelPercent == 80 })
+        // The first status goes out 100 ms after Start, maybe before both
+        // boards are ready, and some fall in the drop; later ones count both.
+        #expect(statuses.allSatisfy { (0...2).contains($0.connectedBoards) })
+        #expect(statuses.contains { $0.connectedBoards == 2 })
 
         let stored = try await rig.store.read { try StoreQueries.counts($0, sessionID: row.id) }
         let recordOutputs = outputs.filter { $0.type != .deviceStatus }.count
